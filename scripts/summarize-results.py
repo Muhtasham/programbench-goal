@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import importlib.metadata
 import json
 import os
 import sys
@@ -44,29 +43,6 @@ def load_programbench(programbench_repo: Path):
     return EvaluationResult, get_active_branches, get_ignored_tests, {
         instance["instance_id"]: instance for instance in load_all_instances(include_tests=True)
     }
-
-
-def ensure_programbench_env(programbench_repo: Path) -> None:
-    if os.environ.get("PROGRAMBENCH_GOAL_SUMMARY_UV") == "1":
-        return
-    try:
-        importlib.metadata.version("programbench")
-    except importlib.metadata.PackageNotFoundError:
-        env = {**os.environ, "PROGRAMBENCH_GOAL_SUMMARY_UV": "1"}
-        env.pop("VIRTUAL_ENV", None)
-        os.execvpe(
-            "uv",
-            [
-                "uv",
-                "run",
-                "--project",
-                str(programbench_repo),
-                "python",
-                str(Path(__file__).resolve()),
-                *sys.argv[1:],
-            ],
-            env,
-        )
 
 
 def score_eval(eval_json: Path, programbench_repo: Path) -> dict:
@@ -153,7 +129,6 @@ def format_cost(cost: float | None) -> str:
 def summarize(args: argparse.Namespace) -> None:
     run_dir = Path(args.run_dir).expanduser()
     programbench_repo = Path(args.programbench_repo).expanduser()
-    ensure_programbench_env(programbench_repo)
     rows = []
     for eval_json in sorted(run_dir.glob("*/*.eval.json")):
         instance_dir = eval_json.parent

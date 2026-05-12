@@ -152,10 +152,15 @@ Evaluate from a ProgramBench checkout:
 Summarize leaderboard-style metrics after evaluation:
 
 ```bash
-uv run python scripts/summarize-results.py ~/pb-goal-runs/gpt55-goal-jq \
+uv run --project /path/to/ProgramBench \
+  python /path/to/programbench-goal-runner/scripts/summarize-results.py ~/pb-goal-runs/gpt55-goal-jq \
   --programbench-repo /path/to/ProgramBench \
   --output results.csv
 ```
+
+Run the summarizer in the ProgramBench `uv` environment because it imports
+ProgramBench's scoring code. The runner itself stays separate from the evaluator
+repo.
 
 The summary reports fully resolved rate, almost-resolved rate (`score > 0.95`,
 matching ProgramBench's FAQ wording), average pass rate, Codex calls, token
