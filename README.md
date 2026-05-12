@@ -23,14 +23,17 @@ Silicon can sometimes emulate them, but serious runs should happen on Linux
 ## Isolation Model
 
 The target binary runs in a Docker container with `--network none`, so probes
-against the original program cannot reach the internet.
+against the original program cannot reach the internet. The generated prompt
+also requires probing through `docker exec -u agent ...`; this matters because
+the cleanroom executable is execute-only for the `agent` user, while root can
+bypass file permissions.
 
 Codex itself runs on the host because it must reach OpenAI. The generated prompt
-forbids internet use, package managers, upstream source lookup, decompilers, and
-the ProgramBench evaluator repository, and the launcher does not enable web
-search. If you need hard enforcement for host shell commands too, run this
-harness inside a VM or host environment with an egress policy that only permits
-Codex/OpenAI traffic.
+forbids internet use, package managers, upstream source lookup, decompilers, the
+ProgramBench evaluator repository, and external replacement docs for images with
+missing documentation. The launcher does not enable web search. If you need hard
+enforcement for host shell commands too, run this harness inside a VM or host
+environment with an egress policy that only permits Codex/OpenAI traffic.
 
 The Codex launcher uses YOLO mode:
 
@@ -51,6 +54,12 @@ Start the no-network target container:
 
 ```bash
 ~/pb-goal-runs/gpt55-goal-jq/jqlang__jq.b33a763/start-target.sh
+```
+
+Check the compliance-critical container properties:
+
+```bash
+~/pb-goal-runs/gpt55-goal-jq/jqlang__jq.b33a763/check-compliance.sh
 ```
 
 Launch Codex in `tmux` and inject `/goal`:

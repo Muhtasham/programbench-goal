@@ -53,7 +53,9 @@ def prepare(args: argparse.Namespace) -> None:
     solution_dir.mkdir(parents=True, exist_ok=True)
     (solution_dir / "AGENT_RULES.md").write_text(
         "Do not use internet, package managers, upstream source, decompilers, "
-        "ProgramBench tests, or the ProgramBench evaluator repository.\n"
+        "ProgramBench tests, or the ProgramBench evaluator repository. Probe the "
+        f"target with docker exec -u agent {container_name} bash -lc '<command>'. "
+        "Use only documentation already present in the cleanroom container.\n"
     )
     (instance_dir / "GOAL_PROMPT.md").write_text(
         render_prompt(
@@ -96,7 +98,33 @@ docker run -d --platform linux/amd64 \\
   -v {shlex.quote(str(solution_dir))}:/workspace/solution \\
   {shlex.quote(image)}:task_cleanroom \\
   sleep infinity
-docker exec {shlex.quote(container_name)} bash -lc 'pwd; find /workspace -maxdepth 2 -type f | sort | head -80'
+docker exec -u agent {shlex.quote(container_name)} bash -lc 'pwd; find /workspace -maxdepth 2 -type f | sort | head -80'
+""",
+    )
+    write_executable(
+        instance_dir / "check-compliance.sh",
+        f"""#!/usr/bin/env bash
+set -euo pipefail
+docker inspect {shlex.quote(container_name)} --format 'network={{{{.HostConfig.NetworkMode}}}} image={{{{.Config.Image}}}} status={{{{.State.Status}}}}'
+docker exec -u agent {shlex.quote(container_name)} bash -lc '
+  set -e
+  id
+  stat -c "%A %a %U %G %n" /workspace/executable
+  /workspace/executable --version >/dev/null
+  if head -c 4 /workspace/executable >/tmp/pb-readtest 2>/dev/null; then
+    echo "FAIL executable is readable"
+    exit 1
+  fi
+  if strings /workspace/executable >/tmp/pb-stringtest 2>/dev/null; then
+    echo "FAIL strings can read executable"
+    exit 1
+  fi
+  if objdump -h /workspace/executable >/tmp/pb-objdumptest 2>/dev/null; then
+    echo "FAIL objdump can read executable"
+    exit 1
+  fi
+  echo "ok: agent can execute but cannot read/decompile executable"
+'
 """,
     )
     write_executable(

@@ -9,7 +9,10 @@ Hard rules:
   repositories, decompilers, disassemblers, or source-code recovery tools.
 - Do not inspect the ProgramBench evaluator repository or hidden tests.
 - Interact with the target only through this container:
-  `docker exec {{container_name}} bash -lc '<command>'`
+  `docker exec -u agent {{container_name}} bash -lc '<command>'`
+- Use only documentation already present in the cleanroom container. If docs are
+  missing or incomplete, do not fetch or supply replacements from outside the
+  container.
 - Write the complete replacement codebase in:
   `{{solution_dir}}`
 - Produce a `compile.sh` at the solution root.
@@ -32,4 +35,3 @@ Run context:
 
 Spend the long horizon on behavior, not explanations. Keep iterating until the
 implementation is ready to package as a ProgramBench submission.
-
