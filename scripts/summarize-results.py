@@ -52,6 +52,8 @@ def ensure_programbench_env(programbench_repo: Path) -> None:
     try:
         importlib.metadata.version("programbench")
     except importlib.metadata.PackageNotFoundError:
+        env = {**os.environ, "PROGRAMBENCH_GOAL_SUMMARY_UV": "1"}
+        env.pop("VIRTUAL_ENV", None)
         os.execvpe(
             "uv",
             [
@@ -63,7 +65,7 @@ def ensure_programbench_env(programbench_repo: Path) -> None:
                 str(Path(__file__).resolve()),
                 *sys.argv[1:],
             ],
-            {**os.environ, "PROGRAMBENCH_GOAL_SUMMARY_UV": "1"},
+            env,
         )
 
 

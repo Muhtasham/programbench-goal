@@ -23,6 +23,7 @@ patches and are not a valid ProgramBench submission format.
 ## Requirements
 
 - Linux `amd64` host for real runs.
+- `uv`.
 - Docker.
 - Codex CLI with `features.goals = true`.
 - `tmux`.
@@ -96,20 +97,20 @@ they should not be the headline score.
 Prepare a `jq` run:
 
 ```bash
-python3 programbench_goal_runner.py prepare jqlang__jq.b33a763
+uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763
 ```
 
 Prepare with an official prompt template when one is available:
 
 ```bash
-python3 programbench_goal_runner.py prepare jqlang__jq.b33a763 \
+uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
   --prompt-template /path/to/official-programbench-prompt.md
 ```
 
 Prepare the near-miss first batch:
 
 ```bash
-python3 programbench_goal_runner.py prepare-batch target_sets/first_batch_near_miss.txt
+uv run python programbench_goal_runner.py prepare-batch target_sets/first_batch_near_miss.txt
 ```
 
 Start the no-network target container:
@@ -151,7 +152,7 @@ Evaluate from a ProgramBench checkout:
 Summarize leaderboard-style metrics after evaluation:
 
 ```bash
-scripts/summarize-results.py ~/pb-goal-runs/gpt55-goal-jq \
+uv run python scripts/summarize-results.py ~/pb-goal-runs/gpt55-goal-jq \
   --programbench-repo /path/to/ProgramBench \
   --output results.csv
 ```
