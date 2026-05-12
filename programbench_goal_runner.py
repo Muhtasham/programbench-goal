@@ -171,6 +171,20 @@ uv run programbench info {shlex.quote(str(instance_dir.parent))}
         print("warning: this host is not amd64; use a Linux amd64 host for real runs")
 
 
+def prepare_batch(args: argparse.Namespace) -> None:
+    for line in Path(args.target_file).expanduser().read_text().splitlines():
+        instance_id = line.split("#", 1)[0].strip()
+        if instance_id:
+            prepare(
+                argparse.Namespace(
+                    instance_id=instance_id,
+                    run_root=args.run_root,
+                    run_name="",
+                    prompt_template=args.prompt_template,
+                )
+            )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Prepare Codex /goal ProgramBench runs")
     subparsers = parser.add_subparsers(required=True)
@@ -184,6 +198,15 @@ def main() -> None:
         help="Prompt template to render. Use this to pass an official ProgramBench prompt unchanged when available.",
     )
     prepare_parser.set_defaults(func=prepare)
+    batch_parser = subparsers.add_parser("prepare-batch")
+    batch_parser.add_argument("target_file")
+    batch_parser.add_argument("--run-root", default=str(DEFAULT_ROOT))
+    batch_parser.add_argument(
+        "--prompt-template",
+        default=str(PROMPT_TEMPLATE),
+        help="Prompt template to render. Use this to pass an official ProgramBench prompt unchanged when available.",
+    )
+    batch_parser.set_defaults(func=prepare_batch)
     args = parser.parse_args()
     args.func(args)
 

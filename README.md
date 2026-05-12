@@ -106,6 +106,12 @@ python3 programbench_goal_runner.py prepare jqlang__jq.b33a763 \
   --prompt-template /path/to/official-programbench-prompt.md
 ```
 
+Prepare the near-miss first batch:
+
+```bash
+python3 programbench_goal_runner.py prepare-batch target_sets/first_batch_near_miss.txt
+```
+
 Start the no-network target container:
 
 ```bash
@@ -142,9 +148,47 @@ Evaluate from a ProgramBench checkout:
 ~/pb-goal-runs/gpt55-goal-jq/jqlang__jq.b33a763/eval-submission.sh /path/to/ProgramBench
 ```
 
+Summarize leaderboard-style metrics after evaluation:
+
+```bash
+scripts/summarize-results.py ~/pb-goal-runs/gpt55-goal-jq \
+  --programbench-repo /path/to/ProgramBench \
+  --output results.csv
+```
+
+The summary reports fully resolved rate, almost-resolved rate (`score > 0.95`,
+matching ProgramBench's FAQ wording), average pass rate, Codex calls, token
+usage, and estimated cost. The CSV includes the exact Codex JSONL `session_logs`
+used for each instance, so usage numbers can be audited directly. Codex CLI
+session logs expose token counts and call counts, but not authoritative dollars.
+Set these environment variables to estimate cost from current pricing:
+
+```bash
+export CODEX_INPUT_USD_PER_MTOK=...
+export CODEX_CACHED_INPUT_USD_PER_MTOK=...
+export CODEX_OUTPUT_USD_PER_MTOK=...
+```
+
+To audit a row's usage numbers, inspect the `session_logs` path from the CSV:
+
+```bash
+python3 - <<'PY' /path/to/codex-session.jsonl
+import json, sys
+calls = 0
+last = None
+for line in open(sys.argv[1], errors="replace"):
+    event = json.loads(line)
+    payload = event.get("payload", {})
+    if event.get("type") == "event_msg" and payload.get("type") == "token_count" and payload.get("info"):
+        calls += 1
+        last = payload["info"]["total_token_usage"]
+print({"calls": calls, "total_token_usage": last})
+PY
+```
+
 ## Pilot Order
 
-1. `testorg__calculator.abc1234` to verify packaging and evaluation mechanics.
-2. `wfxr__csview.8ac4de0` or `sclevine__yj.8016400` for a realistic small CLI.
-3. `jqlang__jq.b33a763` for the serious long run.
-4. `ffmpeg__ffmpeg.360a402` only after the harness proves itself on smaller tasks.
+1. Near-miss conversion set in `target_sets/first_batch_near_miss.txt`.
+2. Full xhigh almost-resolved set in `target_sets/gpt55_xhigh_almost_resolved.txt`.
+3. Iconic follow-ups in `target_sets/iconic_followups.txt`.
+4. A random control slice for generality.
