@@ -45,6 +45,10 @@ def prepare(args: argparse.Namespace) -> None:
     container_name = f"pb-goal-{slug(args.instance_id)}"
     session_name = f"pb-goal-{slug(args.instance_id)}"
     image = image_name(args.instance_id)
+    objective = (
+        f"Solve ProgramBench instance {args.instance_id} in the cleanroom container by reimplementing the "
+        "target CLI from black-box behavior only, then produce a packageable submission."
+    )
 
     solution_dir.mkdir(parents=True, exist_ok=True)
     (solution_dir / "AGENT_RULES.md").write_text(
@@ -62,6 +66,7 @@ def prepare(args: argparse.Namespace) -> None:
             },
         )
     )
+    (instance_dir / "GOAL_OBJECTIVE.txt").write_text(objective + "\n")
     (instance_dir / "run.json").write_text(
         json.dumps(
             {
@@ -102,11 +107,11 @@ tmux kill-session -t {shlex.quote(session_name)} >/dev/null 2>&1 || true
 tmux new-session -d -s {shlex.quote(session_name)} -c {shlex.quote(str(solution_dir))} \\
   "codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' -C {shlex.quote(str(solution_dir))} -s danger-full-access -a never --no-alt-screen"
 sleep 4
-tmux send-keys -t {shlex.quote(session_name)} "/goal" C-m
+tmux send-keys -t {shlex.quote(session_name)} {shlex.quote("/goal " + objective)} Enter
 sleep 2
 tmux load-buffer {shlex.quote(str(instance_dir / "GOAL_PROMPT.md"))}
 tmux paste-buffer -t {shlex.quote(session_name)}
-tmux send-keys -t {shlex.quote(session_name)} C-m
+tmux send-keys -t {shlex.quote(session_name)} Enter
 echo "Attached session: tmux attach -t {session_name}"
 """,
     )
