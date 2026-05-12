@@ -35,32 +35,40 @@ class TokenUsage:
         ) / 1_000_000
 
 
-def load_programbench(programbench_repo: Path):
+def load_programbench(programbench_repo: Path) -> tuple:
     sys.path.insert(0, str(programbench_repo / "src"))
     from programbench.eval.eval import EvaluationResult
+    from programbench.eval.eval_batch import InstanceEvalSummary
     from programbench.utils.load_data import get_active_branches, get_ignored_tests, load_all_instances
 
-    return EvaluationResult, get_active_branches, get_ignored_tests, {
+    return EvaluationResult, InstanceEvalSummary, get_active_branches, get_ignored_tests, {
         instance["instance_id"]: instance for instance in load_all_instances(include_tests=True)
     }
 
 
-def score_eval(eval_json: Path, programbench_repo: Path) -> dict:
-    EvaluationResult, get_active_branches, get_ignored_tests, instances = load_programbench(programbench_repo)
+def score_eval(eval_json: Path, programbench: tuple) -> dict:
+    EvaluationResult, InstanceEvalSummary, get_active_branches, get_ignored_tests, instances = programbench
     instance_id = eval_json.parent.name
     result = EvaluationResult.model_validate_json(eval_json.read_text())
     if instance_id in instances:
         result = result.for_branches(get_active_branches(instances[instance_id])).without_ignored(
             get_ignored_tests(instances[instance_id])
         )
+    summary = InstanceEvalSummary.from_eval_result(instance_id, result)
+    has_eval_errors = bool(
+        summary.error_code or summary.test_branch_errors or summary.n_system_errors or summary.n_warnings
+    )
     return {
         "instance_id": instance_id,
-        "score": result.score,
-        "resolved": result.score == 1.0 and len(result) > 0,
-        "almost_resolved": result.score > 0.95 and len(result) > 0,
-        "n_resolved_tests": result.n_resolved,
-        "n_tests": len(result),
-        "error_code": result.error_code or "",
+        "score": summary.score,
+        "resolved": summary.score == 1.0 and summary.n_tests > 0 and not has_eval_errors,
+        "almost_resolved": summary.score > 0.95 and summary.n_tests > 0,
+        "n_resolved_tests": summary.n_resolved,
+        "n_tests": summary.n_tests,
+        "error_code": summary.error_code or "",
+        "test_branch_errors": json.dumps(summary.test_branch_errors, sort_keys=True),
+        "n_system_errors": summary.n_system_errors,
+        "n_warnings": summary.n_warnings,
     }
 
 
@@ -129,10 +137,11 @@ def format_cost(cost: float | None) -> str:
 def summarize(args: argparse.Namespace) -> None:
     run_dir = Path(args.run_dir).expanduser()
     programbench_repo = Path(args.programbench_repo).expanduser()
+    programbench = load_programbench(programbench_repo)
     rows = []
-    for eval_json in sorted(run_dir.glob("*/*.eval.json")):
+    for eval_json in sorted(run_dir.glob("**/*.eval.json")):
         instance_dir = eval_json.parent
-        eval_row = score_eval(eval_json, programbench_repo)
+        eval_row = score_eval(eval_json, programbench)
         usage = find_codex_usage(instance_dir, Path(args.codex_sessions).expanduser())
         rows.append({
             **eval_row,

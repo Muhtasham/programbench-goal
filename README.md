@@ -3,6 +3,11 @@
 Small harness for running Codex GPT-5.5 `/goal` against ProgramBench cleanroom
 tasks.
 
+This is a Codex `/goal` scaffold, not the official mini-SWE-agent baseline
+scaffold. It uses ProgramBench's Docker task images and evaluation code, but the
+inference loop is Codex CLI goal mode. Report results as Codex `/goal` results,
+not as mini-SWE-agent results.
+
 The harness keeps the solving workspace separate from the ProgramBench evaluator
 repo. It starts the target binary inside a no-network Docker container, gives
 Codex a clean writable solution directory, and produces the `submission.tar.gz`
@@ -16,9 +21,11 @@ product requirements, hidden hints, or task-specific harness tuning.
 
 If ProgramBench publishes the exact mini-SWE-agent baseline prompt, use it via
 `--prompt-template` and keep only the local runtime substitutions needed for the
-container name and solution path. As of the last check, the public
-mini-SWE-agent repository only included SWE-bench prompts, which ask for git
-patches and are not a valid ProgramBench submission format.
+container name and solution path. The ProgramBench usage guide says their paper
+baselines used mini-SWE-agent with a framework similar to mini-SWE-agent's
+SWE-bench runner and that they expect to release that baseline system in
+mini-SWE-agent. Until that exists in public code, keep this runner labeled as a
+separate Codex `/goal` scaffold.
 
 ## Requirements
 

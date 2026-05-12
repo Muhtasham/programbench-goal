@@ -39,7 +39,7 @@ def write_executable(path: Path, text: str) -> None:
 
 
 def prepare(args: argparse.Namespace) -> None:
-    root = Path(args.run_root).expanduser()
+    root = Path(args.run_root).expanduser().resolve()
     instance_dir = root / (args.run_name or run_name(args.instance_id)) / args.instance_id
     solution_dir = instance_dir / "solution"
     container_name = f"pb-goal-{slug(args.instance_id)}"
@@ -106,6 +106,7 @@ docker exec -u agent {shlex.quote(container_name)} bash -lc 'pwd; find /workspac
         f"""#!/usr/bin/env bash
 set -euo pipefail
 docker inspect {shlex.quote(container_name)} --format 'network={{{{.HostConfig.NetworkMode}}}} image={{{{.Config.Image}}}} status={{{{.State.Status}}}}'
+test "$(docker inspect {shlex.quote(container_name)} --format '{{{{.HostConfig.NetworkMode}}}}')" = "none"
 docker exec -u agent {shlex.quote(container_name)} bash -lc '
   set -e
   id
