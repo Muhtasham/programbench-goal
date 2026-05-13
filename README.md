@@ -1,7 +1,6 @@
 # ProgramBench Goal Runner
 
-Small harness for running Codex GPT-5.5 `/goal` against ProgramBench cleanroom
-tasks.
+Small harness for running Codex GPT-5.5 `/goal` against ProgramBench tasks.
 
 This is a Codex `/goal` scaffold, not the official mini-SWE-agent baseline
 scaffold. It uses ProgramBench's Docker task images and evaluation code, but the
@@ -33,7 +32,7 @@ separate Codex `/goal` scaffold.
 - Linux `amd64` host for real runs.
 - `uv`.
 - Docker.
-- Codex CLI with `features.goals = true`.
+- Codex CLI with `/goal` support.
 - `tmux`.
 - A separate ProgramBench checkout only for evaluation.
 
@@ -45,24 +44,28 @@ Silicon can sometimes emulate them, but serious runs should happen on Linux
 
 In `paper`, `no-internet`, and `no-internet-local-tools` modes, the target
 binary runs in a Docker container with `--network none`, so probes against the
-original program cannot reach the internet. The generated cleanroom prompts
-also require probing through `docker exec -u agent ...`; this matters because
+original program cannot reach the internet. The `paper` and `no-internet`
+prompts require probing through `docker exec -u agent ...`; this matters because
 the cleanroom executable is execute-only for the `agent` user, while root can
-bypass file permissions.
+bypass file permissions. The `no-internet-local-tools` mode intentionally allows
+root-level target inspection as a non-compliant ablation.
 
-Codex itself runs on the host because it must reach OpenAI. The generated prompt
-forbids internet use, package managers, upstream source lookup, decompilers, the
-ProgramBench evaluator repository, and external replacement docs for images with
-missing documentation. The launcher does not enable web search. If you need hard
-enforcement for host shell commands too, run this harness inside a VM or host
-environment with an egress policy that only permits Codex/OpenAI traffic.
+Codex itself runs on the host because it must reach OpenAI. The `paper` and
+`no-internet` prompts forbid internet use, package managers, upstream source
+lookup, decompilers, the ProgramBench evaluator repository, and external
+replacement docs for images with missing documentation. The launcher does not
+enable web search. If you need hard enforcement for host shell commands too, run
+this harness inside a VM or host environment with an egress policy that only
+permits Codex/OpenAI traffic.
 
-For stricter runs, avoid giving the Codex user direct Docker socket access.
-Install the narrow target wrapper and prepare runs with `--target-access wrapper`:
+For stricter cleanroom runs, avoid giving the Codex user direct Docker socket
+access. Install the narrow target wrapper and prepare `paper` runs with
+`--target-access wrapper`:
 
 ```bash
 sudo install -o root -g root -m 0755 scripts/pb-target-exec /usr/local/bin/pb-target-exec
 uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
+  --inference-mode paper \
   --target-access wrapper
 ```
 
@@ -97,9 +100,9 @@ report those local smoke runs as paper-comparable results.
 
 For `paper` and `no-internet`, the generated Codex launcher prepends a
 `guard-bin` directory to `PATH`. It blocks common host-side internet,
-source/package lookup, and binary-analysis commands, restricts `docker` to the allowed
-`docker exec -u agent <container> ...` target-probing form, and points common
-tool caches at an empty per-run directory. Local build commands such as
+source/package lookup, and binary-analysis commands, restricts `docker` to the
+allowed `docker exec -u agent <container> ...` target-probing form, and points
+common tool caches at an empty per-run directory. Local build commands such as
 `go build` and `cargo build` are still allowed; source-acquisition commands such
 as `go get`, `cargo install`, and `pip install` are blocked. Agent-created
 black-box probes, fuzzers, generators, and comparison scripts are allowed when
@@ -199,9 +202,9 @@ sudo scripts/linux-openai-egress-guard.sh delete codex-runner
 
 For strict compliance, do not give the Codex user broad Docker socket access.
 Raw Docker access is effectively root-equivalent and can bypass network
-controls. The generated prompts require `docker exec -u agent ...`, but for a
-publishable run you should either supervise that boundary or expose only a
-narrow wrapper for target execution.
+controls. The `paper` and `no-internet` prompts require
+`docker exec -u agent ...`, but for a publishable run you should either
+supervise that boundary or expose only a narrow wrapper for target execution.
 
 ## Metrics
 
@@ -269,6 +272,7 @@ Prepare the same batch with wrapper-mode target access:
 
 ```bash
 uv run python programbench_goal_runner.py prepare-batch target_sets/first_batch_near_miss.txt \
+  --inference-mode paper \
   --target-access wrapper
 ```
 
