@@ -6,6 +6,9 @@ mini-SWE-agent baseline. Report it as a separate scaffold.
 The default `paper` inference mode is the cleanroom mode. The optional
 `no-internet` mode keeps internet/source/package access blocked but is reported
 as a Codex scaffold ablation rather than a paper-comparable run. The optional
+`no-internet-local-tools` mode also keeps external internet/source/package
+lookup blocked, but allows local binary-analysis/tracing tools and root-level
+target inspection. The optional
 `open-internet` mode is intentionally non-compliant and exists only for
 ProgramBench-inspired exploratory runs.
 
@@ -43,6 +46,14 @@ No-internet mode:
 - Uses a lighter Codex ablation prompt and is labeled separately from paper-comparable rows.
 - Must not be reported as a ProgramBench paper-style result unless the run also used `paper` mode and passed the strict preflight/audit path.
 
+No-internet-local-tools mode:
+
+- Starts the target container with `--network none`.
+- Blocks external internet, source lookup, package registries, and evaluator/hidden-test inspection.
+- Allows local installed tooling, local binary-analysis tools, tracing/instrumentation tools, and root-level target inspection.
+- Is specifically for measuring the “not tool-starved, but still no internet” ablation.
+- Must be reported separately from both paper/cleanroom and no-internet black-box rows.
+
 Minimum bar before public reporting:
 
 1. Run on Linux `amd64`, not macOS/ARM64 emulation.
@@ -57,4 +68,4 @@ Minimum bar before public reporting:
 Report the same ProgramBench metrics as the leaderboard: resolved, almost
 resolved, average pass rate, cost, and calls. Add wall-clock time, scaffold,
 inference mode, host/network enforcement, and any paper deviations as disclosure
-fields. Keep `open-internet` runs in a separate table.
+fields. Keep ablation and open-internet runs in separate tables.

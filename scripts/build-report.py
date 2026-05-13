@@ -198,6 +198,7 @@ def mode_label(row: ResultRow) -> str:
     return {
         "paper": "Paper / cleanroom",
         "no-internet": "No internet",
+        "no-internet-local-tools": "No internet + local tools",
         "open-internet": "Open internet",
     }.get(row.inference_mode, row.inference_mode or "Unknown")
 
@@ -217,6 +218,8 @@ def compliance_label(row: ResultRow) -> str:
         return "Non-compliant: internet allowed"
     if row.inference_mode == "no-internet":
         return "Codex no-internet ablation"
+    if row.inference_mode == "no-internet-local-tools":
+        return "Non-compliant: local/binary tools allowed"
     if is_programbench_comparable(row):
         return "ProgramBench-style"
     return "Local smoke: host/resources differ"

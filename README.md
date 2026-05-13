@@ -127,6 +127,20 @@ uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
   --inference-mode no-internet
 ```
 
+There is a second no-internet ablation for the “tool-starved benchmark”
+criticism:
+
+```bash
+uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
+  --inference-mode no-internet-local-tools
+```
+
+This keeps external internet/source/package lookup blocked and keeps the target
+container on `--network none`, but it allows local installed tools, local
+binary-analysis/tracing tools, and root-level target inspection through the
+target container. This is intentionally non-compliant with ProgramBench
+cleanroom rules and must be reported separately.
+
 Open-internet mode is explicitly non-compliant research mode for
 ProgramBench-inspired runs where Codex can use normal internet and package
 tooling:
@@ -136,9 +150,10 @@ uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
   --inference-mode open-internet
 ```
 
-No-internet and open-internet runs still produce `submission.tar.gz` and can be
-evaluated with ProgramBench, but report them separately as Codex `/goal`
-experiments. Do not mix them with cleanroom ProgramBench results.
+No-internet, no-internet-local-tools, and open-internet runs still produce
+`submission.tar.gz` and can be evaluated with ProgramBench, but report them
+separately as Codex `/goal` experiments. Do not mix them with cleanroom
+ProgramBench results.
 
 ## Reporting
 
@@ -260,8 +275,8 @@ uv run python scripts/run-batch.py watch target_sets/first_batch_near_miss.txt \
 ```
 
 Use `--max-parallel 1` on a laptop until we know the active Codex rate limits.
-Use separate batch names for `high`, `xhigh`, `paper`, `no-internet`, and
-`open-internet` runs. The manager stores resumable state under `local_state/batches/`, starts
+Use separate batch names for `high`, `xhigh`, `paper`, `no-internet`,
+`no-internet-local-tools`, and `open-internet` runs. The manager stores resumable state under `local_state/batches/`, starts
 new work only when active sessions are below the concurrency cap, and pauses new
 launches when a running pane shows rate-limit text.
 
@@ -419,7 +434,7 @@ uv run python scripts/build-report.py \
 `build-report.py` fetches the latest ProgramBench public baseline rows by
 default before rendering. Use `--no-refresh-baselines` only for offline rebuilds.
 
-The report keeps `paper`, `no-internet`, and `open-internet` tracks separate, includes the
+The report keeps `paper`, `no-internet`, `no-internet-local-tools`, and `open-internet` tracks separate, includes the
 ProgramBench-style resolved/almost/average-pass/cost/calls metrics, and commits
 only sanitized aggregate rows. Local Codex session-log paths stay in
 `local_state/` and are not published.

@@ -136,6 +136,15 @@ def uses_allowed_docker(command: str, container_name: str) -> bool:
     return bool(re.search(rf"\bdocker\s+exec\s+(?:-i\s+)?-u\s+agent\s+{re.escape(container_name)}\b", command))
 
 
+def uses_allowed_local_tools_docker(command: str, container_name: str) -> bool:
+    escaped = re.escape(container_name)
+    return bool(
+        re.search(rf"\bdocker\s+exec\s+(?:-i\s+)?{escaped}\b", command)
+        or re.search(rf"\bdocker\s+cp\s+{escaped}:/", command)
+        or re.search(rf"\bdocker\s+inspect\s+{escaped}\b", command)
+    )
+
+
 def is_inside(path: str, root: Path) -> bool:
     candidate = Path(path).expanduser()
     return candidate == root or root in candidate.parents
@@ -228,6 +237,7 @@ def audit_command(
     output: str,
     solution_dir: Path,
     container_name: str,
+    allow_local_tools: bool,
 ) -> list[Finding]:
     findings = []
     if was_blocked(output):
@@ -240,9 +250,13 @@ def audit_command(
         findings.append(Finding(line_source, "command contains private host or evaluator path", command))
     if PARENT_INSPECTION.search(command):
         findings.append(Finding(line_source, "command inspects parent directories from solution workspace", command))
-    if uses_tool(command, "docker") and not uses_allowed_docker(command, container_name):
+    if uses_tool(command, "docker") and not (
+        uses_allowed_local_tools_docker(command, container_name)
+        if allow_local_tools
+        else uses_allowed_docker(command, container_name)
+    ):
         findings.append(Finding(line_source, "docker command does not use the allowed target exec form", command))
-    if "/workspace/executable" in command:
+    if "/workspace/executable" in command and not allow_local_tools:
         for tool in BINARY_ANALYSIS_TOOLS:
             if uses_tool(command, tool):
                 findings.append(
@@ -256,6 +270,8 @@ def audit_command(
         if host not in LOCALHOSTS:
             findings.append(Finding(line_source, f"external URL fetch: {match.group(0)}", command))
     for tool in FORBIDDEN_TOOLS:
+        if allow_local_tools and tool in BINARY_ANALYSIS_TOOLS:
+            continue
         if uses_tool(command, tool) and tool != "docker":
             findings.append(Finding(line_source, f"forbidden cleanroom host/tool command: {tool}", command))
     return findings
@@ -291,6 +307,7 @@ def audit(args: argparse.Namespace) -> None:
                     output,
                     solution_dir,
                     run["container_name"],
+                    run.get("inference_mode") == "no-internet-local-tools",
                 )
             )
 

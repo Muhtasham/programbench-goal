@@ -14,6 +14,7 @@ from pathlib import Path
 DEFAULT_ROOT = Path.home() / "pb-goal-runs"
 PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal.md"
 NO_INTERNET_PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal_no_internet.md"
+LOCAL_TOOLS_PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal_local_tools.md"
 OPEN_PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal_open.md"
 DEFAULT_MODEL = "gpt-5.5"
 DEFAULT_REASONING_EFFORT = "xhigh"
@@ -84,6 +85,13 @@ TOOL_CACHE_ENV = (
     "PIP_CACHE_DIR",
     "PIP_NO_INDEX",
 )
+LOCAL_TOOLS_OFFLINE_ENV = (
+    "CARGO_NET_OFFLINE",
+    "GOPROXY",
+    "GOSUMDB",
+    "NPM_CONFIG_OFFLINE",
+    "PIP_NO_INDEX",
+)
 
 
 def image_name(instance_id: str) -> str:
@@ -120,13 +128,34 @@ def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def write_guard_bin(guard_dir: Path, container_name: str, target_access: str, target_wrapper_command: str) -> None:
+def write_guard_bin(
+    guard_dir: Path,
+    container_name: str,
+    target_access: str,
+    target_wrapper_command: str,
+    allow_local_tools: bool,
+) -> None:
     guard_dir.mkdir(parents=True, exist_ok=True)
     if target_access == "direct-docker":
         write_executable(
             guard_dir / "docker",
             f"""#!/usr/bin/env bash
 set -euo pipefail
+if [ "${{1:-}}" = "inspect" ] && [ "${{2:-}}" = {shlex.quote(container_name)} ]; then
+  exec {shlex.quote(shutil.which("docker") or "docker")} "$@"
+fi
+if [ {str(allow_local_tools).lower()} = "true" ] && [ "${{1:-}}" = "cp" ]; then
+  case "${{2:-}}" in
+    {container_name}:/*)
+      exec {shlex.quote(shutil.which("docker") or "docker")} "$@"
+      ;;
+  esac
+fi
+if [ {str(allow_local_tools).lower()} = "true" ] \\
+  && [ "${{1:-}}" = "exec" ] \\
+  && [ "${{2:-}}" = {shlex.quote(container_name)} ]; then
+  exec {shlex.quote(shutil.which("docker") or "docker")} "$@"
+fi
 index=2
 if [ "${{1:-}}" = "exec" ] && [ "${{2:-}}" = "-i" ]; then
   index=3
@@ -159,11 +188,31 @@ exit 126
 """,
         )
     write_sudo_guard(guard_dir, container_name, target_access, target_wrapper_command)
+    blocked_reason = (
+        "host internet/source tooling" if allow_local_tools else "host internet/source/binary-analysis tooling"
+    )
     for tool in BLOCKED_ALWAYS_TOOLS:
+        if allow_local_tools and tool in {
+            "dtruss",
+            "file",
+            "gdb",
+            "hexdump",
+            "lldb",
+            "ltrace",
+            "nm",
+            "objdump",
+            "otool",
+            "perf",
+            "readelf",
+            "strings",
+            "strace",
+            "xxd",
+        }:
+            continue
         write_executable(
             guard_dir / tool,
             f"""#!/usr/bin/env bash
-echo "blocked {tool}: ProgramBench cleanroom runs forbid host internet/source/binary-analysis tooling" >&2
+echo "blocked {tool}: ProgramBench cleanroom runs forbid {blocked_reason}" >&2
 exit 126
 """,
         )
@@ -259,6 +308,17 @@ def tool_cache_exports(cache_dir: Path) -> str:
     return " ".join(f"{key}={shlex.quote(str(value))}" for key, value in values.items())
 
 
+def local_tools_offline_exports() -> str:
+    values = {
+        "CARGO_NET_OFFLINE": "true",
+        "GOPROXY": "off",
+        "GOSUMDB": "off",
+        "NPM_CONFIG_OFFLINE": "true",
+        "PIP_NO_INDEX": "1",
+    }
+    return " ".join(f"{key}={shlex.quote(value)}" for key, value in values.items())
+
+
 def prepare(args: argparse.Namespace) -> None:
     root = Path(args.run_root).expanduser().resolve()
     prepared_run_name = args.run_name or run_name(args.instance_id, args.model, args.reasoning_effort)
@@ -267,14 +327,21 @@ def prepare(args: argparse.Namespace) -> None:
     guard_dir = instance_dir / "guard-bin"
     cache_dir = instance_dir / "tool-caches"
     paper_mode = args.inference_mode == "paper"
-    no_internet_mode = args.inference_mode in {"paper", "no-internet"}
+    cleanroom_mode = args.inference_mode in {"paper", "no-internet"}
+    local_tools_mode = args.inference_mode == "no-internet-local-tools"
+    no_internet_mode = args.inference_mode in {"paper", "no-internet", "no-internet-local-tools"}
+    tool_env = list(TOOL_CACHE_ENV) if cleanroom_mode else list(LOCAL_TOOLS_OFFLINE_ENV) if local_tools_mode else []
     container_name = f"pb-goal-{slug(prepared_run_name)}-{slug(args.instance_id)}"
     session_name = f"pb-goal-{slug(prepared_run_name)}-{slug(args.instance_id)}"
     image = image_name(args.instance_id)
     target_command = (
-        f"docker exec -u agent {container_name} bash -lc '<command>'"
-        if args.target_access == "direct-docker"
-        else f"{args.target_wrapper_command} {container_name} bash -lc '<command>'"
+        f"docker exec {container_name} bash -lc '<command>'"
+        if local_tools_mode and args.target_access == "direct-docker"
+        else (
+            f"docker exec -u agent {container_name} bash -lc '<command>'"
+            if args.target_access == "direct-docker"
+            else f"{args.target_wrapper_command} {container_name} bash -lc '<command>'"
+        )
     )
     objective = (
         f"Solve ProgramBench instance {args.instance_id} in the cleanroom container by reimplementing the "
@@ -284,7 +351,7 @@ def prepare(args: argparse.Namespace) -> None:
 
     solution_dir.mkdir(parents=True, exist_ok=True)
     cache_dir.mkdir(parents=True, exist_ok=True)
-    write_guard_bin(guard_dir, container_name, args.target_access, args.target_wrapper_command)
+    write_guard_bin(guard_dir, container_name, args.target_access, args.target_wrapper_command, local_tools_mode)
     (solution_dir / "AGENT_RULES.md").write_text(
         (
             "Do not use internet, package managers, upstream source, decompilers, "
@@ -294,7 +361,14 @@ def prepare(args: argparse.Namespace) -> None:
             f"target executable at /workspace/executable with {target_command}. "
             "Use only documentation already present in the cleanroom container.\n"
         )
-        if no_internet_mode
+        if cleanroom_mode
+        else (
+            "No-internet local-tools research mode: this is not ProgramBench-compliant and must not be reported as a "
+            "cleanroom benchmark result. Do not use internet, package registries, public source, external docs, or "
+            "ProgramBench tests. Local installed tools, binary-analysis tools, tracing tools, and agent-created tools "
+            f"are allowed. Probe the target executable at /workspace/executable with {target_command}.\n"
+        )
+        if local_tools_mode
         else (
             "Open-internet research mode: this is not ProgramBench-compliant and must not be reported as a cleanroom "
             "benchmark result. You may use internet/package tooling to solve the task, but still write a packageable "
@@ -306,6 +380,7 @@ def prepare(args: argparse.Namespace) -> None:
         or {
             "paper": PROMPT_TEMPLATE,
             "no-internet": NO_INTERNET_PROMPT_TEMPLATE,
+            "no-internet-local-tools": LOCAL_TOOLS_PROMPT_TEMPLATE,
             "open-internet": OPEN_PROMPT_TEMPLATE,
         }[args.inference_mode]
     )
@@ -335,7 +410,7 @@ def prepare(args: argparse.Namespace) -> None:
                 "solution_dir": str(solution_dir),
                 "guard_bin_dir": str(guard_dir),
                 "tool_cache_dir": str(cache_dir),
-                "tool_cache_env": list(TOOL_CACHE_ENV),
+                "tool_cache_env": tool_env,
                 "target_access": args.target_access,
                 "target_wrapper_command": args.target_wrapper_command,
                 "target_command": target_command,
@@ -411,7 +486,12 @@ docker exec -u agent {shlex.quote(container_name)} bash -lc '
     codex_env = (
         f"PATH={shlex.quote(str(guard_dir))}:$PATH GIT_CEILING_DIRECTORIES={shlex.quote(str(instance_dir))} "
         f"{tool_cache_exports(cache_dir)}"
-        if no_internet_mode
+        if cleanroom_mode
+        else (
+            f"PATH={shlex.quote(str(guard_dir))}:$PATH GIT_CEILING_DIRECTORIES={shlex.quote(str(instance_dir))} "
+            f"{local_tools_offline_exports()}"
+        )
+        if local_tools_mode
         else f"GIT_CEILING_DIRECTORIES={shlex.quote(str(instance_dir))}"
     )
     write_executable(
@@ -498,7 +578,11 @@ def main() -> None:
     prepare_parser.add_argument("--run-name", default="")
     prepare_parser.add_argument("--docker-cpus", type=int, default=20)
     prepare_parser.add_argument("--docker-memory", default="60g")
-    prepare_parser.add_argument("--inference-mode", choices=["paper", "no-internet", "open-internet"], default="paper")
+    prepare_parser.add_argument(
+        "--inference-mode",
+        choices=["paper", "no-internet", "no-internet-local-tools", "open-internet"],
+        default="paper",
+    )
     prepare_parser.add_argument(
         "--target-access",
         choices=["direct-docker", "wrapper"],
@@ -519,7 +603,11 @@ def main() -> None:
     batch_parser.add_argument("--run-root", default=str(DEFAULT_ROOT))
     batch_parser.add_argument("--docker-cpus", type=int, default=20)
     batch_parser.add_argument("--docker-memory", default="60g")
-    batch_parser.add_argument("--inference-mode", choices=["paper", "no-internet", "open-internet"], default="paper")
+    batch_parser.add_argument(
+        "--inference-mode",
+        choices=["paper", "no-internet", "no-internet-local-tools", "open-internet"],
+        default="paper",
+    )
     batch_parser.add_argument(
         "--target-access",
         choices=["direct-docker", "wrapper"],
