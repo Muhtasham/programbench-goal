@@ -6,12 +6,20 @@ import argparse
 import csv
 import html
 import json
+import re
 from dataclasses import dataclass, fields
 from datetime import datetime, timezone
+from html import unescape
 from pathlib import Path
+from urllib.request import Request, urlopen
 
 AGENT_NAME = "Codex /goal"
 PROGRAMBENCH_TASKS = 200
+PROGRAMBENCH_EXTENDED = "https://programbench.com/extended/"
+TARGET_BASELINE_MODELS = {"GPT 5.5 (xhigh)", "GPT 5.5 (high)"}
+ROW_RE = re.compile(r"<tr class=\"clickable-row\".*?</tr>", re.S)
+CELL_RE = re.compile(r"<td[^>]*>(.*?)</td>", re.S)
+TAG_RE = re.compile(r"<[^>]+>")
 
 
 @dataclass
@@ -61,6 +69,63 @@ BASELINES = [
 
 def slug_text(value: str) -> str:
     return "".join(ch if ch.isalnum() else "-" for ch in value.lower()).strip("-")
+
+
+def fetch(url: str) -> str:
+    with urlopen(Request(url, headers={"User-Agent": "programbench-goal-runner/0.1"}), timeout=30) as response:
+        return response.read().decode("utf-8", "replace")
+
+
+def clean_html(value: str) -> str:
+    return " ".join(unescape(TAG_RE.sub(" ", value)).split())
+
+
+def parse_percent(value: str) -> float:
+    return float(value.rstrip("%")) / 100
+
+
+def parse_money(value: str) -> float:
+    return float(value.lstrip("$"))
+
+
+def parse_baseline_rows(page: str) -> list[dict]:
+    rows = []
+    for row in ROW_RE.findall(page):
+        cells = [clean_html(cell) for cell in CELL_RE.findall(row)]
+        if len(cells) < 8 or cells[2] not in TARGET_BASELINE_MODELS:
+            continue
+        rows.append(
+            {
+                "model": cells[2],
+                "agent": cells[3],
+                "resolved_rate": parse_percent(cells[4]),
+                "almost_resolved_rate": parse_percent(cells[5]),
+                "average_cost_usd": parse_money(cells[6]),
+                "average_calls": int(float(cells[7])),
+                "source": PROGRAMBENCH_EXTENDED,
+            }
+        )
+    missing = TARGET_BASELINE_MODELS - {row["model"] for row in rows}
+    if missing:
+        raise ValueError(f"missing ProgramBench baseline rows: {sorted(missing)}")
+    return rows
+
+
+def refresh_baselines(output_dir: Path) -> None:
+    path = output_dir / "data" / "programbench-baselines.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "fetched_at": datetime.now(timezone.utc).isoformat(),
+                "source": PROGRAMBENCH_EXTENDED,
+                "baselines": parse_baseline_rows(fetch(PROGRAMBENCH_EXTENDED)),
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def load_baselines(output_dir: Path) -> list[dict]:
@@ -644,6 +709,8 @@ def render_html(data: dict) -> str:
 def build(args: argparse.Namespace) -> None:
     rows = [row for path in args.results_csv for row in read_results(Path(path).expanduser())]
     output_dir = Path(args.output_dir).expanduser()
+    if args.refresh_baselines:
+        refresh_baselines(output_dir)
     data = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "sample_instances": len(rows),
@@ -669,6 +736,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build the static ProgramBench /goal report site")
     parser.add_argument("results_csv", nargs="+")
     parser.add_argument("--output-dir", default="docs")
+    parser.add_argument(
+        "--refresh-baselines",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Fetch latest ProgramBench public baseline rows before rendering.",
+    )
     build(parser.parse_args())
 
 

@@ -406,6 +406,9 @@ uv run python scripts/build-report.py \
   --output-dir docs
 ```
 
+`build-report.py` fetches the latest ProgramBench public baseline rows by
+default before rendering. Use `--no-refresh-baselines` only for offline rebuilds.
+
 The report keeps `paper` and `open-internet` tracks separate, includes the
 ProgramBench-style resolved/almost/average-pass/cost/calls metrics, and commits
 only sanitized aggregate rows. Local Codex session-log paths stay in
