@@ -180,7 +180,7 @@ if [[ -n "$PROGRAMBENCH_REPO" && "$TARGET_FILE" == "target_sets/all_tasks.txt" ]
 fi
 
 if [[ -n "$PROGRAMBENCH_REPO" ]]; then
-  run uv run --project "$PROGRAMBENCH_REPO" python scripts/check-metric-parity.py --programbench-repo "$PROGRAMBENCH_REPO"
+  run env -u VIRTUAL_ENV uv run --project "$PROGRAMBENCH_REPO" python scripts/check-metric-parity.py --programbench-repo "$PROGRAMBENCH_REPO"
 fi
 
 if [[ "$REFRESH_REPORT" -eq 1 ]]; then
