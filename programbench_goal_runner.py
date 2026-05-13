@@ -328,8 +328,10 @@ test -f {shlex.quote(str(solution_dir / "compile.sh"))} || {{
   echo "missing solution/compile.sh" >&2
   exit 1
 }}
-tar -C {shlex.quote(str(solution_dir))} \\
+COPYFILE_DISABLE=1 tar -C {shlex.quote(str(solution_dir))} \\
   --exclude './AGENT_RULES.md' \\
+  --exclude './.DS_Store' \\
+  --exclude './._*' \\
   -czf {shlex.quote(str(instance_dir / "submission.tar.gz"))} .
 ls -lh {shlex.quote(str(instance_dir / "submission.tar.gz"))}
 """,
