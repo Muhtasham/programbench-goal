@@ -55,6 +55,26 @@ missing documentation. The launcher does not enable web search. If you need hard
 enforcement for host shell commands too, run this harness inside a VM or host
 environment with an egress policy that only permits Codex/OpenAI traffic.
 
+For stricter runs, avoid giving the Codex user direct Docker socket access.
+Install the narrow target wrapper and prepare runs with `--target-access wrapper`:
+
+```bash
+sudo install -o root -g root -m 0755 scripts/pb-target-exec /usr/local/bin/pb-target-exec
+uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
+  --target-access wrapper
+```
+
+In wrapper mode the prompt tells Codex to probe targets through:
+
+```bash
+sudo -n /usr/local/bin/pb-target-exec <container> bash -lc '<command>'
+```
+
+That wrapper only performs `docker exec -u agent` against `pb-goal-*`
+containers and refuses nested Docker commands. For a publishable Linux run,
+grant the dedicated Codex user only that wrapper through sudoers instead of
+adding it to the `docker` group.
+
 The Codex launcher uses YOLO mode:
 
 ```bash
@@ -202,10 +222,21 @@ uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
   --prompt-template /path/to/official-programbench-prompt.md
 ```
 
+The generated `run.json` records the prompt template path, template SHA-256,
+and rendered prompt SHA-256. If ProgramBench publishes an official baseline
+prompt, pin that file and report its hash with the run.
+
 Prepare the near-miss first batch:
 
 ```bash
 uv run python programbench_goal_runner.py prepare-batch target_sets/first_batch_near_miss.txt
+```
+
+Prepare the same batch with wrapper-mode target access:
+
+```bash
+uv run python programbench_goal_runner.py prepare-batch target_sets/first_batch_near_miss.txt \
+  --target-access wrapper
 ```
 
 For real sweeps, prefer the resumable batch manager so the laptop does not start
@@ -255,6 +286,19 @@ Before running expensive inference, do a full evaluator preflight with a known
 bad stub on one small real task. The expected result is a clean evaluation with a
 low score, not a solved task. This verifies Docker image access, blob access,
 `submission.tar.gz` layout, eval JSON output, and the metrics summarizer.
+
+For a paper-comparable host, run the strict preflight before launching a batch:
+
+```bash
+uv run python scripts/preflight-paper-host.py \
+  --codex-user codex-runner \
+  --check-egress-guard \
+  --instance-dir ~/pb-goal-runs/gpt55-goal-jq/jqlang__jq.b33a763
+```
+
+The preflight checks Linux `amd64`, Docker CPU/RAM capacity, dedicated-user
+existence, direct Docker-group exposure, OpenAI egress guard status, target
+container network mode, and generated guard wrappers.
 
 Launch Codex in `tmux` and inject `/goal`:
 
@@ -306,6 +350,12 @@ reasoning effort, inference mode, host/resource disclosures, and the exact Codex
 JSONL `session_logs` used for each instance, so usage numbers can be audited
 directly. Codex CLI session logs expose token counts and call counts, but not
 authoritative dollars.
+
+When an output CSV is written, the summarizer also writes `usage-audit.json`
+next to it. That file records matched Codex session logs, token totals, pricing
+source, pricing snapshot hash, cost estimates, and warnings for missing logs or
+pricing.
+
 Set these environment variables to estimate cost from current pricing:
 
 ```bash
@@ -374,10 +424,21 @@ uv run python scripts/build-report.py \
   --output-dir docs
 ```
 
-This writes `docs/evidence/<run>/<instance>/manifest.json` and
-`eval-summary.json`. Raw Codex JSONL traces and `submission.tar.gz` files remain
-local under `local_state/run_artifacts/` unless explicitly reviewed and
-published.
+This writes `docs/evidence/<run>/<instance>/manifest.json`,
+`eval-summary.json`, and a redacted public `eval.json`. If the local artifact
+contains `usage-audit.json`, that is exported too. Raw Codex JSONL traces and
+`submission.tar.gz` files remain local under `local_state/run_artifacts/`
+unless explicitly reviewed and published.
+
+Refresh the ProgramBench baseline rows before rebuilding the public report:
+
+```bash
+uv run python scripts/refresh-programbench-baselines.py
+```
+
+The report publishes `docs/data/results.json`, `docs/data/results.csv`, the
+refreshed `programbench-baselines.json`, per-run detail pages under `docs/run/`,
+and public evidence under `docs/evidence/`.
 
 ## Pilot Order
 

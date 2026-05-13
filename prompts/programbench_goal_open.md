@@ -21,7 +21,7 @@ Harness context:
 - Target container: `{{container_name}}`
 - Solution directory: `{{solution_dir}}`
 - Probe the target with:
-  `docker exec -u agent {{container_name}} bash -lc '<command>'`
+  `{{target_command}}`
 - The target executable is `/workspace/executable` inside that container.
 - Bundled documentation is inside `/workspace` in that container.
 

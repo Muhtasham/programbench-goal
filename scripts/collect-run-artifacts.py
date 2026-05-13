@@ -113,6 +113,12 @@ def collect(args: argparse.Namespace) -> None:
             "run_json": copy_text_if_exists(instance_dir / "run.json", output_dir / "run.json"),
             "eval_json": copy_text_if_exists(eval_path, output_dir / eval_path.name),
             "results_csv": copy_text_if_exists(instance_dir.parent / "results.csv", output_dir / "results.csv"),
+            "usage_audit": copy_text_if_exists(
+                (
+                    Path(args.results_csv).expanduser() if args.results_csv else instance_dir.parent / "results.csv"
+                ).with_name("usage-audit.json"),
+                output_dir / "usage-audit.json",
+            ),
             "submission": copy_if_exists(instance_dir / "submission.tar.gz", output_dir / "submission.tar.gz"),
             "codex_logs": copied_logs,
         },

@@ -62,7 +62,11 @@ def eval_summary(eval_json: dict) -> dict:
     }
 
 
-def public_manifest(manifest: dict, eval_summary_path: str) -> dict:
+def public_eval(eval_json: dict) -> dict:
+    return eval_json
+
+
+def public_manifest(manifest: dict, eval_summary_path: str, eval_json_path: str) -> dict:
     return {
         "collected_at": manifest["collected_at"],
         "instance_id": manifest["run"]["instance_id"],
@@ -83,6 +87,11 @@ def public_manifest(manifest: dict, eval_summary_path: str) -> dict:
             "test_branch_errors": manifest["eval"]["test_branch_errors"],
             "warnings": manifest["eval"]["warnings"],
             "summary_path": eval_summary_path,
+            "public_eval_path": eval_json_path,
+        },
+        "usage_audit": {
+            "available_local_artifact": bool(manifest["copied_files"].get("usage_audit")),
+            "public_path": "usage-audit.json" if manifest["copied_files"].get("usage_audit") else "",
         },
         "package": {
             "contents": manifest["package"]["contents"],
@@ -106,11 +115,20 @@ def export_one(manifest_path: Path, output_dir: Path) -> None:
 
     eval_json_path = manifest_path.parent / f"{instance_id}.eval.json"
     summary_name = "eval-summary.json"
+    public_eval_name = "eval.json"
     (target_dir / summary_name).write_text(
         json.dumps(eval_summary(read_json(eval_json_path)), indent=2, sort_keys=True) + "\n"
     )
+    (target_dir / public_eval_name).write_text(
+        json.dumps(public_eval(read_json(eval_json_path)), indent=2, sort_keys=True) + "\n"
+    )
+    usage_audit_path = manifest_path.parent / "usage-audit.json"
+    if usage_audit_path.is_file():
+        (target_dir / "usage-audit.json").write_text(
+            json.dumps(read_json(usage_audit_path), indent=2, sort_keys=True) + "\n"
+        )
     (target_dir / "manifest.json").write_text(
-        json.dumps(public_manifest(manifest, summary_name), indent=2, sort_keys=True) + "\n"
+        json.dumps(public_manifest(manifest, summary_name, public_eval_name), indent=2, sort_keys=True) + "\n"
     )
     print(target_dir)
 

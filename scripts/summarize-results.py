@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import sys
@@ -172,10 +173,59 @@ def load_pricing(path: str) -> dict:
     return json.loads(pricing_path.read_text()).get("models", {})
 
 
+def file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else ""
+
+
+def usage_audit(rows: list[dict], pricing_file: Path) -> dict:
+    warnings = []
+    for row in rows:
+        if not row["session_logs"]:
+            warnings.append(f"{row['instance_id']}: no Codex session logs matched solution cwd")
+        if not row["estimated_cost_usd"]:
+            warnings.append(f"{row['instance_id']}: no estimated cost; missing pricing for {row['model']}")
+        if not row["pricing_source"]:
+            warnings.append(f"{row['instance_id']}: pricing source missing for {row['model']}")
+    return {
+        "generated_at": datetime.now().astimezone().isoformat(),
+        "pricing_file": str(pricing_file),
+        "pricing_file_sha256": file_sha256(pricing_file),
+        "rows": [
+            {
+                "instance_id": row["instance_id"],
+                "run_name": row["run_name"],
+                "model": row["model"],
+                "reasoning_effort": row["reasoning_effort"],
+                "calls": row["calls"],
+                "input_tokens": row["input_tokens"],
+                "cached_input_tokens": row["cached_input_tokens"],
+                "output_tokens": row["output_tokens"],
+                "reasoning_output_tokens": row["reasoning_output_tokens"],
+                "total_tokens": row["total_tokens"],
+                "estimated_cost_usd": row["estimated_cost_usd"],
+                "pricing_source": row["pricing_source"],
+                "session_logs": row["session_logs"].split(";") if row["session_logs"] else [],
+            }
+            for row in rows
+        ],
+        "totals": {
+            "calls": sum(row["calls"] for row in rows),
+            "input_tokens": sum(row["input_tokens"] for row in rows),
+            "cached_input_tokens": sum(row["cached_input_tokens"] for row in rows),
+            "output_tokens": sum(row["output_tokens"] for row in rows),
+            "reasoning_output_tokens": sum(row["reasoning_output_tokens"] for row in rows),
+            "total_tokens": sum(row["total_tokens"] for row in rows),
+            "estimated_cost_usd": sum(float(row["estimated_cost_usd"] or 0) for row in rows),
+        },
+        "warnings": warnings,
+    }
+
+
 def summarize(args: argparse.Namespace) -> None:
     run_dir = Path(args.run_dir).expanduser()
     programbench_repo = Path(args.programbench_repo).expanduser()
     programbench = load_programbench(programbench_repo)
+    pricing_file = Path(args.pricing_file).expanduser()
     pricing = load_pricing(args.pricing_file)
     rows = []
     for eval_json in sorted(run_dir.glob("**/*.eval.json")):
@@ -213,10 +263,19 @@ def summarize(args: argparse.Namespace) -> None:
         )
 
     if args.output:
-        with Path(args.output).expanduser().open("w", newline="") as f:
+        output_path = Path(args.output).expanduser()
+        with output_path.open("w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=list(rows[0]) if rows else [])
             writer.writeheader()
             writer.writerows(rows)
+        usage_audit_path = (
+            Path(args.usage_audit_output).expanduser()
+            if args.usage_audit_output
+            else output_path.with_name("usage-audit.json")
+        )
+        usage_audit_path.parent.mkdir(parents=True, exist_ok=True)
+        usage_audit_path.write_text(json.dumps(usage_audit(rows, pricing_file), indent=2, sort_keys=True) + "\n")
+        print(f"usage_audit,{usage_audit_path}")
 
     total = len(rows)
     resolved = sum(row["resolved"] for row in rows)
@@ -239,6 +298,7 @@ def main() -> None:
     parser.add_argument("--codex-sessions", default=str(Path.home() / ".codex" / "sessions"))
     parser.add_argument("--pricing-file", default="local_state/openai_pricing.json")
     parser.add_argument("--output", default="")
+    parser.add_argument("--usage-audit-output", default="")
     summarize(parser.parse_args())
 
 

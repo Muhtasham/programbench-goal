@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import platform
 import re
@@ -114,11 +115,16 @@ def write_executable(path: Path, text: str) -> None:
     path.chmod(0o755)
 
 
-def write_guard_bin(guard_dir: Path, container_name: str) -> None:
+def file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_guard_bin(guard_dir: Path, container_name: str, target_access: str) -> None:
     guard_dir.mkdir(parents=True, exist_ok=True)
-    write_executable(
-        guard_dir / "docker",
-        f"""#!/usr/bin/env bash
+    if target_access == "direct-docker":
+        write_executable(
+            guard_dir / "docker",
+            f"""#!/usr/bin/env bash
 set -euo pipefail
 index=2
 if [ "${{1:-}}" = "exec" ] && [ "${{2:-}}" = "-i" ]; then
@@ -142,7 +148,15 @@ fi
 echo "blocked docker command. Use: docker exec [-i] -u agent {container_name} bash -lc '<command>'" >&2
 exit 126
 """,
-    )
+        )
+    else:
+        write_executable(
+            guard_dir / "docker",
+            """#!/usr/bin/env bash
+echo "blocked docker command. This run uses the configured target exec wrapper, not raw Docker." >&2
+exit 126
+""",
+        )
     for tool in BLOCKED_ALWAYS_TOOLS:
         write_executable(
             guard_dir / tool,
@@ -221,6 +235,11 @@ def prepare(args: argparse.Namespace) -> None:
     container_name = f"pb-goal-{slug(prepared_run_name)}-{slug(args.instance_id)}"
     session_name = f"pb-goal-{slug(prepared_run_name)}-{slug(args.instance_id)}"
     image = image_name(args.instance_id)
+    target_command = (
+        f"docker exec -u agent {container_name} bash -lc '<command>'"
+        if args.target_access == "direct-docker"
+        else f"{args.target_wrapper_command} {container_name} bash -lc '<command>'"
+    )
     objective = (
         f"Solve ProgramBench instance {args.instance_id} in the cleanroom container by reimplementing the "
         "target CLI from black-box behavior only. Do not mark the goal complete until solution/compile.sh exists, "
@@ -229,35 +248,35 @@ def prepare(args: argparse.Namespace) -> None:
 
     solution_dir.mkdir(parents=True, exist_ok=True)
     cache_dir.mkdir(parents=True, exist_ok=True)
-    write_guard_bin(guard_dir, container_name)
+    write_guard_bin(guard_dir, container_name, args.target_access)
     (solution_dir / "AGENT_RULES.md").write_text(
         (
             "Do not use internet, package managers, upstream source, decompilers, "
             "disassemblers, tracing/instrumentation tools, ProgramBench tests, or "
             "the ProgramBench evaluator repository. Do not inspect files outside "
             "this solution directory, except through the target container command. Probe the "
-            f"target executable at /workspace/executable with docker exec -u agent {container_name} "
-            "bash -lc '<command>'. "
+            f"target executable at /workspace/executable with {target_command}. "
             "Use only documentation already present in the cleanroom container.\n"
         )
         if paper_mode
         else (
             "Open-internet research mode: this is not ProgramBench-compliant and must not be reported as a cleanroom "
             "benchmark result. You may use internet/package tooling to solve the task, but still write a packageable "
-            f"solution and probe the target executable at /workspace/executable with docker exec -u agent "
-            f"{container_name} bash -lc '<command>'.\n"
+            f"solution and probe the target executable at /workspace/executable with {target_command}.\n"
         )
     )
     prompt_template = args.prompt_template or (PROMPT_TEMPLATE if paper_mode else OPEN_PROMPT_TEMPLATE)
+    prompt_template_path = Path(prompt_template).expanduser()
     (instance_dir / "GOAL_PROMPT.md").write_text(
         render_prompt(
-            Path(prompt_template).expanduser().read_text(),
+            prompt_template_path.read_text(),
             {
                 "instance_id": args.instance_id,
                 "run_name": prepared_run_name,
                 "image": image,
                 "container_name": container_name,
                 "solution_dir": str(solution_dir),
+                "target_command": target_command,
             },
         )
     )
@@ -274,6 +293,12 @@ def prepare(args: argparse.Namespace) -> None:
                 "guard_bin_dir": str(guard_dir),
                 "tool_cache_dir": str(cache_dir),
                 "tool_cache_env": list(TOOL_CACHE_ENV),
+                "target_access": args.target_access,
+                "target_wrapper_command": args.target_wrapper_command,
+                "target_command": target_command,
+                "prompt_template": str(prompt_template_path),
+                "prompt_template_sha256": file_sha256(prompt_template_path),
+                "prompt_rendered_sha256": file_sha256(instance_dir / "GOAL_PROMPT.md"),
                 "docker_cpus": args.docker_cpus,
                 "docker_memory": args.docker_memory,
                 "inference_mode": args.inference_mode,
@@ -410,6 +435,8 @@ def prepare_batch(args: argparse.Namespace) -> None:
                     run_root=args.run_root,
                     run_name="",
                     prompt_template=args.prompt_template,
+                    target_access=args.target_access,
+                    target_wrapper_command=args.target_wrapper_command,
                     docker_cpus=args.docker_cpus,
                     docker_memory=args.docker_memory,
                     inference_mode=args.inference_mode,
@@ -429,6 +456,13 @@ def main() -> None:
     prepare_parser.add_argument("--docker-cpus", type=int, default=20)
     prepare_parser.add_argument("--docker-memory", default="60g")
     prepare_parser.add_argument("--inference-mode", choices=["paper", "open-internet"], default="paper")
+    prepare_parser.add_argument(
+        "--target-access",
+        choices=["direct-docker", "wrapper"],
+        default="direct-docker",
+        help="Use guarded raw Docker for local smoke runs, or a narrow external target exec wrapper for strict runs.",
+    )
+    prepare_parser.add_argument("--target-wrapper-command", default="sudo -n /usr/local/bin/pb-target-exec")
     prepare_parser.add_argument("--model", default=DEFAULT_MODEL)
     prepare_parser.add_argument("--reasoning-effort", default=DEFAULT_REASONING_EFFORT)
     prepare_parser.add_argument(
@@ -443,6 +477,13 @@ def main() -> None:
     batch_parser.add_argument("--docker-cpus", type=int, default=20)
     batch_parser.add_argument("--docker-memory", default="60g")
     batch_parser.add_argument("--inference-mode", choices=["paper", "open-internet"], default="paper")
+    batch_parser.add_argument(
+        "--target-access",
+        choices=["direct-docker", "wrapper"],
+        default="direct-docker",
+        help="Use guarded raw Docker for local smoke runs, or a narrow external target exec wrapper for strict runs.",
+    )
+    batch_parser.add_argument("--target-wrapper-command", default="sudo -n /usr/local/bin/pb-target-exec")
     batch_parser.add_argument("--model", default=DEFAULT_MODEL)
     batch_parser.add_argument("--reasoning-effort", default=DEFAULT_REASONING_EFFORT)
     batch_parser.add_argument(

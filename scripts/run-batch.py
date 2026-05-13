@@ -82,6 +82,10 @@ def prepare_instance(args: argparse.Namespace, instance_id: str, run_root: Path)
         args.docker_memory,
         "--inference-mode",
         args.inference_mode,
+        "--target-access",
+        args.target_access,
+        "--target-wrapper-command",
+        args.target_wrapper_command,
         "--model",
         args.model,
         "--reasoning-effort",
@@ -287,6 +291,8 @@ def add_common_run_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--docker-cpus", type=int, default=20)
     parser.add_argument("--docker-memory", default="60g")
     parser.add_argument("--inference-mode", choices=["paper", "open-internet"], default="paper")
+    parser.add_argument("--target-access", choices=["direct-docker", "wrapper"], default="direct-docker")
+    parser.add_argument("--target-wrapper-command", default="sudo -n /usr/local/bin/pb-target-exec")
     parser.add_argument("--model", default="gpt-5.5")
     parser.add_argument("--reasoning-effort", default="xhigh")
     parser.add_argument("--run-name-prefix", default="")

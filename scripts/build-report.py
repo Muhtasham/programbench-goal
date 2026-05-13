@@ -59,6 +59,15 @@ BASELINES = [
 ]
 
 
+def slug_text(value: str) -> str:
+    return "".join(ch if ch.isalnum() else "-" for ch in value.lower()).strip("-")
+
+
+def load_baselines(output_dir: Path) -> list[dict]:
+    path = output_dir / "data" / "programbench-baselines.json"
+    return json.loads(path.read_text())["baselines"] if path.is_file() else BASELINES
+
+
 def as_bool(value: str) -> bool:
     return value.lower() == "true"
 
@@ -152,6 +161,7 @@ def result_groups(rows: list[ResultRow]) -> list[dict]:
         grouped.setdefault(group_key(row), []).append(row)
     groups = [
         {
+            "slug": slug_text("-".join(key)),
             "model": key[0],
             "agent": key[1],
             "mode": key[2],
@@ -235,7 +245,7 @@ def render_leaderboard(groups: list[dict]) -> str:
         f"""
             <tr>
               <td>{index}</td>
-              <td>{cell(str(group["model"]))}</td>
+              <td><a href="run/{cell(str(group["slug"]))}/">{cell(str(group["model"]))}</a></td>
               <td>{cell(str(group["agent"]))}</td>
               <td>{result_count(group, "resolved")}</td>
               <td>{result_count(group, "almost_resolved")}</td>
@@ -293,16 +303,20 @@ def render_instances(rows: list[ResultRow]) -> str:
     return "\n".join(table_rows)
 
 
-def evidence_links(row: ResultRow) -> str:
+def evidence_links(row: ResultRow, prefix: str = "") -> str:
     base = f"evidence/{row.run_name}/{row.instance_id}"
     links = [
         (f"{base}/manifest.json", "manifest"),
+        (f"{base}/eval.json", "eval json"),
         (f"{base}/eval-summary.json", "eval summary"),
+        (f"{base}/usage-audit.json", "usage audit"),
     ]
-    return " · ".join(f'<a href="{cell(path)}">{label}</a>' for path, label in links if Path("docs", path).is_file())
+    return " · ".join(
+        f'<a href="{cell(prefix + path)}">{label}</a>' for path, label in links if Path("docs", path).is_file()
+    )
 
 
-def render_baselines() -> str:
+def render_baselines(baselines: list[dict]) -> str:
     return "\n".join(
         f"""
         <tr>
@@ -315,8 +329,125 @@ def render_baselines() -> str:
           <td>{row["average_calls"]}</td>
         </tr>
         """
-        for index, row in enumerate(BASELINES, start=1)
+        for index, row in enumerate(baselines, start=1)
     )
+
+
+def render_csv(rows: list[ResultRow]) -> str:
+    output = []
+    names = [field.name for field in fields(ResultRow)]
+    output.append(",".join(names))
+    for row in rows:
+        values = []
+        for name in names:
+            value = getattr(row, name)
+            text = str(value)
+            values.append('"' + text.replace('"', '""') + '"' if "," in text else text)
+        output.append(",".join(values))
+    return "\n".join(output) + "\n"
+
+
+def heat_color(score: float) -> str:
+    if score >= 1:
+        return "#047857"
+    if score >= 0.95:
+        return "#d97706"
+    if score >= 0.5:
+        return "#0f766e"
+    if score > 0:
+        return "#94a3b8"
+    return "#e5e7eb"
+
+
+def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
+    matching = [
+        row for row in rows if group_key(row) == (group["model"], group["agent"], group["mode"], group["compliance"])
+    ]
+    heatmap = "\n".join(
+        f'<a class="heat-cell" style="background:{heat_color(row.score)}" title="{cell(row.instance_id)}: {percent(row.score)}" href="../../{evidence_link_path(row)}"></a>'
+        for row in sorted(matching, key=lambda item: item.instance_id)
+    )
+    table = "\n".join(
+        f"""
+        <tr>
+          <td><code>{cell(row.instance_id)}</code></td>
+          <td>{percent(row.score)}</td>
+          <td>{"yes" if row.resolved else "no"}</td>
+          <td>{"yes" if row.almost_resolved else "no"}</td>
+          <td>{row.n_resolved_tests}/{row.n_tests}</td>
+          <td>{money(row.estimated_cost_usd)}</td>
+          <td>{row.calls}</td>
+          <td>{evidence_links(row, "../../")}</td>
+        </tr>
+        """
+        for row in sorted(matching, key=lambda item: item.score, reverse=True)
+    )
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{cell(str(group["model"]))} ProgramBench /goal Run</title>
+  <style>
+    body {{ font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #182026; }}
+    a {{ color: #075985; }}
+    table {{ border-collapse: collapse; width: 100%; margin-top: 16px; }}
+    th, td {{ border-bottom: 1px solid #d9e0e6; padding: 9px 10px; text-align: left; font-size: 13px; }}
+    th {{ background: #f5f7f8; }}
+    code {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }}
+    .heatmap {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(14px, 1fr)); gap: 3px; max-width: 780px; margin: 16px 0; }}
+    .heat-cell {{ display: block; aspect-ratio: 1; border-radius: 3px; }}
+    .muted {{ color: #61707d; }}
+  </style>
+</head>
+<body>
+  <p><a href="../../">← Back to summary</a></p>
+  <h1>{cell(str(group["model"]))}</h1>
+  <p class="muted">{cell(str(group["agent"]))} · {cell(str(group["mode"]))} · {cell(str(group["compliance"]))}</p>
+  <p>Resolved {result_count(group, "resolved")} · Almost {result_count(group, "almost_resolved")} · Avg. pass {percent(group["average_pass_rate"])} · Cost {money(group["average_cost_usd"])} · Calls {group["average_calls"]:.1f}</p>
+  <h2>Score by Task</h2>
+  <div class="heatmap">{heatmap}</div>
+  <table>
+    <thead><tr><th>Instance</th><th>Score</th><th>Resolved</th><th>Almost</th><th>Tests</th><th>Cost</th><th>Calls</th><th>Evidence</th></tr></thead>
+    <tbody>{table}</tbody>
+  </table>
+</body>
+</html>
+"""
+
+
+def evidence_link_path(row: ResultRow) -> str:
+    return f"evidence/{row.run_name}/{row.instance_id}/manifest.json"
+
+
+def render_comparison(groups: list[dict]) -> str:
+    if len(groups) < 2:
+        return ""
+    rows = []
+    for left in groups:
+        for right in groups:
+            if left is right:
+                continue
+            rows.append(
+                f"""
+                <tr>
+                  <td>{cell(str(left["model"]))}</td>
+                  <td>{cell(str(right["model"]))}</td>
+                  <td>{percent(left["resolved_rate"] - right["resolved_rate"])}</td>
+                  <td>{percent(left["almost_resolved_rate"] - right["almost_resolved_rate"])}</td>
+                  <td>{percent(left["average_pass_rate"] - right["average_pass_rate"])}</td>
+                </tr>
+                """
+            )
+    return f"""
+    <h2>Model Comparison</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Y model</th><th>X model</th><th>Resolved Δ</th><th>Almost Δ</th><th>Avg. pass Δ</th></tr></thead>
+        <tbody>{"".join(rows)}</tbody>
+      </table>
+    </div>
+    """
 
 
 def render_html(data: dict) -> str:
@@ -459,6 +590,7 @@ def render_html(data: dict) -> str:
   </header>
   <main>
     <p class="note">Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. Open-internet runs are intentionally non-compliant with ProgramBench cleanroom rules and are reported separately from paper/cleanroom runs.</p>
+    <p><a href="data/results.json">Download results.json</a> · <a href="data/results.csv">Download results.csv</a></p>
     <div class="cards">
       {group_cards}
     </div>
@@ -481,6 +613,8 @@ def render_html(data: dict) -> str:
     </div>
     <p>These disclosure fields are intentionally outside the mirrored metric table because ProgramBench's public leaderboard does not mix scaffold deviations into the metric columns.</p>
 
+    {render_comparison(data["groups"])}
+
     <h2>Per-Instance Results</h2>
     <div class="table-wrap">
       <table>
@@ -494,7 +628,7 @@ def render_html(data: dict) -> str:
     <div class="table-wrap">
       <table>
         <thead><tr><th>#</th><th>Model</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Cost</th><th>Calls</th></tr></thead>
-        <tbody>{render_baselines()}</tbody>
+        <tbody>{render_baselines(data["baselines"])}</tbody>
       </table>
     </div>
 
@@ -509,20 +643,26 @@ def render_html(data: dict) -> str:
 
 def build(args: argparse.Namespace) -> None:
     rows = [row for path in args.results_csv for row in read_results(Path(path).expanduser())]
+    output_dir = Path(args.output_dir).expanduser()
     data = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "sample_instances": len(rows),
         "programbench_tasks": PROGRAMBENCH_TASKS,
         "groups": result_groups(rows),
         "rows": [row_to_dict(row) for row in rows],
-        "baselines": BASELINES,
+        "baselines": load_baselines(output_dir),
     }
-    output_dir = Path(args.output_dir).expanduser()
     (output_dir / "data").mkdir(parents=True, exist_ok=True)
     (output_dir / "data" / "results.json").write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
+    (output_dir / "data" / "results.csv").write_text(render_csv(rows))
     (output_dir / "index.html").write_text(render_html(data))
+    for group in data["groups"]:
+        run_dir = output_dir / "run" / str(group["slug"])
+        run_dir.mkdir(parents=True, exist_ok=True)
+        (run_dir / "index.html").write_text(render_run_detail(group, rows))
     print(output_dir / "index.html")
     print(output_dir / "data" / "results.json")
+    print(output_dir / "data" / "results.csv")
 
 
 def main() -> None:

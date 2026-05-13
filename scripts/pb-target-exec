@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -lt 2 ]]; then
+  echo "usage: pb-target-exec <pb-goal-container> <command> [args...]" >&2
+  exit 2
+fi
+
+container="$1"
+shift
+
+if [[ ! "$container" =~ ^pb-goal-[a-zA-Z0-9._-]+$ ]]; then
+  echo "refusing non ProgramBench target container: $container" >&2
+  exit 126
+fi
+
+if [[ "${1:-}" == "docker" || "${1:-}" == *"/docker" ]]; then
+  echo "refusing nested docker command" >&2
+  exit 126
+fi
+
+exec docker exec -u agent "$container" "$@"
