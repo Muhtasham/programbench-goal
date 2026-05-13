@@ -316,9 +316,12 @@ external lookup. It is not the official mini-SWE-agent baseline, but it avoids
 the biggest confound from normal Codex internet access:
 
 ```bash
-scripts/run-sweep.sh --programbench-repo /path/to/ProgramBench --dry-run
-scripts/run-sweep.sh --programbench-repo /path/to/ProgramBench
+scripts/run-sweep.sh --dry-run
+scripts/run-sweep.sh
 ```
+
+By default, `run-sweep.sh` uses `PROGRAMBENCH_REPO` if set, otherwise it
+auto-detects a sibling `../ProgramBench` checkout.
 
 The script refreshes `target_sets/all_tasks.txt`, runs the configured batch,
 refreshes the OpenAI pricing snapshot before scoring, finalizes completed
@@ -328,7 +331,7 @@ and runs the privacy scan. Add `--publish` to commit and push `docs/` after the
 site rebuild:
 
 ```bash
-scripts/run-sweep.sh --programbench-repo /path/to/ProgramBench --skip-watch --publish
+scripts/run-sweep.sh --skip-watch --publish
 ```
 
 Use `--offline-report` only when you intentionally want cached pricing and

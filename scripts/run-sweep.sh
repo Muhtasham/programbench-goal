@@ -16,11 +16,12 @@ REFRESH_TARGET_SET=1
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/run-sweep.sh --programbench-repo /path/to/ProgramBench [options]
+  scripts/run-sweep.sh [options]
 
 Options:
   --config PATH              Batch config JSON (default: configs/full-nointernet-xhigh.json)
   --programbench-repo PATH   ProgramBench checkout used for target metadata and evaluation
+                             (default: PROGRAMBENCH_REPO or sibling ../ProgramBench)
   --skip-watch               Do not run/watch Codex sessions
   --skip-finalize            Do not package/evaluate completed sessions
   --site-only                Only export evidence and rebuild docs
@@ -34,9 +35,10 @@ Options:
   -h, --help                 Show this help
 
 Examples:
-  scripts/run-sweep.sh --programbench-repo /path/to/ProgramBench
-  scripts/run-sweep.sh --config configs/full-nointernet-high.json --programbench-repo /path/to/ProgramBench
-  scripts/run-sweep.sh --site-only --programbench-repo /path/to/ProgramBench --publish
+  scripts/run-sweep.sh --dry-run
+  scripts/run-sweep.sh
+  scripts/run-sweep.sh --config configs/full-nointernet-high.json
+  scripts/run-sweep.sh --site-only --publish
 EOF
 }
 
@@ -109,8 +111,16 @@ if [[ ! -f "$CONFIG" ]]; then
   exit 1
 fi
 
+if [[ -z "$PROGRAMBENCH_REPO" ]]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  CANDIDATE_PROGRAMBENCH_REPO="$(cd "$SCRIPT_DIR/.." && pwd)/../ProgramBench"
+  if [[ -d "$CANDIDATE_PROGRAMBENCH_REPO/src/programbench" ]]; then
+    PROGRAMBENCH_REPO="$(cd "$CANDIDATE_PROGRAMBENCH_REPO" && pwd)"
+  fi
+fi
+
 if [[ -z "$PROGRAMBENCH_REPO" && ( "$FINALIZE" -eq 1 || "$REFRESH_TARGET_SET" -eq 1 ) ]]; then
-  echo "--programbench-repo is required unless both --skip-finalize and --no-target-refresh are set" >&2
+  echo "ProgramBench repo not found. Set PROGRAMBENCH_REPO or pass --programbench-repo." >&2
   exit 1
 fi
 
