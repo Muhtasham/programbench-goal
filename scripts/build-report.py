@@ -168,9 +168,11 @@ def result_groups(rows: list[ResultRow]) -> list[dict]:
 
 
 def row_to_dict(row: ResultRow) -> dict:
+    evidence_path = f"evidence/{row.run_name}/{row.instance_id}/manifest.json"
     return {
         "instance_id": row.instance_id,
         "run_name": row.run_name,
+        "evidence_path": evidence_path if Path("docs", evidence_path).is_file() else "",
         "model": row.model,
         "model_display": model_display(row),
         "agent": AGENT_NAME,
@@ -272,10 +274,16 @@ def render_instances(rows: list[ResultRow]) -> str:
               <td>{row.wall_clock_seconds / 3600:.2f}h</td>
               <td>{cell(row.host_system)}/{cell(row.host_machine)}</td>
               <td>{cell(row.docker_cpus)} CPU / {cell(row.docker_memory)}</td>
+              <td>{evidence_link(row)}</td>
             </tr>
             """
         )
     return "\n".join(table_rows)
+
+
+def evidence_link(row: ResultRow) -> str:
+    path = f"evidence/{row.run_name}/{row.instance_id}/manifest.json"
+    return f'<a href="{cell(path)}">manifest</a>' if Path("docs", path).is_file() else ""
 
 
 def render_baselines() -> str:
@@ -450,7 +458,7 @@ def render_html(data: dict) -> str:
     <h2>Per-Instance Results</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Instance</th><th>Mode</th><th>Model</th><th>Compliance</th><th>Status</th><th>Score</th><th>Tests</th><th>Cost</th><th>Calls</th><th>Wall</th><th>Host</th><th>Docker</th></tr></thead>
+        <thead><tr><th>#</th><th>Instance</th><th>Mode</th><th>Model</th><th>Compliance</th><th>Status</th><th>Score</th><th>Tests</th><th>Cost</th><th>Calls</th><th>Wall</th><th>Host</th><th>Docker</th><th>Evidence</th></tr></thead>
         <tbody>{render_instances(instances)}</tbody>
       </table>
     </div>
@@ -465,7 +473,7 @@ def render_html(data: dict) -> str:
     </div>
 
     <h2>Method Notes</h2>
-    <p>Metrics use ProgramBench's resolved, almost-resolved, average pass rate, cost, and calls shape. Resolved requires every scored test to pass with no evaluator errors. Local smoke runs are not ProgramBench-comparable until they run on Linux amd64 with 20 CPU / 60g and strict egress. Cost is estimated from Codex token logs and the locally refreshed OpenAI model pricing snapshot; it is not authoritative billing. The committed data omits local session-log paths.</p>
+    <p>Metrics use ProgramBench's resolved, almost-resolved, average pass rate, cost, and calls shape. Resolved requires every scored test to pass with no evaluator errors. Local smoke runs are not ProgramBench-comparable until they run on Linux amd64 with 20 CPU / 60g and strict egress. Public evidence manifests include sanitized eval summaries and package contents. Raw Codex session logs and submission tarballs stay local by default. Cost is estimated from Codex token logs and the locally refreshed OpenAI model pricing snapshot; it is not authoritative billing. The committed data omits local session-log paths.</p>
     <p>Sources: <a href="https://programbench.com/extended/">ProgramBench extended results</a>, <a href="https://programbench.com/run/gpt-5-5-xhigh/">GPT 5.5 xhigh run detail</a>, and this repository's generated CSV summaries.</p>
   </main>
 </body>
