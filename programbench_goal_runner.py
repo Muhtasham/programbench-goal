@@ -223,7 +223,8 @@ def prepare(args: argparse.Namespace) -> None:
     image = image_name(args.instance_id)
     objective = (
         f"Solve ProgramBench instance {args.instance_id} in the cleanroom container by reimplementing the "
-        "target CLI from black-box behavior only, then produce a packageable submission."
+        "target CLI from black-box behavior only. Do not mark the goal complete until solution/compile.sh exists, "
+        "running ./compile.sh creates ./executable, and ../package-submission.sh succeeds."
     )
 
     solution_dir.mkdir(parents=True, exist_ok=True)
@@ -376,7 +377,7 @@ COPYFILE_DISABLE=1 tar -C {shlex.quote(str(solution_dir))} \\
   --exclude './.DS_Store' \\
   --exclude './._*' \\
   -czf {shlex.quote(str(instance_dir / "submission.tar.gz"))} .
-ls -lh {shlex.quote(str(instance_dir / "submission.tar.gz"))}
+/bin/ls -lh {shlex.quote(str(instance_dir / "submission.tar.gz"))}
 """,
     )
     write_executable(

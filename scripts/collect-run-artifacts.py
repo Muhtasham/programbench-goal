@@ -85,7 +85,9 @@ def collect(args: argparse.Namespace) -> None:
 
     eval_path = instance_dir / f"{instance_id}.eval.json"
     eval_json = read_json(eval_path)
-    row = results_row(instance_dir.parent / "results.csv", instance_id)
+    row = results_row(
+        Path(args.results_csv).expanduser() if args.results_csv else instance_dir.parent / "results.csv", instance_id
+    )
     copied_logs = []
     for session_log in filter(None, row.get("session_logs", "").split(";")):
         copied_logs.append(copy_text_if_exists(Path(session_log), output_dir / "codex_logs" / Path(session_log).name))
@@ -126,6 +128,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Collect local, uncommitted ProgramBench /goal run artifacts")
     parser.add_argument("instance_dir")
     parser.add_argument("--output-dir", default="local_state/run_artifacts")
+    parser.add_argument("--results-csv", default="")
     collect(parser.parse_args())
 
 

@@ -13,6 +13,7 @@ Task:
 - Write the complete replacement codebase in `{{solution_dir}}`.
 - Produce `compile.sh` at the solution root.
 - `compile.sh` must build or copy the final executable to `./executable`.
+- You may execute `../package-submission.sh` to verify packaging.
 
 Harness context:
 - Instance: `{{instance_id}}`
@@ -25,3 +26,7 @@ Harness context:
 - Bundled documentation is inside `/workspace` in that container.
 
 Complete the implementation in `{{solution_dir}}` so it is ready to package.
+
+Do not mark the goal complete until `compile.sh` exists, `./compile.sh`
+succeeds, `./executable` exists and runs, and `../package-submission.sh`
+succeeds.
