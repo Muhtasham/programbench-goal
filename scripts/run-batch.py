@@ -304,14 +304,10 @@ def finalize(args: argparse.Namespace) -> None:
             save_state(state)
     summarize_and_collect(args, state)
     if not args.allow_partial:
-        incomplete = [
-            record["instance_id"]
-            for record in state["items"].values()
-            if record["status"] not in {"evaluated", "failed"}
-        ]
+        incomplete = [record["instance_id"] for record in state["items"].values() if record["status"] != "evaluated"]
         if incomplete:
             raise SystemExit(
-                f"batch is incomplete ({len(incomplete)} remaining); pass --allow-partial to publish a partial run"
+                f"batch is incomplete ({len(incomplete)} not evaluated); pass --allow-partial to publish a partial run"
             )
     save_state(state)
     print_status(state)
