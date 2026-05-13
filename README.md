@@ -299,8 +299,8 @@ Run the summarizer in the ProgramBench `uv` environment because it imports
 ProgramBench's scoring code. The runner itself stays separate from the evaluator
 repo.
 
-The summary reports fully resolved rate, almost-resolved rate (`score > 0.95`,
-matching ProgramBench's FAQ wording), average pass rate, Codex calls,
+The summary reports fully resolved rate, almost-resolved rate (`score >= 0.95`,
+matching ProgramBench's displayed leaderboard wording), average pass rate, Codex calls,
 wall-clock hours, token usage, and estimated cost. The CSV includes model,
 reasoning effort, inference mode, host/resource disclosures, and the exact Codex
 JSONL `session_logs` used for each instance, so usage numbers can be audited

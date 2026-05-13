@@ -88,7 +88,7 @@ def score_eval(eval_json: Path, programbench: tuple) -> dict:
         "instance_id": instance_id,
         "score": summary.score,
         "resolved": summary.score == 1.0 and summary.n_tests > 0 and not has_eval_errors,
-        "almost_resolved": summary.score > 0.95 and summary.n_tests > 0,
+        "almost_resolved": summary.score >= 0.95 and summary.n_tests > 0,
         "n_resolved_tests": summary.n_resolved,
         "n_tests": summary.n_tests,
         "error_code": summary.error_code or "",
