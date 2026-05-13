@@ -237,14 +237,26 @@ def render_leaderboard(groups: list[dict]) -> str:
               <td>{index}</td>
               <td>{cell(str(group["model"]))}</td>
               <td>{cell(str(group["agent"]))}</td>
+              <td>{result_count(group, "resolved")}</td>
+              <td>{result_count(group, "almost_resolved")}</td>
+              <td>{money(group["average_cost_usd"])}</td>
+              <td>{group["average_calls"]:.1f}</td>
+            </tr>
+            """
+        for index, group in enumerate(groups, start=1)
+    )
+
+
+def render_disclosures(groups: list[dict]) -> str:
+    return "\n".join(
+        f"""
+            <tr>
+              <td>{index}</td>
+              <td>{cell(str(group["model"]))}</td>
               <td>{cell(str(group["mode"]))}</td>
               <td>{cell(str(group["compliance"]))}</td>
               <td>{group["instances"]}/{PROGRAMBENCH_TASKS}</td>
-              <td>{result_count(group, "resolved")}</td>
-              <td>{result_count(group, "almost_resolved")}</td>
               <td>{percent(group["average_pass_rate"])}</td>
-              <td>{money(group["average_cost_usd"])}</td>
-              <td>{group["average_calls"]:.1f}</td>
               <td>{group["total_wall_clock_hours"]:.2f}h</td>
             </tr>
             """
@@ -274,22 +286,27 @@ def render_instances(rows: list[ResultRow]) -> str:
               <td>{row.wall_clock_seconds / 3600:.2f}h</td>
               <td>{cell(row.host_system)}/{cell(row.host_machine)}</td>
               <td>{cell(row.docker_cpus)} CPU / {cell(row.docker_memory)}</td>
-              <td>{evidence_link(row)}</td>
+              <td>{evidence_links(row)}</td>
             </tr>
             """
         )
     return "\n".join(table_rows)
 
 
-def evidence_link(row: ResultRow) -> str:
-    path = f"evidence/{row.run_name}/{row.instance_id}/manifest.json"
-    return f'<a href="{cell(path)}">manifest</a>' if Path("docs", path).is_file() else ""
+def evidence_links(row: ResultRow) -> str:
+    base = f"evidence/{row.run_name}/{row.instance_id}"
+    links = [
+        (f"{base}/manifest.json", "manifest"),
+        (f"{base}/eval-summary.json", "eval summary"),
+    ]
+    return " · ".join(f'<a href="{cell(path)}">{label}</a>' for path, label in links if Path("docs", path).is_file())
 
 
 def render_baselines() -> str:
     return "\n".join(
         f"""
         <tr>
+          <td>{index}</td>
           <td>{cell(str(row["model"]))}</td>
           <td>{cell(str(row["agent"]))}</td>
           <td>{percent(float(row["resolved_rate"]))}</td>
@@ -298,7 +315,7 @@ def render_baselines() -> str:
           <td>{row["average_calls"]}</td>
         </tr>
         """
-        for row in BASELINES
+        for index, row in enumerate(BASELINES, start=1)
     )
 
 
@@ -446,14 +463,23 @@ def render_html(data: dict) -> str:
       {group_cards}
     </div>
 
-    <h2>ProgramBench-Style Results</h2>
+    <h2>Extended Results</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Model</th><th>Agent</th><th>Mode</th><th>Compliance</th><th>Tasks</th><th>Resolved</th><th>Almost</th><th>Avg. pass</th><th>Cost</th><th>Calls</th><th>Wall</th></tr></thead>
+        <thead><tr><th>#</th><th>Model</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Cost</th><th>Calls</th></tr></thead>
         <tbody>{render_leaderboard(data["groups"])}</tbody>
       </table>
     </div>
-    <p>Cost and calls are averages per task instance, matching ProgramBench extended-results semantics. Wall time is total elapsed time for this scaffold run group.</p>
+    <p>Columns mirror ProgramBench's extended leaderboard: resolved and almost-resolved rates, average API cost per task instance, and average calls per task instance. Rows are sorted by resolved, almost-resolved, then average pass rate.</p>
+
+    <h2>Run Disclosures</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Model</th><th>Mode</th><th>Compliance</th><th>Tasks</th><th>Avg. pass</th><th>Wall</th></tr></thead>
+        <tbody>{render_disclosures(data["groups"])}</tbody>
+      </table>
+    </div>
+    <p>These disclosure fields are intentionally outside the mirrored metric table because ProgramBench's public leaderboard does not mix scaffold deviations into the metric columns.</p>
 
     <h2>Per-Instance Results</h2>
     <div class="table-wrap">
@@ -467,7 +493,7 @@ def render_html(data: dict) -> str:
     <p>For orientation only. ProgramBench's public extended table reports mini-SWE-agent over 200 tasks, sorted by resolved, almost-resolved, then average pass rate.</p>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Model</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Cost</th><th>Calls</th></tr></thead>
+        <thead><tr><th>#</th><th>Model</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Cost</th><th>Calls</th></tr></thead>
         <tbody>{render_baselines()}</tbody>
       </table>
     </div>
