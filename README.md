@@ -313,6 +313,23 @@ print({"calls": calls, "total_token_usage": last})
 PY
 ```
 
+## GitHub Pages Report
+
+The public report is generated into `docs/` and deployed by GitHub Actions. Build
+it from one or more summarized result CSVs:
+
+```bash
+uv run python scripts/build-report.py \
+  local_state/open-sample-results.csv \
+  local_state/csview-paper-smoke-results.csv \
+  --output-dir docs
+```
+
+The report keeps `paper` and `open-internet` tracks separate, includes the
+ProgramBench-style resolved/almost/average-pass/cost/calls metrics, and commits
+only sanitized aggregate rows. Local Codex session-log paths stay in
+`local_state/` and are not published.
+
 ## Pilot Order
 
 1. Near-miss conversion set in `target_sets/first_batch_near_miss.txt`.
