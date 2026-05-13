@@ -7,6 +7,11 @@ from pathlib import Path
 
 LOCAL_ARTIFACTS = Path("local_state/run_artifacts")
 DEFAULT_OUTPUT = Path("docs/evidence")
+MAX_TEXT_CHARS = 2000
+
+
+def truncate(value: str, limit: int = MAX_TEXT_CHARS) -> str:
+    return value if len(value) <= limit else value[:limit] + f"\n[truncated {len(value) - limit} chars]"
 
 
 def read_json(path: Path) -> dict:
@@ -30,7 +35,7 @@ def failed_tests(eval_json: dict) -> list[dict]:
             "name": result["name"],
             "branch": result.get("branch", ""),
             "status": result["status"],
-            "message": result.get("extra", {}).get("message", ""),
+            "message": truncate(result.get("extra", {}).get("message", "")),
         }
         for result in eval_json.get("test_results", [])
         if result["status"] != "passed"
@@ -63,7 +68,52 @@ def eval_summary(eval_json: dict) -> dict:
 
 
 def public_eval(eval_json: dict) -> dict:
-    return eval_json
+    return {
+        "test_results": [
+            {
+                "name": result["name"],
+                "branch": result.get("branch", ""),
+                "status": result["status"],
+                "extra": public_extra(result.get("extra", {})),
+            }
+            for result in eval_json.get("test_results", [])
+        ],
+        "error_code": eval_json.get("error_code"),
+        "error_details": truncate(eval_json.get("error_details") or ""),
+        "log": [public_log_entry(entry) for entry in eval_json.get("log", [])],
+        "solution_branch": eval_json.get("solution_branch"),
+        "test_branches": eval_json.get("test_branches", []),
+        "test_branch_errors": eval_json.get("test_branch_errors", {}),
+        "executable_hash": eval_json.get("executable_hash"),
+        "warnings": eval_json.get("warnings", []),
+        "public_redactions": {
+            "log_output": "redacted",
+            "long_extra_text": f"truncated to {MAX_TEXT_CHARS} chars",
+        },
+    }
+
+
+def public_extra(extra: dict) -> dict:
+    allowed = {key: extra[key] for key in ("time", "message") if key in extra}
+    if "message" in allowed:
+        allowed["message"] = truncate(str(allowed["message"]))
+    if "text" in extra:
+        allowed["text"] = truncate(str(extra["text"]))
+        allowed["text_original_chars"] = len(str(extra["text"]))
+    return allowed
+
+
+def public_log_entry(entry: dict) -> dict:
+    return {
+        "step": entry.get("step", ""),
+        "branch": entry.get("branch", ""),
+        "command": entry.get("command", ""),
+        "wall_time": entry.get("wall_time"),
+        "returncode": entry.get("returncode"),
+        "exception_info": truncate(entry.get("exception_info", "")),
+        "output_redacted": "output" in entry,
+        "output_original_chars": len(str(entry.get("output", ""))) if "output" in entry else 0,
+    }
 
 
 def public_manifest(manifest: dict, eval_summary_path: str, eval_json_path: str) -> dict:

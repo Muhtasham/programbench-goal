@@ -425,8 +425,10 @@ uv run python scripts/build-report.py \
 ```
 
 This writes `docs/evidence/<run>/<instance>/manifest.json`,
-`eval-summary.json`, and a redacted public `eval.json`. If the local artifact
-contains `usage-audit.json`, that is exported too. Raw Codex JSONL traces and
+`eval-summary.json`, and a size-safe public `eval.json`. The public eval keeps
+test statuses and failure messages but redacts evaluator `log.output` payloads
+and truncates long captured test text. If the local artifact contains
+`usage-audit.json`, that is exported too. Raw Codex JSONL traces and
 `submission.tar.gz` files remain local under `local_state/run_artifacts/`
 unless explicitly reviewed and published.
 
@@ -439,6 +441,16 @@ uv run python scripts/refresh-programbench-baselines.py
 The report publishes `docs/data/results.json`, `docs/data/results.csv`, the
 refreshed `programbench-baselines.json`, per-run detail pages under `docs/run/`,
 and public evidence under `docs/evidence/`.
+
+Before pushing a large report, check the static artifact size budget:
+
+```bash
+uv run python scripts/check-docs-size.py
+```
+
+The summary page does not load public eval files automatically; it links to
+them. That keeps the main page usable for all 200 tasks while still preserving
+click-through evidence per instance.
 
 ## Pilot Order
 

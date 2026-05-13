@@ -69,6 +69,15 @@ def container_network(container: str) -> str:
     return result.stdout.strip() if result.returncode == 0 else ""
 
 
+def sudoers_allows_wrapper(wrapper: str) -> tuple[bool, str]:
+    if os.geteuid() == 0:
+        return True, "running as root"
+    if not shutil.which("sudo"):
+        return False, "sudo not installed"
+    result = run(["sudo", "-n", "-l", wrapper])
+    return result.returncode == 0, result.stdout[-1200:]
+
+
 def check_instance(instance_dir: Path) -> list[Check]:
     run_json = json.loads((instance_dir / "run.json").read_text())
     guard_dir = Path(run_json["guard_bin_dir"])
@@ -111,6 +120,8 @@ def collect(args: argparse.Namespace) -> list[Check]:
     if args.wrapper_command:
         wrapper = args.wrapper_command.split()[-1]
         checks.append(Check("target exec wrapper installed", Path(wrapper).is_file(), wrapper))
+        ok, detail = sudoers_allows_wrapper(wrapper)
+        checks.append(Check("sudoers allows target wrapper", ok, detail.strip() or wrapper))
     if args.instance_dir:
         checks.extend(check_instance(Path(args.instance_dir).expanduser().resolve()))
     return checks

@@ -119,7 +119,7 @@ def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def write_guard_bin(guard_dir: Path, container_name: str, target_access: str) -> None:
+def write_guard_bin(guard_dir: Path, container_name: str, target_access: str, target_wrapper_command: str) -> None:
     guard_dir.mkdir(parents=True, exist_ok=True)
     if target_access == "direct-docker":
         write_executable(
@@ -157,6 +157,7 @@ echo "blocked docker command. This run uses the configured target exec wrapper, 
 exit 126
 """,
         )
+    write_sudo_guard(guard_dir, container_name, target_access, target_wrapper_command)
     for tool in BLOCKED_ALWAYS_TOOLS:
         write_executable(
             guard_dir / tool,
@@ -207,6 +208,39 @@ args=" $* "
         )
 
 
+def write_sudo_guard(guard_dir: Path, container_name: str, target_access: str, target_wrapper_command: str) -> None:
+    real_sudo = shutil.which("sudo") or "sudo"
+    wrapper_parts = shlex.split(target_wrapper_command)
+    if target_access == "wrapper" and wrapper_parts[:1] == ["sudo"]:
+        allowed = wrapper_parts[1:] + [container_name]
+        checks = "\n".join(
+            f'[[ "${{{index}:-}}" == {shlex.quote(value)} ]] || allowed=0'
+            for index, value in enumerate(allowed, start=1)
+        )
+        write_executable(
+            guard_dir / "sudo",
+            f"""#!/usr/bin/env bash
+set -euo pipefail
+allowed=1
+[[ "$#" -ge {len(allowed)} ]] || allowed=0
+{checks}
+if [[ "$allowed" == 1 ]]; then
+  exec {shlex.quote(real_sudo)} "$@"
+fi
+echo "blocked sudo command. Use only: {shlex.quote(target_wrapper_command)} {container_name} <command> [args...]" >&2
+exit 126
+""",
+        )
+        return
+    write_executable(
+        guard_dir / "sudo",
+        """#!/usr/bin/env bash
+echo "blocked sudo command in ProgramBench cleanroom run" >&2
+exit 126
+""",
+    )
+
+
 def tool_cache_exports(cache_dir: Path) -> str:
     values = {
         "CARGO_HOME": cache_dir / "cargo",
@@ -248,7 +282,7 @@ def prepare(args: argparse.Namespace) -> None:
 
     solution_dir.mkdir(parents=True, exist_ok=True)
     cache_dir.mkdir(parents=True, exist_ok=True)
-    write_guard_bin(guard_dir, container_name, args.target_access)
+    write_guard_bin(guard_dir, container_name, args.target_access, args.target_wrapper_command)
     (solution_dir / "AGENT_RULES.md").write_text(
         (
             "Do not use internet, package managers, upstream source, decompilers, "
