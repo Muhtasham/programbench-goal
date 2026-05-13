@@ -67,13 +67,18 @@ def parse_task(instance_id: str, html: str) -> dict:
 
 def refresh(args: argparse.Namespace) -> None:
     output = Path(args.output).expanduser()
+    existing = json.loads(output.read_text()) if args.merge_existing and output.exists() else {}
+    tasks = existing.get("tasks", {})
+    tasks.update(
+        {
+            instance_id: parse_task(instance_id, fetch(PROGRAMBENCH_TASK.format(instance_id=instance_id)))
+            for instance_id in target_ids(Path(args.target_set).expanduser())
+        }
+    )
     data = {
         "fetched_at": datetime.now(timezone.utc).isoformat(),
         "source": "https://programbench.com/task/<instance_id>/",
-        "tasks": {
-            instance_id: parse_task(instance_id, fetch(PROGRAMBENCH_TASK.format(instance_id=instance_id)))
-            for instance_id in target_ids(Path(args.target_set).expanduser())
-        },
+        "tasks": tasks,
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
@@ -85,6 +90,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Refresh ProgramBench per-task public baseline rows")
     parser.add_argument("--target-set", default="target_sets/all_tasks.txt")
     parser.add_argument("--output", default="docs/data/programbench-task-baselines.json")
+    parser.add_argument("--merge-existing", action="store_true")
     refresh(parser.parse_args())
 
 
