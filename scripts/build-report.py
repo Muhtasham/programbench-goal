@@ -139,11 +139,6 @@ def load_task_baselines(output_dir: Path) -> dict:
     return json.loads(path.read_text())["tasks"] if path.is_file() else {}
 
 
-def load_run_baselines(output_dir: Path) -> dict:
-    path = output_dir / "data" / "programbench-run-baselines.json"
-    return json.loads(path.read_text())["runs"] if path.is_file() else {}
-
-
 def as_bool(value: str) -> bool:
     return value.lower() == "true"
 
@@ -673,19 +668,19 @@ def task_page_link(row: ResultRow, prefix: str = "") -> str:
     return f"{prefix}task/{row.instance_id}/"
 
 
-def official_run_slug(model: str) -> str:
+def official_run_url(model: str) -> str:
     return {
-        "GPT 5.5 (xhigh)": "gpt-5-5-xhigh",
-        "GPT 5.5 (high)": "gpt-5-5-high",
+        "GPT 5.5 (xhigh)": "https://programbench.com/run/gpt-5-5-xhigh/",
+        "GPT 5.5 (high)": "https://programbench.com/run/gpt-5-5-high/",
     }.get(model, "")
 
 
-def render_baselines(baselines: list[dict], official_runs: dict) -> str:
+def render_baselines(baselines: list[dict]) -> str:
     return "\n".join(
         f"""
         <tr>
           <td>{index}</td>
-          <td>{baseline_model_link(row, official_runs)}</td>
+          <td>{baseline_model_link(row)}</td>
           <td>{cell(str(row["agent"]))}</td>
           <td>{percent(float(row["resolved_rate"]))}</td>
           <td>{percent(float(row["almost_resolved_rate"]))}</td>
@@ -697,10 +692,10 @@ def render_baselines(baselines: list[dict], official_runs: dict) -> str:
     )
 
 
-def baseline_model_link(row: dict, official_runs: dict) -> str:
-    slug = official_run_slug(str(row["model"]))
-    if slug and slug in official_runs:
-        return f'<a href="official-run/{slug}/">{cell(str(row["model"]))}</a>'
+def baseline_model_link(row: dict) -> str:
+    url = official_run_url(str(row["model"]))
+    if url:
+        return f'<a href="{cell(url)}">{cell(str(row["model"]))}</a>'
     return cell(str(row["model"]))
 
 
@@ -918,70 +913,6 @@ def render_task_detail(instance_id: str, rows: list[ResultRow], official_tasks: 
   <table>
     <thead><tr><th>#</th><th>Model</th><th>Provider</th><th>Score</th><th>Cost</th><th>Calls</th></tr></thead>
     <tbody>{official_task_result_rows(official_task) or '<tr><td colspan="6">Official task rows not cached yet.</td></tr>'}</tbody>
-  </table>
-</body>
-</html>
-"""
-
-
-def render_official_run_detail(slug: str, run: dict) -> str:
-    rows = "\n".join(
-        f"""
-        <tr>
-          <td>{index}</td>
-          <td><a href="../../task/{cell(str(row["instance_id"]))}/"><code>{cell(str(row["repository"]))}</code></a><br><span class="muted">{cell(str(row["description"]))}</span></td>
-          <td>{cell(str(row["language"]))}</td>
-          <td>{percent(float(row["score"])) if row["score"] is not None else "n/a"}</td>
-          <td>{money(float(row["cost_usd"]))}</td>
-          <td>{integer(int(row["calls"]))}</td>
-        </tr>
-        """
-        for index, row in enumerate(run["instances"], start=1)
-    )
-    return f"""<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{cell(slug)} Official ProgramBench Run</title>
-  <style>
-    body {{ font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #182026; }}
-    a {{ color: #075985; }}
-    table {{ border-collapse: collapse; width: 100%; margin-top: 16px; }}
-    th, td {{ border-bottom: 1px solid #d9e0e6; padding: 9px 10px; text-align: left; font-size: 13px; vertical-align: top; }}
-    th {{ background: #f5f7f8; }}
-    code {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }}
-    .metric-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; max-width: 900px; margin: 16px 0; }}
-    .metric {{ border: 1px solid #d9e0e6; border-radius: 8px; padding: 14px; }}
-    .metric strong {{ display: block; font-size: 24px; }}
-    .metric span, .muted {{ color: #61707d; font-size: 13px; }}
-    .plot-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 14px 0 18px; }}
-    .plot-card {{ border: 1px solid #d9e0e6; border-radius: 8px; padding: 12px; }}
-    .plot {{ width: 100%; height: auto; display: block; }}
-    .plot line {{ stroke: #d9e0e6; stroke-width: 1.5; }}
-    .plot text {{ fill: #61707d; font-size: 11px; }}
-  </style>
-</head>
-<body>
-  <p><a href="../../">← Back to summary</a> · <a href="{cell(str(run["source"]))}">Official ProgramBench run page</a></p>
-  <h1>{cell(str(run.get("model", slug)))}</h1>
-  <p class="muted">Official ProgramBench mini-SWE-agent baseline context cached from the public run page. These rows are not Codex <code>/goal</code> results.</p>
-  <div class="metric-grid">
-    <div class="metric"><strong>{percent(float(run["resolved_rate"] or 0))}</strong><span>resolved</span></div>
-    <div class="metric"><strong>{percent(float(run["almost_resolved_rate"] or 0))}</strong><span>almost resolved</span></div>
-    <div class="metric"><strong>{whole_money(float(run["total_cost_usd"]))}</strong><span>total cost</span></div>
-    <div class="metric"><strong>{integer(int(run["total_calls"]))}</strong><span>total calls</span></div>
-  </div>
-  <h2>Score (Behavioral Test Pass Rate) Distribution</h2>
-  <div class="plot-grid">
-    <section class="plot-card"><h3>Histogram</h3>{official_distribution_svg(run["instances"], cumulative=False)}</section>
-    <section class="plot-card"><h3>Cumulative</h3>{official_distribution_svg(run["instances"], cumulative=True)}</section>
-  </div>
-  <h2>Per-Instance Results</h2>
-  <p class="muted">{len(run["instances"])} instances</p>
-  <table>
-    <thead><tr><th>#</th><th>Repository</th><th>Lang</th><th>Score</th><th>Cost</th><th>Calls</th></tr></thead>
-    <tbody>{rows}</tbody>
   </table>
 </body>
 </html>
@@ -1314,10 +1245,10 @@ def render_html(data: dict) -> str:
     <div class="table-wrap">
       <table>
         <thead><tr><th>#</th><th>Model</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Avg. cost</th><th>Avg. calls</th></tr></thead>
-        <tbody>{render_baselines(data["baselines"], data["official_runs"])}</tbody>
+        <tbody>{render_baselines(data["baselines"])}</tbody>
       </table>
     </div>
-    <p>GPT-5.5 baseline rows link to cached official run-detail pages with total cost, total calls, distribution plots, and all 200 per-instance results.</p>
+    <p>GPT-5.5 baseline rows link to ProgramBench's official run-detail pages for total cost, total calls, distribution plots, and all 200 per-instance results.</p>
 
     <h2>Method Notes</h2>
     <p>Metrics use ProgramBench's resolved, almost-resolved, average pass rate, cost, and calls shape. Scoring is computed through ProgramBench's own <code>EvaluationResult</code> and <code>InstanceEvalSummary</code> logic after active-branch and ignored-test filtering. Resolved means the ProgramBench behavioral test pass rate is exactly 100%; evaluator warnings/errors are disclosed separately in evidence artifacts. Local smoke runs are not ProgramBench-comparable until they run on Linux amd64 with 20 CPU / 60g and strict egress. Public evidence manifests include sanitized eval summaries and package contents. Raw Codex session logs and submission tarballs stay local by default. Estimated cost comes from Codex token logs and the locally refreshed OpenAI model pricing snapshot; it is not authoritative billing. The committed data omits local session-log paths.</p>
@@ -1333,12 +1264,15 @@ def build(args: argparse.Namespace) -> None:
     output_dir = Path(args.output_dir).expanduser()
     target_ids = read_target_ids(Path(args.target_set).expanduser())
     official_tasks = load_task_baselines(output_dir)
-    official_runs = load_run_baselines(output_dir)
     if args.clean_output:
         for generated in (output_dir / "run", output_dir / "task", output_dir / "official-run"):
             if generated.exists():
                 shutil.rmtree(generated)
-        for generated in (output_dir / "data" / "results.json", output_dir / "data" / "results.csv"):
+        for generated in (
+            output_dir / "data" / "results.json",
+            output_dir / "data" / "results.csv",
+            output_dir / "data" / "programbench-run-baselines.json",
+        ):
             if generated.exists():
                 generated.unlink()
     if args.refresh_baselines:
@@ -1351,7 +1285,6 @@ def build(args: argparse.Namespace) -> None:
         "tasks": task_groups(rows, target_ids, official_tasks),
         "rows": [row_to_dict(row) for row in rows],
         "baselines": load_baselines(output_dir),
-        "official_runs": official_runs,
     }
     (output_dir / "data").mkdir(parents=True, exist_ok=True)
     (output_dir / "data" / "results.json").write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
@@ -1365,10 +1298,6 @@ def build(args: argparse.Namespace) -> None:
         task_dir = output_dir / "task" / str(task["instance_id"])
         task_dir.mkdir(parents=True, exist_ok=True)
         (task_dir / "index.html").write_text(render_task_detail(str(task["instance_id"]), rows, official_tasks))
-    for slug, run in official_runs.items():
-        run_dir = output_dir / "official-run" / slug
-        run_dir.mkdir(parents=True, exist_ok=True)
-        (run_dir / "index.html").write_text(render_official_run_detail(slug, run))
     print(output_dir / "index.html")
     print(output_dir / "data" / "results.json")
     print(output_dir / "data" / "results.csv")

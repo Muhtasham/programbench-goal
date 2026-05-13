@@ -323,9 +323,9 @@ scripts/run-sweep.sh --programbench-repo /path/to/ProgramBench
 The script refreshes `target_sets/all_tasks.txt`, runs the configured batch,
 refreshes the OpenAI pricing snapshot before scoring, finalizes completed
 instances, exports sanitized evidence, rebuilds `docs/`, refreshes public
-ProgramBench leaderboard rows, GPT-5.5 baseline run-detail rows, and per-task
-baseline context, checks report size, and runs the privacy scan. Add `--publish`
-to commit and push `docs/` after the site rebuild:
+ProgramBench leaderboard rows and per-task baseline context, checks report size,
+and runs the privacy scan. Add `--publish` to commit and push `docs/` after the
+site rebuild:
 
 ```bash
 scripts/run-sweep.sh --programbench-repo /path/to/ProgramBench --skip-watch --publish
