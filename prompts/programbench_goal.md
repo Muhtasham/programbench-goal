@@ -19,6 +19,8 @@ Hard rules:
 - Do not use tracing or instrumentation tools on the target executable, such as
   `strace`, `ltrace`, debuggers, syscall tracers, profilers, or similar tools.
 - Do not inspect the ProgramBench evaluator repository or hidden tests.
+- Do not inspect files outside `{{solution_dir}}`, except by interacting with
+  the target through the allowed `docker exec -u agent ...` command.
 - Interact with the target only through this container:
   `docker exec -u agent {{container_name}} bash -lc '<command>'`
 - Use only documentation already present in the cleanroom container. If docs are

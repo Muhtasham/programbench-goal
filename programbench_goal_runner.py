@@ -54,7 +54,8 @@ def prepare(args: argparse.Namespace) -> None:
     (solution_dir / "AGENT_RULES.md").write_text(
         "Do not use internet, package managers, upstream source, decompilers, "
         "disassemblers, tracing/instrumentation tools, ProgramBench tests, or "
-        "the ProgramBench evaluator repository. Probe the "
+        "the ProgramBench evaluator repository. Do not inspect files outside "
+        "this solution directory, except through the target container command. Probe the "
         f"target with docker exec -u agent {container_name} bash -lc '<command>'. "
         "Use only documentation already present in the cleanroom container.\n"
     )
@@ -135,7 +136,7 @@ docker exec -u agent {shlex.quote(container_name)} bash -lc '
 set -euo pipefail
 tmux kill-session -t {shlex.quote(session_name)} >/dev/null 2>&1 || true
 tmux new-session -d -s {shlex.quote(session_name)} -c {shlex.quote(str(solution_dir))} \\
-  "codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' -C {shlex.quote(str(solution_dir))} -s danger-full-access -a never --no-alt-screen"
+  "GIT_CEILING_DIRECTORIES={shlex.quote(str(instance_dir))} codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' -C {shlex.quote(str(solution_dir))} -s danger-full-access -a never --no-alt-screen"
 sleep 4
 tmux send-keys -t {shlex.quote(session_name)} {shlex.quote("/goal " + objective)} Enter
 sleep 2
