@@ -62,6 +62,18 @@ codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' \
   -s danger-full-access -a never --no-alt-screen
 ```
 
+The generated target container defaults to the paper's resource setting of 20
+CPUs and 60GB RAM. For local smoke tests on smaller machines, pass
+`--docker-cpus` and `--docker-memory` to `prepare` or `prepare-batch`; do not
+report those local smoke runs as paper-comparable results.
+
+The generated Codex launcher prepends a `guard-bin` directory to `PATH`. It
+blocks common host-side internet, source/package lookup, and binary-analysis
+commands, and restricts `docker` to the allowed
+`docker exec -u agent <container> ...` target-probing form. This catches common
+mistakes, but it is not a replacement for a VM/container/user-level egress
+policy.
+
 ## Optional Host Egress Guard
 
 For a stronger run on Linux, create a dedicated user for the Codex process and
@@ -162,6 +174,12 @@ Package the submission:
 
 ```bash
 ~/pb-goal-runs/gpt55-goal-jq/jqlang__jq.b33a763/package-submission.sh
+```
+
+Audit the Codex JSONL trace and package shape before evaluating or reporting:
+
+```bash
+uv run python scripts/audit-run.py ~/pb-goal-runs/gpt55-goal-jq/jqlang__jq.b33a763
 ```
 
 Evaluate from a ProgramBench checkout:

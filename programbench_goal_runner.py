@@ -5,6 +5,7 @@ import argparse
 import json
 import platform
 import re
+import shutil
 import shlex
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,6 +13,37 @@ from pathlib import Path
 
 DEFAULT_ROOT = Path.home() / "pb-goal-runs"
 PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal.md"
+BLOCKED_HOST_TOOLS = (
+    "apt",
+    "apt-get",
+    "brew",
+    "cargo",
+    "curl",
+    "dtruss",
+    "file",
+    "gdb",
+    "gh",
+    "git",
+    "go",
+    "hexdump",
+    "lldb",
+    "ltrace",
+    "nm",
+    "npm",
+    "objdump",
+    "otool",
+    "perf",
+    "pip",
+    "pip3",
+    "pnpm",
+    "readelf",
+    "strings",
+    "strace",
+    "uv",
+    "wget",
+    "xxd",
+    "yarn",
+)
 
 
 def image_name(instance_id: str) -> str:
@@ -38,10 +70,47 @@ def write_executable(path: Path, text: str) -> None:
     path.chmod(0o755)
 
 
+def write_guard_bin(guard_dir: Path, container_name: str) -> None:
+    guard_dir.mkdir(parents=True, exist_ok=True)
+    write_executable(
+        guard_dir / "docker",
+        f"""#!/usr/bin/env bash
+set -euo pipefail
+index=2
+if [ "${{1:-}}" = "exec" ] && [ "${{2:-}}" = "-i" ]; then
+  index=3
+fi
+if [ "$index" -eq 2 ]; then
+  user_flag="${{2:-}}"
+  user_name="${{3:-}}"
+  target_container="${{4:-}}"
+else
+  user_flag="${{3:-}}"
+  user_name="${{4:-}}"
+  target_container="${{5:-}}"
+fi
+if [ "${{1:-}}" = "exec" ] && [ "$user_flag" = "-u" ] && [ "$user_name" = "agent" ] && [ "$target_container" = {shlex.quote(container_name)} ]; then
+  exec {shlex.quote(shutil.which("docker") or "docker")} "$@"
+fi
+echo "blocked docker command. Use: docker exec [-i] -u agent {container_name} bash -lc '<command>'" >&2
+exit 126
+""",
+    )
+    for tool in BLOCKED_HOST_TOOLS:
+        write_executable(
+            guard_dir / tool,
+            f"""#!/usr/bin/env bash
+echo "blocked {tool}: ProgramBench cleanroom runs forbid host internet, source/package lookup, and binary-analysis tooling" >&2
+exit 126
+""",
+        )
+
+
 def prepare(args: argparse.Namespace) -> None:
     root = Path(args.run_root).expanduser().resolve()
     instance_dir = root / (args.run_name or run_name(args.instance_id)) / args.instance_id
     solution_dir = instance_dir / "solution"
+    guard_dir = instance_dir / "guard-bin"
     container_name = f"pb-goal-{slug(args.instance_id)}"
     session_name = f"pb-goal-{slug(args.instance_id)}"
     image = image_name(args.instance_id)
@@ -51,6 +120,7 @@ def prepare(args: argparse.Namespace) -> None:
     )
 
     solution_dir.mkdir(parents=True, exist_ok=True)
+    write_guard_bin(guard_dir, container_name)
     (solution_dir / "AGENT_RULES.md").write_text(
         "Do not use internet, package managers, upstream source, decompilers, "
         "disassemblers, tracing/instrumentation tools, ProgramBench tests, or "
@@ -79,6 +149,9 @@ def prepare(args: argparse.Namespace) -> None:
                 "container_name": container_name,
                 "session_name": session_name,
                 "solution_dir": str(solution_dir),
+                "guard_bin_dir": str(guard_dir),
+                "docker_cpus": args.docker_cpus,
+                "docker_memory": args.docker_memory,
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "host_machine": platform.machine(),
                 "host_system": platform.system(),
@@ -97,6 +170,8 @@ docker pull --platform linux/amd64 {shlex.quote(image)}:task_cleanroom
 docker run -d --platform linux/amd64 \\
   --name {shlex.quote(container_name)} \\
   --network none \\
+  --cpus {shlex.quote(str(args.docker_cpus))} \\
+  --memory {shlex.quote(args.docker_memory)} \\
   -v {shlex.quote(str(solution_dir))}:/workspace/solution \\
   {shlex.quote(image)}:task_cleanroom \\
   sleep infinity
@@ -136,7 +211,7 @@ docker exec -u agent {shlex.quote(container_name)} bash -lc '
 set -euo pipefail
 tmux kill-session -t {shlex.quote(session_name)} >/dev/null 2>&1 || true
 tmux new-session -d -s {shlex.quote(session_name)} -c {shlex.quote(str(solution_dir))} \\
-  "GIT_CEILING_DIRECTORIES={shlex.quote(str(instance_dir))} codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' -C {shlex.quote(str(solution_dir))} -s danger-full-access -a never --no-alt-screen"
+  "PATH={shlex.quote(str(guard_dir))}:$PATH GIT_CEILING_DIRECTORIES={shlex.quote(str(instance_dir))} codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' -C {shlex.quote(str(solution_dir))} -s danger-full-access -a never --no-alt-screen"
 sleep 4
 tmux send-keys -t {shlex.quote(session_name)} {shlex.quote("/goal " + objective)} Enter
 sleep 2
@@ -168,7 +243,7 @@ uv run programbench eval {shlex.quote(str(instance_dir.parent))} \\
   --filter {shlex.quote(args.instance_id)} \\
   --workers 1 \\
   --branch-workers 2 \\
-  --docker-cpus 8
+  --docker-cpus {shlex.quote(str(args.docker_cpus))}
 uv run programbench info {shlex.quote(str(instance_dir.parent))}
 """,
     )
@@ -188,6 +263,8 @@ def prepare_batch(args: argparse.Namespace) -> None:
                     run_root=args.run_root,
                     run_name="",
                     prompt_template=args.prompt_template,
+                    docker_cpus=args.docker_cpus,
+                    docker_memory=args.docker_memory,
                 )
             )
 
@@ -199,6 +276,8 @@ def main() -> None:
     prepare_parser.add_argument("instance_id")
     prepare_parser.add_argument("--run-root", default=str(DEFAULT_ROOT))
     prepare_parser.add_argument("--run-name", default="")
+    prepare_parser.add_argument("--docker-cpus", type=int, default=20)
+    prepare_parser.add_argument("--docker-memory", default="60g")
     prepare_parser.add_argument(
         "--prompt-template",
         default=str(PROMPT_TEMPLATE),
@@ -208,6 +287,8 @@ def main() -> None:
     batch_parser = subparsers.add_parser("prepare-batch")
     batch_parser.add_argument("target_file")
     batch_parser.add_argument("--run-root", default=str(DEFAULT_ROOT))
+    batch_parser.add_argument("--docker-cpus", type=int, default=20)
+    batch_parser.add_argument("--docker-memory", default="60g")
     batch_parser.add_argument(
         "--prompt-template",
         default=str(PROMPT_TEMPLATE),

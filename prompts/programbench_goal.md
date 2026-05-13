@@ -1,43 +1,75 @@
-You are solving a ProgramBench cleanroom task.
+You are a helpful assistant that can interact with a computer.
 
-Objective:
-Reimplement the target CLI from scratch by observing only the target binary and
-any documentation already present in the no-network target container.
+This is a reverse-engineering benchmark. You are given a compiled binary and its documentation.
+Your job is to write a new, original codebase from scratch that produces an executable with identical behavior.
+You must figure out the behavior solely by running and interacting with the provided binary.
+Writing original code based on observed behavior is the entire point of this benchmark.
 
-ProgramBench constraints:
-- This is a free-form reimplementation task. Choose the language, architecture,
-  source layout, abstractions, and build approach yourself.
-- There are no method signatures, skeletons, product requirements, hidden hints,
-  or natural-language implementation guidance beyond the executable behavior
-  and in-container documentation.
-- Do not tune the harness or solution for a known test suite. The final answer is
-  judged by fully resolved instances; partial pass rate is only diagnostic.
+Any approach that shortcuts this - finding existing source code, wrapping the binary,
+or installing the original tool - does not count as a solution. It will be detected by an
+automated judge, marked as a disqualification, and scored as a failure.
 
-Hard rules:
-- Do not use the internet, web search, package managers, GitHub, upstream source
-  repositories, decompilers, disassemblers, or source-code recovery tools.
-- Do not use tracing or instrumentation tools on the target executable, such as
-  `strace`, `ltrace`, debuggers, syscall tracers, profilers, or similar tools.
-- Do not inspect the ProgramBench evaluator repository or hidden tests.
-- Do not inspect files outside `{{solution_dir}}`, except by interacting with
-  the target through the allowed `docker exec -u agent ...` command.
-- Interact with the target only through this container:
-  `docker exec -u agent {{container_name}} bash -lc '<command>'`
-- The target executable is `/workspace/executable` inside that container.
-- Use only documentation already present in the cleanroom container. If docs are
-  missing or incomplete, do not fetch or supply replacements from outside the
-  container.
-- Write the complete replacement codebase in:
-  `{{solution_dir}}`
-- Produce a `compile.sh` at the solution root.
-- `compile.sh` must build or copy the final executable to:
-  `./executable`
+<RULES>
+## What is not allowed
 
-Run context:
+### 1. Obtaining source code
+
+The only source of truth about what the executable does is the executable itself and its
+bundled documentation. You must not search the internet, package registries, or any external
+source for information about this project's source code. Even if you recognize what the
+executable is, you must reimplement it from behavioral observation alone.
+
+This includes but is not limited to:
+- Cloning or browsing the original GitHub repository, its forks, or mirrors
+- Downloading the project from package registries: `cargo install <project>`, `go get github.com/<org>/<project>`, `pip install <project>`, `apt-get source <project>`, `npm install <project>`, etc.
+- Fetching source tarballs from project websites
+- Using a package manager to download the project as a dependency and then reading its cached source
+- Searching the web for the project's source code or implementation details
+
+### 2. Wrapping or reusing the original binary
+
+Your submission must be a genuine reimplementation. The provided executable is for
+observation only - your final solution must not depend on it or any other pre-built version
+of the same tool at runtime.
+
+This includes but is not limited to:
+- Writing a wrapper script that delegates to the original binary
+- Installing the tool from a package manager and shimming to it
+- Writing a `compile.sh` that simply makes the provided binary executable or copies it
+- Building a binary whose main function shells out to an external tool
+- Re-linking prebuilt `.o` object files found in the workspace without writing new source code
+
+### 3. Binary analysis of the provided executable
+
+All information about the provided executable must be obtained by interacting with it
+through its normal user interface: CLI flags, stdin/stdout, filesystem effects, and localhost-only network behavior.
+- You MUST NOT decompile the provided executable or use disassemblers on it
+- You MUST NOT use strace, ltrace, debuggers, profilers, or similar tracing/instrumentation tools on it
+
+Note: this restriction applies ONLY to the provided executable. You are free to use analysis
+tools on binaries that you produce yourself during development.
+
+## What IS allowed
+
+- Running the executable with any inputs, flags, and arguments to observe its behavior
+- Reading any documentation files bundled in the workspace
+- Writing, building, and testing your own original replacement program
+</RULES>
+
+Harness context:
 - Instance: `{{instance_id}}`
 - Target image: `{{image}}:task_cleanroom`
 - Target container: `{{container_name}}`
 - Solution directory: `{{solution_dir}}`
+- Interact with the target only through:
+  `docker exec -u agent {{container_name}} bash -lc '<command>'`
+- The target executable is `/workspace/executable` inside that container.
+- The bundled documentation is inside `/workspace` in that container.
+- Do not inspect files outside `{{solution_dir}}` on the host.
+- Do not inspect the ProgramBench evaluator repository or hidden tests.
+- Produce a complete replacement codebase in `{{solution_dir}}`.
+- Produce `compile.sh` at the solution root.
+- `compile.sh` must build or copy the final executable to `./executable`.
 
 Complete the implementation in `{{solution_dir}}` so it is ready to package as a
 ProgramBench submission.
