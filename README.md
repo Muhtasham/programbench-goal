@@ -80,7 +80,9 @@ containers and refuses nested Docker commands. For a publishable Linux run,
 grant the dedicated Codex user only that wrapper through sudoers instead of
 adding it to the `docker` group.
 
-The Codex launcher uses YOLO mode:
+The Codex launcher uses YOLO mode. Generated launch scripts prefer `--yolo`
+when the installed Codex accepts it, then fall back to the public long flag
+`--dangerously-bypass-approvals-and-sandbox`:
 
 ```bash
 codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' \

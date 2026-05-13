@@ -529,11 +529,15 @@ docker exec -u agent {shlex.quote(container_name)} bash -lc '
         instance_dir / "start-codex-goal.sh",
         f"""#!/usr/bin/env bash
 set -euo pipefail
+CODEX_BYPASS_FLAG="--yolo"
+if ! codex --yolo --version >/dev/null 2>&1; then
+  CODEX_BYPASS_FLAG="--dangerously-bypass-approvals-and-sandbox"
+fi
 tmux kill-session -t {shlex.quote(session_name)} >/dev/null 2>&1 || true
 tmux new-session -d -s {shlex.quote(session_name)} -c {shlex.quote(str(solution_dir))} \\
   "{codex_env} codex --enable goals -m {shlex.quote(args.model)} \\
   -c model_reasoning_effort={shlex.quote(args.reasoning_effort)} \\
-  -C {shlex.quote(str(solution_dir))} --yolo --no-alt-screen"
+  -C {shlex.quote(str(solution_dir))} $CODEX_BYPASS_FLAG --no-alt-screen"
 tmux pipe-pane -o -t {shlex.quote(session_name)} 'cat >> {shlex.quote(str(instance_dir / "tmux-transcript.log"))}'
 sleep 4
 tmux send-keys -t {shlex.quote(session_name)} {shlex.quote("/goal " + objective)} Enter
