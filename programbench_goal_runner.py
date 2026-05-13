@@ -48,6 +48,27 @@ SOURCE_ACQUISITION_GUARDS = {
     "pnpm": r"(^| )(install|i|add|publish|login|view|info|search|pack)( |$)",
     "yarn": r"(^| )(install|add|publish|login|info|search|pack)( |$)",
 }
+HOST_INSPECTION_GUARDS = (
+    "cat",
+    "find",
+    "grep",
+    "head",
+    "ls",
+    "rg",
+    "sed",
+    "tail",
+    "wc",
+)
+HOST_INSPECTION_PATTERNS = (
+    "/Users/",
+    "/home/",
+    "/Documents/" + "ProgramBench",
+    "ProgramBench",
+    "pb-goal-runs",
+    " .. ",
+    "../",
+    "/..",
+)
 TOOL_CACHE_ENV = (
     "CARGO_HOME",
     "CARGO_NET_OFFLINE",
@@ -145,6 +166,28 @@ if [[ "$args" =~ $blocked_re ]]; then
   echo "blocked {tool}: ProgramBench cleanroom runs allow local builds, not source/package acquisition" >&2
   exit 126
 fi
+{exec_line}
+""",
+        )
+    for tool in HOST_INSPECTION_GUARDS:
+        real = shutil.which(tool)
+        exec_line = (
+            f'exec {shlex.quote(real)} "$@"' if real else f'echo "{tool} is not available on this host" >&2\nexit 127'
+        )
+        checks = "\n".join(
+            [
+                f'if [[ "$args" == *{shlex.quote(pattern)}* ]]; then '
+                f'echo "blocked {tool}: ProgramBench cleanroom runs forbid host/evaluator path inspection" >&2; '
+                "exit 126; fi"
+                for pattern in HOST_INSPECTION_PATTERNS
+            ]
+        )
+        write_executable(
+            guard_dir / tool,
+            f"""#!/usr/bin/env bash
+set -euo pipefail
+args=" $* "
+{checks}
 {exec_line}
 """,
         )

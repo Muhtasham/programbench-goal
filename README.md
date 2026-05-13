@@ -82,8 +82,9 @@ tool caches at an empty per-run directory. Local build commands such as
 as `go get`, `cargo install`, and `pip install` are blocked. Agent-created
 black-box probes, fuzzers, generators, and comparison scripts are allowed when
 they interact with the target only through normal runtime behavior. This catches
-common mistakes, but it is not a replacement for a VM/container/user-level
-egress policy.
+common mistakes. It also blocks common local file-inspection commands from
+reading parent directories, the run root, home paths, or the evaluator checkout.
+This is still not a replacement for a VM/container/user-level egress policy.
 
 See `docs/paper-compliance.md` for the paper/FAQ compliance matrix.
 

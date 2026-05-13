@@ -109,15 +109,22 @@ def session_meta(path: Path) -> dict | None:
     return None
 
 
-def exec_calls(path: Path) -> list[tuple[int, dict]]:
+def exec_calls(path: Path) -> list[tuple[int, dict, str]]:
     calls = []
+    outputs = {}
     for n, line in enumerate(path.read_text(errors="replace").splitlines(), start=1):
         event = json.loads(line)
         payload = event.get("payload", {})
         if event.get("type") == "response_item" and payload.get("type") == "function_call":
             if payload.get("name") == "exec_command":
-                calls.append((n, json.loads(payload["arguments"])))
-    return calls
+                calls.append((n, payload["call_id"], json.loads(payload["arguments"])))
+        if event.get("type") == "response_item" and payload.get("type") == "function_call_output":
+            outputs[payload["call_id"]] = payload.get("output", "")
+    return [(line, call, outputs.get(call_id, "")) for line, call_id, call in calls]
+
+
+def was_blocked(output: str) -> bool:
+    return "blocked " in output
 
 
 def uses_tool(command: str, tool: str) -> bool:
@@ -218,10 +225,13 @@ def audit_paper_settings(run: dict, instance_dir: Path) -> list[Finding]:
 def audit_command(
     line_source: str,
     call: dict,
+    output: str,
     solution_dir: Path,
     container_name: str,
 ) -> list[Finding]:
     findings = []
+    if was_blocked(output):
+        return findings
     command = call["cmd"]
     workdir = call.get("workdir", "")
     if workdir and not is_inside(workdir, solution_dir):
@@ -270,12 +280,15 @@ def audit(args: argparse.Namespace) -> None:
     logs = find_session_logs(instance_dir, Path(args.codex_sessions).expanduser())
     if not logs:
         findings.append(Finding(str(instance_dir), "no Codex JSONL session logs found for solution cwd"))
+    blocked_attempts = 0
     for log in logs:
-        for line, call in exec_calls(log):
+        for line, call, output in exec_calls(log):
+            blocked_attempts += was_blocked(output)
             findings.extend(
                 audit_command(
                     f"{log}:{line}",
                     call,
+                    output,
                     solution_dir,
                     run["container_name"],
                 )
@@ -290,6 +303,7 @@ def audit(args: argparse.Namespace) -> None:
         raise SystemExit(1)
     print(f"OK audit passed for {instance_dir}")
     print(f"session_logs={';'.join(str(path) for path in logs)}")
+    print(f"blocked_attempts={blocked_attempts}")
 
 
 def main() -> None:
