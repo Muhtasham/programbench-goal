@@ -69,10 +69,37 @@ report those local smoke runs as paper-comparable results.
 
 The generated Codex launcher prepends a `guard-bin` directory to `PATH`. It
 blocks common host-side internet, source/package lookup, and binary-analysis
-commands, and restricts `docker` to the allowed
-`docker exec -u agent <container> ...` target-probing form. This catches common
+commands, restricts `docker` to the allowed
+`docker exec -u agent <container> ...` target-probing form, and points common
+tool caches at an empty per-run directory. Local build commands such as
+`go build` and `cargo build` are still allowed; source-acquisition commands such
+as `go get`, `cargo install`, and `pip install` are blocked. This catches common
 mistakes, but it is not a replacement for a VM/container/user-level egress
 policy.
+
+See `docs/paper-compliance.md` for the paper/FAQ compliance matrix.
+
+## Inference Modes
+
+Default mode is `paper`. This is the only mode intended for ProgramBench-style
+cleanroom reporting:
+
+```bash
+uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763
+```
+
+There is also an explicitly non-compliant research mode for
+ProgramBench-inspired runs where Codex can use normal internet and package
+tooling:
+
+```bash
+uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
+  --inference-mode open-internet
+```
+
+Open-internet runs still produce `submission.tar.gz` and can be evaluated with
+ProgramBench, but report them separately as open-internet Codex `/goal`
+experiments. Do not mix them with cleanroom ProgramBench results.
 
 ## Optional Host Egress Guard
 
@@ -179,7 +206,7 @@ Package the submission:
 Audit the Codex JSONL trace and package shape before evaluating or reporting:
 
 ```bash
-uv run python scripts/audit-run.py ~/pb-goal-runs/gpt55-goal-jq/jqlang__jq.b33a763
+uv run python scripts/audit-run.py --strict-paper ~/pb-goal-runs/gpt55-goal-jq/jqlang__jq.b33a763
 ```
 
 Evaluate from a ProgramBench checkout:

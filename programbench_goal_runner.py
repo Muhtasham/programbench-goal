@@ -13,36 +13,52 @@ from pathlib import Path
 
 DEFAULT_ROOT = Path.home() / "pb-goal-runs"
 PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal.md"
-BLOCKED_HOST_TOOLS = (
-    "apt",
-    "apt-get",
+OPEN_PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal_open.md"
+BLOCKED_ALWAYS_TOOLS = (
     "brew",
-    "cargo",
     "curl",
     "dtruss",
     "file",
     "gdb",
     "gh",
     "git",
-    "go",
     "hexdump",
     "lldb",
     "ltrace",
     "nm",
-    "npm",
     "objdump",
     "otool",
     "perf",
-    "pip",
-    "pip3",
-    "pnpm",
     "readelf",
     "strings",
     "strace",
     "uv",
     "wget",
     "xxd",
-    "yarn",
+)
+SOURCE_ACQUISITION_GUARDS = {
+    "apt": r"(^| )install( |$)|(^| )source( |$)",
+    "apt-get": r"(^| )install( |$)|(^| )source( |$)",
+    "cargo": r"(^| )(install|search|add|fetch|update|publish|login|owner|yank)( |$)",
+    "go": r"(^| )(get|install)( |$)",
+    "npm": r"(^| )(install|i|add|publish|login|view|info|search|pack)( |$)",
+    "pip": r"(^| )install( |$)|(^| )download( |$)",
+    "pip3": r"(^| )install( |$)|(^| )download( |$)",
+    "pnpm": r"(^| )(install|i|add|publish|login|view|info|search|pack)( |$)",
+    "yarn": r"(^| )(install|add|publish|login|info|search|pack)( |$)",
+}
+TOOL_CACHE_ENV = (
+    "CARGO_HOME",
+    "CARGO_NET_OFFLINE",
+    "GOMODCACHE",
+    "GONOSUMDB",
+    "GOPATH",
+    "GOPROXY",
+    "GOSUMDB",
+    "NPM_CONFIG_CACHE",
+    "NPM_CONFIG_OFFLINE",
+    "PIP_CACHE_DIR",
+    "PIP_NO_INDEX",
 )
 
 
@@ -96,7 +112,7 @@ echo "blocked docker command. Use: docker exec [-i] -u agent {container_name} ba
 exit 126
 """,
     )
-    for tool in BLOCKED_HOST_TOOLS:
+    for tool in BLOCKED_ALWAYS_TOOLS:
         write_executable(
             guard_dir / tool,
             f"""#!/usr/bin/env bash
@@ -104,6 +120,43 @@ echo "blocked {tool}: ProgramBench cleanroom runs forbid host internet, source/p
 exit 126
 """,
         )
+    for tool, pattern in SOURCE_ACQUISITION_GUARDS.items():
+        real = shutil.which(tool)
+        exec_line = (
+            f"exec {shlex.quote(real)} \"$@\""
+            if real
+            else f"echo \"{tool} is not available on this host\" >&2\nexit 127"
+        )
+        write_executable(
+            guard_dir / tool,
+            f"""#!/usr/bin/env bash
+set -euo pipefail
+args=" $* "
+blocked_re={shlex.quote(pattern)}
+if [[ "$args" =~ $blocked_re ]]; then
+  echo "blocked {tool}: ProgramBench cleanroom runs allow local builds, not source/package acquisition" >&2
+  exit 126
+fi
+{exec_line}
+""",
+        )
+
+
+def tool_cache_exports(cache_dir: Path) -> str:
+    values = {
+        "CARGO_HOME": cache_dir / "cargo",
+        "CARGO_NET_OFFLINE": "true",
+        "GOMODCACHE": cache_dir / "go" / "pkg" / "mod",
+        "GONOSUMDB": "*",
+        "GOPATH": cache_dir / "go",
+        "GOPROXY": "off",
+        "GOSUMDB": "off",
+        "NPM_CONFIG_CACHE": cache_dir / "npm",
+        "NPM_CONFIG_OFFLINE": "true",
+        "PIP_CACHE_DIR": cache_dir / "pip",
+        "PIP_NO_INDEX": "1",
+    }
+    return " ".join(f"{key}={shlex.quote(str(value))}" for key, value in values.items())
 
 
 def prepare(args: argparse.Namespace) -> None:
@@ -111,6 +164,8 @@ def prepare(args: argparse.Namespace) -> None:
     instance_dir = root / (args.run_name or run_name(args.instance_id)) / args.instance_id
     solution_dir = instance_dir / "solution"
     guard_dir = instance_dir / "guard-bin"
+    cache_dir = instance_dir / "tool-caches"
+    paper_mode = args.inference_mode == "paper"
     container_name = f"pb-goal-{slug(args.instance_id)}"
     session_name = f"pb-goal-{slug(args.instance_id)}"
     image = image_name(args.instance_id)
@@ -120,18 +175,28 @@ def prepare(args: argparse.Namespace) -> None:
     )
 
     solution_dir.mkdir(parents=True, exist_ok=True)
+    cache_dir.mkdir(parents=True, exist_ok=True)
     write_guard_bin(guard_dir, container_name)
     (solution_dir / "AGENT_RULES.md").write_text(
-        "Do not use internet, package managers, upstream source, decompilers, "
-        "disassemblers, tracing/instrumentation tools, ProgramBench tests, or "
-        "the ProgramBench evaluator repository. Do not inspect files outside "
-        "this solution directory, except through the target container command. Probe the "
-        f"target executable at /workspace/executable with docker exec -u agent {container_name} bash -lc '<command>'. "
-        "Use only documentation already present in the cleanroom container.\n"
+        (
+            "Do not use internet, package managers, upstream source, decompilers, "
+            "disassemblers, tracing/instrumentation tools, ProgramBench tests, or "
+            "the ProgramBench evaluator repository. Do not inspect files outside "
+            "this solution directory, except through the target container command. Probe the "
+            f"target executable at /workspace/executable with docker exec -u agent {container_name} bash -lc '<command>'. "
+            "Use only documentation already present in the cleanroom container.\n"
+        )
+        if paper_mode
+        else (
+            "Open-internet research mode: this is not ProgramBench-compliant and must not be reported as a cleanroom "
+            "benchmark result. You may use internet/package tooling to solve the task, but still write a packageable "
+            f"solution and probe the target executable at /workspace/executable with docker exec -u agent {container_name} "
+            "bash -lc '<command>'.\n"
+        )
     )
     (instance_dir / "GOAL_PROMPT.md").write_text(
         render_prompt(
-            Path(args.prompt_template).expanduser().read_text(),
+            Path(args.prompt_template or (PROMPT_TEMPLATE if paper_mode else OPEN_PROMPT_TEMPLATE)).expanduser().read_text(),
             {
                 "instance_id": args.instance_id,
                 "image": image,
@@ -150,8 +215,12 @@ def prepare(args: argparse.Namespace) -> None:
                 "session_name": session_name,
                 "solution_dir": str(solution_dir),
                 "guard_bin_dir": str(guard_dir),
+                "tool_cache_dir": str(cache_dir),
+                "tool_cache_env": list(TOOL_CACHE_ENV),
                 "docker_cpus": args.docker_cpus,
                 "docker_memory": args.docker_memory,
+                "inference_mode": args.inference_mode,
+                "paper_compliant": paper_mode,
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "host_machine": platform.machine(),
                 "host_system": platform.system(),
@@ -161,6 +230,7 @@ def prepare(args: argparse.Namespace) -> None:
         + "\n"
     )
 
+    network_arg = "--network none" if paper_mode else "--network bridge"
     write_executable(
         instance_dir / "start-target.sh",
         f"""#!/usr/bin/env bash
@@ -169,7 +239,7 @@ docker rm -f {shlex.quote(container_name)} >/dev/null 2>&1 || true
 docker pull --platform linux/amd64 {shlex.quote(image)}:task_cleanroom
 docker run -d --platform linux/amd64 \\
   --name {shlex.quote(container_name)} \\
-  --network none \\
+  {network_arg} \\
   --cpus {shlex.quote(str(args.docker_cpus))} \\
   --memory {shlex.quote(args.docker_memory)} \\
   -v {shlex.quote(str(solution_dir))}:/workspace/solution \\
@@ -183,7 +253,7 @@ docker exec -u agent {shlex.quote(container_name)} bash -lc 'pwd; find /workspac
         f"""#!/usr/bin/env bash
 set -euo pipefail
 docker inspect {shlex.quote(container_name)} --format 'network={{{{.HostConfig.NetworkMode}}}} image={{{{.Config.Image}}}} status={{{{.State.Status}}}}'
-test "$(docker inspect {shlex.quote(container_name)} --format '{{{{.HostConfig.NetworkMode}}}}')" = "none"
+{"test \"$(docker inspect " + shlex.quote(container_name) + " --format '{{.HostConfig.NetworkMode}}')\" = \"none\"" if paper_mode else "echo 'open-internet mode: target container network is intentionally not cleanroom-compliant'"}
 docker exec -u agent {shlex.quote(container_name)} bash -lc '
   set -e
   id
@@ -205,13 +275,19 @@ docker exec -u agent {shlex.quote(container_name)} bash -lc '
 '
 """,
     )
+    codex_env = (
+        f"PATH={shlex.quote(str(guard_dir))}:$PATH GIT_CEILING_DIRECTORIES={shlex.quote(str(instance_dir))} "
+        f"{tool_cache_exports(cache_dir)}"
+        if paper_mode
+        else f"GIT_CEILING_DIRECTORIES={shlex.quote(str(instance_dir))}"
+    )
     write_executable(
         instance_dir / "start-codex-goal.sh",
         f"""#!/usr/bin/env bash
 set -euo pipefail
 tmux kill-session -t {shlex.quote(session_name)} >/dev/null 2>&1 || true
 tmux new-session -d -s {shlex.quote(session_name)} -c {shlex.quote(str(solution_dir))} \\
-  "PATH={shlex.quote(str(guard_dir))}:$PATH GIT_CEILING_DIRECTORIES={shlex.quote(str(instance_dir))} codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' -C {shlex.quote(str(solution_dir))} -s danger-full-access -a never --no-alt-screen"
+  "{codex_env} codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' -C {shlex.quote(str(solution_dir))} -s danger-full-access -a never --no-alt-screen"
 sleep 4
 tmux send-keys -t {shlex.quote(session_name)} {shlex.quote("/goal " + objective)} Enter
 sleep 2
@@ -229,7 +305,7 @@ test -f {shlex.quote(str(solution_dir / "compile.sh"))} || {{
   echo "missing solution/compile.sh" >&2
   exit 1
 }}
-tar -C {shlex.quote(str(solution_dir))} -czf {shlex.quote(str(instance_dir / "submission.tar.gz"))} .
+tar -C {shlex.quote(str(solution_dir))} --exclude './AGENT_RULES.md' -czf {shlex.quote(str(instance_dir / "submission.tar.gz"))} .
 ls -lh {shlex.quote(str(instance_dir / "submission.tar.gz"))}
 """,
     )
@@ -265,6 +341,7 @@ def prepare_batch(args: argparse.Namespace) -> None:
                     prompt_template=args.prompt_template,
                     docker_cpus=args.docker_cpus,
                     docker_memory=args.docker_memory,
+                    inference_mode=args.inference_mode,
                 )
             )
 
@@ -278,9 +355,10 @@ def main() -> None:
     prepare_parser.add_argument("--run-name", default="")
     prepare_parser.add_argument("--docker-cpus", type=int, default=20)
     prepare_parser.add_argument("--docker-memory", default="60g")
+    prepare_parser.add_argument("--inference-mode", choices=["paper", "open-internet"], default="paper")
     prepare_parser.add_argument(
         "--prompt-template",
-        default=str(PROMPT_TEMPLATE),
+        default="",
         help="Prompt template to render. Use this to pass an official ProgramBench prompt unchanged when available.",
     )
     prepare_parser.set_defaults(func=prepare)
@@ -289,9 +367,10 @@ def main() -> None:
     batch_parser.add_argument("--run-root", default=str(DEFAULT_ROOT))
     batch_parser.add_argument("--docker-cpus", type=int, default=20)
     batch_parser.add_argument("--docker-memory", default="60g")
+    batch_parser.add_argument("--inference-mode", choices=["paper", "open-internet"], default="paper")
     batch_parser.add_argument(
         "--prompt-template",
-        default=str(PROMPT_TEMPLATE),
+        default="",
         help="Prompt template to render. Use this to pass an official ProgramBench prompt unchanged when available.",
     )
     batch_parser.set_defaults(func=prepare_batch)

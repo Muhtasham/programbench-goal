@@ -8,6 +8,7 @@ Writing original code based on observed behavior is the entire point of this ben
 Any approach that shortcuts this - finding existing source code, wrapping the binary,
 or installing the original tool - does not count as a solution. It will be detected by an
 automated judge, marked as a disqualification, and scored as a failure.
+The trace will be posted to an online wall of shame.
 
 <RULES>
 ## What is not allowed
@@ -22,8 +23,8 @@ executable is, you must reimplement it from behavioral observation alone.
 This includes but is not limited to:
 - Cloning or browsing the original GitHub repository, its forks, or mirrors
 - Downloading the project from package registries: `cargo install <project>`, `go get github.com/<org>/<project>`, `pip install <project>`, `apt-get source <project>`, `npm install <project>`, etc.
-- Fetching source tarballs from project websites
-- Using a package manager to download the project as a dependency and then reading its cached source
+- Fetching source tarballs from project websites (e.g., `curl https://lua.org/ftp/lua-5.5.0.tar.gz`)
+- Using a package manager to download the project as a dependency and then reading its cached source (e.g., navigating into `~/.cargo/registry/src/` or `$(go env GOPATH)/pkg/mod/`)
 - Searching the web for the project's source code or implementation details
 
 ### 2. Wrapping or reusing the original binary
@@ -34,9 +35,9 @@ of the same tool at runtime.
 
 This includes but is not limited to:
 - Writing a wrapper script that delegates to the original binary
-- Installing the tool from a package manager and shimming to it
+- Installing the tool from a package manager and shimming to it (e.g., `apt-get install nnn && cp $(which nnn) ./executable`)
 - Writing a `compile.sh` that simply makes the provided binary executable or copies it
-- Building a binary whose main function shells out to an external tool
+- Building a binary whose main function shells out to an external tool (e.g., `Command::new("miniserve").args(args).exec()`)
 - Re-linking prebuilt `.o` object files found in the workspace without writing new source code
 
 ### 3. Binary analysis of the provided executable

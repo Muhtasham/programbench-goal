@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import tarfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -68,6 +69,26 @@ BINARY_ANALYSIS_TOOLS = (
     "xxd",
 )
 PARENT_INSPECTION = re.compile(r"(^|[;&|]\s*)(cat|find|grep|head|ls|rg|sed|tail|wc)\s+[^;&|]*\.\.")
+WRAPPER_PATTERNS = (
+    r"/workspace/executable",
+    r"\bdocker\s+exec\b",
+    r"\bprogrambench\b",
+    r"\bexec\s+[^;\n]*\s+\"\$@\"",
+    r"\bsubprocess\.[^(]+\(.*executable",
+    r"\bCommand::new\([^)]*executable",
+)
+PAPER_CACHE_ENV = {
+    "CARGO_HOME",
+    "CARGO_NET_OFFLINE",
+    "GOMODCACHE",
+    "GOPATH",
+    "GOPROXY",
+    "GOSUMDB",
+    "NPM_CONFIG_CACHE",
+    "NPM_CONFIG_OFFLINE",
+    "PIP_CACHE_DIR",
+    "PIP_NO_INDEX",
+}
 
 
 @dataclass
@@ -75,6 +96,7 @@ class Finding:
     source: str
     message: str
     command: str = ""
+    strict_only: bool = False
 
 
 def session_meta(path: Path) -> dict | None:
@@ -119,14 +141,73 @@ def find_session_logs(instance_dir: Path, sessions_root: Path) -> list[Path]:
     ]
 
 
+def text_files(root: Path) -> list[Path]:
+    files = []
+    for path in sorted(root.rglob("*")):
+        if path.is_file() and path.name != "AGENT_RULES.md" and path.stat().st_size < 2_000_000:
+            try:
+                path.read_text(errors="strict")
+            except UnicodeDecodeError:
+                continue
+            files.append(path)
+    return files
+
+
+def audit_solution_files(solution_dir: Path) -> list[Finding]:
+    findings = []
+    for path in text_files(solution_dir):
+        text = path.read_text(errors="replace")
+        for pattern in WRAPPER_PATTERNS:
+            if re.search(pattern, text):
+                findings.append(Finding(str(path), f"solution file contains wrapper/evaluator pattern: {pattern}"))
+    return findings
+
+
+def audit_submission_archive(instance_dir: Path) -> list[Finding]:
+    archive = instance_dir / "submission.tar.gz"
+    if not archive.exists():
+        return []
+    findings = []
+    with tarfile.open(archive) as tar:
+        names = tar.getnames()
+    if not any(name.strip("./") == "compile.sh" for name in names):
+        findings.append(Finding(str(archive), "submission archive does not include compile.sh"))
+    if any(name.strip("./") == "AGENT_RULES.md" for name in names):
+        findings.append(Finding(str(archive), "submission archive includes harness-only AGENT_RULES.md"))
+    for name in names:
+        if name.startswith("/") or ".." in Path(name).parts:
+            findings.append(Finding(str(archive), f"submission archive contains unsafe path: {name}"))
+    return findings
+
+
+def audit_paper_settings(run: dict, instance_dir: Path) -> list[Finding]:
+    findings = []
+    if run.get("inference_mode", "paper") != "paper" or not run.get("paper_compliant", True):
+        findings.append(Finding(str(instance_dir / "run.json"), "run is not in ProgramBench paper-compliant inference mode", strict_only=True))
+    if run.get("host_system") != "Linux":
+        findings.append(Finding(str(instance_dir / "run.json"), "paper-comparable run should use Linux host", strict_only=True))
+    if run.get("host_machine") not in {"x86_64", "AMD64"}:
+        findings.append(Finding(str(instance_dir / "run.json"), "paper-comparable run should use amd64 host", strict_only=True))
+    if run.get("docker_cpus") != 20:
+        findings.append(Finding(str(instance_dir / "run.json"), "paper uses 20 CPUs per run", strict_only=True))
+    if run.get("docker_memory") != "60g":
+        findings.append(Finding(str(instance_dir / "run.json"), "paper uses 60GB RAM per run", strict_only=True))
+    if not PAPER_CACHE_ENV.issubset(set(run.get("tool_cache_env", []))):
+        findings.append(
+            Finding(str(instance_dir / "run.json"), "paper-mode run should isolate package/tool caches", strict_only=True)
+        )
+    return findings
+
+
 def audit_command(
     line_source: str,
-    command: str,
-    workdir: str,
+    call: dict,
     solution_dir: Path,
     container_name: str,
 ) -> list[Finding]:
     findings = []
+    command = call["cmd"]
+    workdir = call.get("workdir", "")
     if workdir and not is_inside(workdir, solution_dir):
         findings.append(Finding(line_source, f"exec workdir escapes solution dir: {workdir}", command))
     if any(marker in command for marker in HOST_PATH_MARKERS):
@@ -162,6 +243,9 @@ def audit(args: argparse.Namespace) -> None:
         findings.append(Finding(str(solution_dir / "compile.sh"), "missing ProgramBench compile.sh"))
     if (instance_dir / "submission.tar.gz").is_file() and not (solution_dir / "compile.sh").is_file():
         findings.append(Finding(str(instance_dir / "submission.tar.gz"), "submission exists but cannot compile without compile.sh"))
+    findings.extend(audit_solution_files(solution_dir))
+    findings.extend(audit_submission_archive(instance_dir))
+    findings.extend(audit_paper_settings(run, instance_dir))
 
     logs = find_session_logs(instance_dir, Path(args.codex_sessions).expanduser())
     if not logs:
@@ -171,13 +255,13 @@ def audit(args: argparse.Namespace) -> None:
             findings.extend(
                 audit_command(
                     f"{log}:{line}",
-                    call["cmd"],
-                    call.get("workdir", ""),
+                    call,
                     solution_dir,
                     run["container_name"],
                 )
             )
 
+    findings = [finding for finding in findings if args.strict_paper or not finding.strict_only]
     if findings:
         for finding in findings:
             print(f"FAIL {finding.source}: {finding.message}")
@@ -192,6 +276,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Audit a Codex /goal ProgramBench run for cleanroom gaps")
     parser.add_argument("instance_dir")
     parser.add_argument("--codex-sessions", default=str(Path.home() / ".codex" / "sessions"))
+    parser.add_argument("--strict-paper", action="store_true", help="fail on paper-comparability gaps such as host/resources")
     audit(parser.parse_args())
 
 
