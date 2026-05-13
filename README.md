@@ -453,6 +453,9 @@ The report keeps `paper`, `no-internet`, `no-internet-local-tools`, and
 resolved/almost/average-pass/estimated-cost/calls metrics, and commits only
 sanitized aggregate rows. Local Codex session-log paths stay in
 `local_state/` and are not published.
+The summary page also plots per-task pass rate against estimated cost, Codex
+calls, and wall-clock latency. Calls are the public compute proxy; raw token
+logs remain local unless explicitly exported.
 
 ProgramBench's public usage guide documents the per-instance `.eval.json` files
 that `programbench eval` writes, including `test_results` and evaluator `log`

@@ -294,6 +294,68 @@ def cell(value: str) -> str:
     return html.escape(value)
 
 
+def plot_points(rows: list[ResultRow], x_value, x_label: str, x_format) -> str:
+    width = 360
+    height = 220
+    left = 42
+    right = 18
+    top = 18
+    bottom = 34
+    plot_width = width - left - right
+    plot_height = height - top - bottom
+    values = [x_value(row) for row in rows]
+    max_x = max(values) if values else 1
+    max_x = max_x or 1
+    circles = []
+    for row in rows:
+        x = left + (x_value(row) / max_x) * plot_width
+        y = top + (1 - row.score) * plot_height
+        title = (
+            f"{row.instance_id}: {percent(row.score)} pass, "
+            f"{x_label.lower()} {x_format(x_value(row))}, {mode_label(row)}"
+        )
+        color = "#047857" if row.resolved else "#d97706" if row.almost_resolved else "#be123c"
+        circles.append(
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="5.5" fill="{color}"><title>{cell(title)}</title></circle>'
+        )
+    return f"""
+      <svg class="plot" viewBox="0 0 {width} {height}" role="img" aria-label="Pass rate by {cell(x_label)}">
+        <line x1="{left}" y1="{top}" x2="{left}" y2="{top + plot_height}" />
+        <line x1="{left}" y1="{top + plot_height}" x2="{left + plot_width}" y2="{top + plot_height}" />
+        <text x="{left - 8}" y="{top + 4}" text-anchor="end">100%</text>
+        <text x="{left - 8}" y="{top + plot_height + 4}" text-anchor="end">0%</text>
+        <text x="{left}" y="{height - 8}">0</text>
+        <text x="{left + plot_width}" y="{height - 8}" text-anchor="end">{cell(x_format(max_x))}</text>
+        <text x="{width / 2}" y="{height - 8}" text-anchor="middle">{cell(x_label)}</text>
+        <text x="12" y="{height / 2}" transform="rotate(-90 12 {height / 2})" text-anchor="middle">pass rate</text>
+        {"".join(circles)}
+      </svg>
+    """
+
+
+def render_efficiency_plots(rows: list[ResultRow]) -> str:
+    if not rows:
+        return ""
+    return f"""
+    <h2>Efficiency Plots</h2>
+    <p>Each point is one evaluated task. Compute is shown as Codex calls because public results omit raw token logs; cost is estimated from local token logs and a pricing snapshot.</p>
+    <div class="plot-grid">
+      <section class="plot-card">
+        <h3>Pass vs. Est. Cost</h3>
+        {plot_points(rows, lambda row: row.estimated_cost_usd, "Est. cost (USD)", money)}
+      </section>
+      <section class="plot-card">
+        <h3>Pass vs. Calls</h3>
+        {plot_points(rows, lambda row: row.calls, "Codex calls", lambda value: f"{value:.0f}")}
+      </section>
+      <section class="plot-card">
+        <h3>Pass vs. Latency</h3>
+        {plot_points(rows, lambda row: row.wall_clock_seconds / 3600, "Wall-clock hours", lambda value: f"{value:.2f}h")}
+      </section>
+    </div>
+    """
+
+
 def render_summary_cards(label: str, summary: dict) -> str:
     return f"""
       <section class="summary-card">
@@ -572,6 +634,7 @@ def render_html(data: dict) -> str:
     }}
     h1 {{ margin: 0 0 8px; font-size: 28px; letter-spacing: 0; }}
     h2 {{ margin: 32px 0 12px; font-size: 18px; letter-spacing: 0; }}
+    h3 {{ margin: 0 0 10px; font-size: 14px; letter-spacing: 0; }}
     p {{ color: var(--muted); line-height: 1.5; max-width: 900px; }}
     .pill-row {{ display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }}
     .pill {{
@@ -664,6 +727,25 @@ def render_html(data: dict) -> str:
     }}
     .mode-card strong {{ display: block; margin-bottom: 6px; }}
     .mode-card p {{ margin: 0; font-size: 13px; }}
+    .plot-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+      margin: 14px 0 18px;
+    }}
+    .plot-card {{
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+    }}
+    .plot {{
+      width: 100%;
+      height: auto;
+      display: block;
+    }}
+    .plot line {{ stroke: var(--line); stroke-width: 1.5; }}
+    .plot text {{ fill: var(--muted); font-size: 11px; }}
     a {{ color: #075985; }}
   </style>
 </head>
@@ -703,6 +785,8 @@ def render_html(data: dict) -> str:
     <div class="cards">
       {group_cards}
     </div>
+
+    {render_efficiency_plots(instances)}
 
     <h2>Extended Results</h2>
     <div class="table-wrap">
