@@ -56,7 +56,7 @@ def prepare(args: argparse.Namespace) -> None:
         "disassemblers, tracing/instrumentation tools, ProgramBench tests, or "
         "the ProgramBench evaluator repository. Do not inspect files outside "
         "this solution directory, except through the target container command. Probe the "
-        f"target with docker exec -u agent {container_name} bash -lc '<command>'. "
+        f"target executable at /workspace/executable with docker exec -u agent {container_name} bash -lc '<command>'. "
         "Use only documentation already present in the cleanroom container.\n"
     )
     (instance_dir / "GOAL_PROMPT.md").write_text(
@@ -150,6 +150,10 @@ echo "Attached session: tmux attach -t {session_name}"
         instance_dir / "package-submission.sh",
         f"""#!/usr/bin/env bash
 set -euo pipefail
+test -f {shlex.quote(str(solution_dir / "compile.sh"))} || {{
+  echo "missing solution/compile.sh" >&2
+  exit 1
+}}
 tar -C {shlex.quote(str(solution_dir))} -czf {shlex.quote(str(instance_dir / "submission.tar.gz"))} .
 ls -lh {shlex.quote(str(instance_dir / "submission.tar.gz"))}
 """,

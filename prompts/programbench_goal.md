@@ -23,6 +23,7 @@ Hard rules:
   the target through the allowed `docker exec -u agent ...` command.
 - Interact with the target only through this container:
   `docker exec -u agent {{container_name}} bash -lc '<command>'`
+- The target executable is `/workspace/executable` inside that container.
 - Use only documentation already present in the cleanroom container. If docs are
   missing or incomplete, do not fetch or supply replacements from outside the
   container.
