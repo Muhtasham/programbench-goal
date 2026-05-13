@@ -23,11 +23,16 @@ class TokenUsage:
     ended_at: str = ""
     session_logs: list[str] | None = None
 
-    @property
-    def estimated_cost_usd(self) -> float | None:
+    def estimated_cost_usd(self, rates: dict | None) -> float | None:
         input_rate = os.environ.get("CODEX_INPUT_USD_PER_MTOK")
         cached_rate = os.environ.get("CODEX_CACHED_INPUT_USD_PER_MTOK")
         output_rate = os.environ.get("CODEX_OUTPUT_USD_PER_MTOK")
+        if input_rate is None and rates:
+            input_rate = str(rates["input_usd_per_mtok"])
+        if cached_rate is None and rates:
+            cached_rate = str(rates["cached_input_usd_per_mtok"])
+        if output_rate is None and rates:
+            output_rate = str(rates["output_usd_per_mtok"])
         if input_rate is None or cached_rate is None or output_rate is None:
             return None
         uncached_input = max(0, self.input_tokens - self.cached_input_tokens)
@@ -160,21 +165,30 @@ def format_cost(cost: float | None) -> str:
     return "" if cost is None else f"{cost:.4f}"
 
 
+def load_pricing(path: str) -> dict:
+    pricing_path = Path(path).expanduser()
+    if not pricing_path.is_file():
+        return {}
+    return json.loads(pricing_path.read_text()).get("models", {})
+
+
 def summarize(args: argparse.Namespace) -> None:
     run_dir = Path(args.run_dir).expanduser()
     programbench_repo = Path(args.programbench_repo).expanduser()
     programbench = load_programbench(programbench_repo)
+    pricing = load_pricing(args.pricing_file)
     rows = []
     for eval_json in sorted(run_dir.glob("**/*.eval.json")):
         instance_dir = eval_json.parent
         eval_row = score_eval(eval_json, programbench)
         run = json.loads((instance_dir / "run.json").read_text()) if (instance_dir / "run.json").is_file() else {}
         usage = find_codex_usage(instance_dir, Path(args.codex_sessions).expanduser())
+        model = run.get("model", "")
         rows.append(
             {
                 **eval_row,
                 "run_name": run.get("run_name", ""),
-                "model": run.get("model", ""),
+                "model": model,
                 "reasoning_effort": run.get("reasoning_effort", ""),
                 "inference_mode": run.get("inference_mode", ""),
                 "paper_compliant": run.get("paper_compliant", ""),
@@ -192,7 +206,8 @@ def summarize(args: argparse.Namespace) -> None:
                 "output_tokens": usage.output_tokens,
                 "reasoning_output_tokens": usage.reasoning_output_tokens,
                 "total_tokens": usage.total_tokens,
-                "estimated_cost_usd": format_cost(usage.estimated_cost_usd),
+                "estimated_cost_usd": format_cost(usage.estimated_cost_usd(pricing.get(model))),
+                "pricing_source": pricing.get(model, {}).get("source_url", ""),
                 "session_logs": ";".join(usage.session_logs or []),
             }
         )
@@ -222,6 +237,7 @@ def main() -> None:
     parser.add_argument("run_dir")
     parser.add_argument("--programbench-repo", required=True)
     parser.add_argument("--codex-sessions", default=str(Path.home() / ".codex" / "sessions"))
+    parser.add_argument("--pricing-file", default="local_state/openai_pricing.json")
     parser.add_argument("--output", default="")
     summarize(parser.parse_args())
 

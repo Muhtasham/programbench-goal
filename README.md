@@ -155,6 +155,21 @@ Use ProgramBench's primary metric when reporting results: fully resolved
 instances. Almost-resolved and average pass rate are useful diagnostics, but
 they should not be the headline score.
 
+Local state lives under `local_state/`, which is ignored by git. Use it for
+pricing snapshots, run manifests, copied Codex logs, eval JSON, result CSVs, and
+trace bundles that should be shareable locally but not committed.
+
+Refresh OpenAI pricing before summarizing cost:
+
+```bash
+uv run python scripts/refresh-openai-pricing.py
+```
+
+This writes `local_state/openai_pricing.json` from official OpenAI model docs.
+The summarizer reads that file by default; `CODEX_INPUT_USD_PER_MTOK`,
+`CODEX_CACHED_INPUT_USD_PER_MTOK`, and `CODEX_OUTPUT_USD_PER_MTOK` still
+override it when set.
+
 Evaluation may need internet access to fetch ProgramBench test blobs from
 Hugging Face. That is evaluator-side access, not inference-side access. For
 repeatable runs, prefetch the blobs from the ProgramBench checkout before
@@ -266,6 +281,19 @@ export CODEX_INPUT_USD_PER_MTOK=...
 export CODEX_CACHED_INPUT_USD_PER_MTOK=...
 export CODEX_OUTPUT_USD_PER_MTOK=...
 ```
+
+Collect local evidence for a run after evaluation:
+
+```bash
+uv run python scripts/collect-run-artifacts.py ~/pb-goal-runs/gpt55-goal-jq/jqlang__jq.b33a763
+```
+
+The collector writes an ignored bundle under `local_state/run_artifacts/` with a
+manifest, `run.json`, eval JSON, `results.csv`, `submission.tar.gz`, package
+listing, and copied Codex JSONL logs. This is the local trace bundle to inspect
+or selectively share when discussing results. Text artifacts are copied with
+local home, run-root, ProgramBench-repo, and Codex-session paths redacted; the
+submitted tarball is preserved byte-for-byte.
 
 To audit a row's usage numbers, inspect the `session_logs` path from the CSV:
 
