@@ -5,11 +5,10 @@ import argparse
 import json
 import platform
 import re
-import shutil
 import shlex
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-
 
 DEFAULT_ROOT = Path.home() / "pb-goal-runs"
 PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal.md"
@@ -105,7 +104,10 @@ else
   user_name="${{4:-}}"
   target_container="${{5:-}}"
 fi
-if [ "${{1:-}}" = "exec" ] && [ "$user_flag" = "-u" ] && [ "$user_name" = "agent" ] && [ "$target_container" = {shlex.quote(container_name)} ]; then
+if [ "${{1:-}}" = "exec" ] \\
+  && [ "$user_flag" = "-u" ] \\
+  && [ "$user_name" = "agent" ] \\
+  && [ "$target_container" = {shlex.quote(container_name)} ]; then
   exec {shlex.quote(shutil.which("docker") or "docker")} "$@"
 fi
 echo "blocked docker command. Use: docker exec [-i] -u agent {container_name} bash -lc '<command>'" >&2
@@ -116,16 +118,14 @@ exit 126
         write_executable(
             guard_dir / tool,
             f"""#!/usr/bin/env bash
-echo "blocked {tool}: ProgramBench cleanroom runs forbid host internet, source/package lookup, and binary-analysis tooling" >&2
+echo "blocked {tool}: ProgramBench cleanroom runs forbid host internet/source/binary-analysis tooling" >&2
 exit 126
 """,
         )
     for tool, pattern in SOURCE_ACQUISITION_GUARDS.items():
         real = shutil.which(tool)
         exec_line = (
-            f"exec {shlex.quote(real)} \"$@\""
-            if real
-            else f"echo \"{tool} is not available on this host\" >&2\nexit 127"
+            f'exec {shlex.quote(real)} "$@"' if real else f'echo "{tool} is not available on this host" >&2\nexit 127'
         )
         write_executable(
             guard_dir / tool,
@@ -183,20 +183,22 @@ def prepare(args: argparse.Namespace) -> None:
             "disassemblers, tracing/instrumentation tools, ProgramBench tests, or "
             "the ProgramBench evaluator repository. Do not inspect files outside "
             "this solution directory, except through the target container command. Probe the "
-            f"target executable at /workspace/executable with docker exec -u agent {container_name} bash -lc '<command>'. "
+            f"target executable at /workspace/executable with docker exec -u agent {container_name} "
+            "bash -lc '<command>'. "
             "Use only documentation already present in the cleanroom container.\n"
         )
         if paper_mode
         else (
             "Open-internet research mode: this is not ProgramBench-compliant and must not be reported as a cleanroom "
             "benchmark result. You may use internet/package tooling to solve the task, but still write a packageable "
-            f"solution and probe the target executable at /workspace/executable with docker exec -u agent {container_name} "
-            "bash -lc '<command>'.\n"
+            f"solution and probe the target executable at /workspace/executable with docker exec -u agent "
+            f"{container_name} bash -lc '<command>'.\n"
         )
     )
+    prompt_template = args.prompt_template or (PROMPT_TEMPLATE if paper_mode else OPEN_PROMPT_TEMPLATE)
     (instance_dir / "GOAL_PROMPT.md").write_text(
         render_prompt(
-            Path(args.prompt_template or (PROMPT_TEMPLATE if paper_mode else OPEN_PROMPT_TEMPLATE)).expanduser().read_text(),
+            Path(prompt_template).expanduser().read_text(),
             {
                 "instance_id": args.instance_id,
                 "image": image,
@@ -230,6 +232,11 @@ def prepare(args: argparse.Namespace) -> None:
         + "\n"
     )
 
+    network_check = (
+        f'test "$(docker inspect {shlex.quote(container_name)} --format \'{{{{.HostConfig.NetworkMode}}}}\')" = "none"'
+        if paper_mode
+        else "echo 'open-internet mode: target container network is intentionally not cleanroom-compliant'"
+    )
     network_arg = "--network none" if paper_mode else "--network bridge"
     write_executable(
         instance_dir / "start-target.sh",
@@ -252,8 +259,9 @@ docker exec -u agent {shlex.quote(container_name)} bash -lc 'pwd; find /workspac
         instance_dir / "check-compliance.sh",
         f"""#!/usr/bin/env bash
 set -euo pipefail
-docker inspect {shlex.quote(container_name)} --format 'network={{{{.HostConfig.NetworkMode}}}} image={{{{.Config.Image}}}} status={{{{.State.Status}}}}'
-{"test \"$(docker inspect " + shlex.quote(container_name) + " --format '{{.HostConfig.NetworkMode}}')\" = \"none\"" if paper_mode else "echo 'open-internet mode: target container network is intentionally not cleanroom-compliant'"}
+docker inspect {shlex.quote(container_name)} \\
+  --format 'network={{{{.HostConfig.NetworkMode}}}} image={{{{.Config.Image}}}} status={{{{.State.Status}}}}'
+{network_check}
 docker exec -u agent {shlex.quote(container_name)} bash -lc '
   set -e
   id
@@ -287,7 +295,8 @@ docker exec -u agent {shlex.quote(container_name)} bash -lc '
 set -euo pipefail
 tmux kill-session -t {shlex.quote(session_name)} >/dev/null 2>&1 || true
 tmux new-session -d -s {shlex.quote(session_name)} -c {shlex.quote(str(solution_dir))} \\
-  "{codex_env} codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' -C {shlex.quote(str(solution_dir))} -s danger-full-access -a never --no-alt-screen"
+  "{codex_env} codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' \\
+  -C {shlex.quote(str(solution_dir))} -s danger-full-access -a never --no-alt-screen"
 sleep 4
 tmux send-keys -t {shlex.quote(session_name)} {shlex.quote("/goal " + objective)} Enter
 sleep 2
@@ -305,7 +314,9 @@ test -f {shlex.quote(str(solution_dir / "compile.sh"))} || {{
   echo "missing solution/compile.sh" >&2
   exit 1
 }}
-tar -C {shlex.quote(str(solution_dir))} --exclude './AGENT_RULES.md' -czf {shlex.quote(str(instance_dir / "submission.tar.gz"))} .
+tar -C {shlex.quote(str(solution_dir))} \\
+  --exclude './AGENT_RULES.md' \\
+  -czf {shlex.quote(str(instance_dir / "submission.tar.gz"))} .
 ls -lh {shlex.quote(str(instance_dir / "submission.tar.gz"))}
 """,
     )

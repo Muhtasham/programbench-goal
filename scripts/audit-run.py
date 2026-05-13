@@ -8,7 +8,6 @@ import tarfile
 from dataclasses import dataclass
 from pathlib import Path
 
-
 FORBIDDEN_TOOLS = (
     "brew",
     "dtruss",
@@ -51,7 +50,10 @@ SOURCE_LOOKUP_PATTERNS = (
     r"\bGOMODCACHE\b",
 )
 LOCALHOSTS = {"127.0.0.1", "localhost", "::1", "[::1]", "0.0.0.0"}
-HOST_PATH_MARKERS = ("/" "Users/", "/" "Documents/" "ProgramBench")
+HOST_PATH_MARKERS = (
+    "/Users/",
+    "/Documents/" + "ProgramBench",
+)
 BINARY_ANALYSIS_TOOLS = (
     "dtruss",
     "file",
@@ -183,18 +185,32 @@ def audit_submission_archive(instance_dir: Path) -> list[Finding]:
 def audit_paper_settings(run: dict, instance_dir: Path) -> list[Finding]:
     findings = []
     if run.get("inference_mode", "paper") != "paper" or not run.get("paper_compliant", True):
-        findings.append(Finding(str(instance_dir / "run.json"), "run is not in ProgramBench paper-compliant inference mode", strict_only=True))
+        findings.append(
+            Finding(
+                str(instance_dir / "run.json"),
+                "run is not in ProgramBench paper-compliant inference mode",
+                strict_only=True,
+            )
+        )
     if run.get("host_system") != "Linux":
-        findings.append(Finding(str(instance_dir / "run.json"), "paper-comparable run should use Linux host", strict_only=True))
+        findings.append(
+            Finding(str(instance_dir / "run.json"), "paper-comparable run should use Linux host", strict_only=True)
+        )
     if run.get("host_machine") not in {"x86_64", "AMD64"}:
-        findings.append(Finding(str(instance_dir / "run.json"), "paper-comparable run should use amd64 host", strict_only=True))
+        findings.append(
+            Finding(str(instance_dir / "run.json"), "paper-comparable run should use amd64 host", strict_only=True)
+        )
     if run.get("docker_cpus") != 20:
         findings.append(Finding(str(instance_dir / "run.json"), "paper uses 20 CPUs per run", strict_only=True))
     if run.get("docker_memory") != "60g":
         findings.append(Finding(str(instance_dir / "run.json"), "paper uses 60GB RAM per run", strict_only=True))
     if not PAPER_CACHE_ENV.issubset(set(run.get("tool_cache_env", []))):
         findings.append(
-            Finding(str(instance_dir / "run.json"), "paper-mode run should isolate package/tool caches", strict_only=True)
+            Finding(
+                str(instance_dir / "run.json"),
+                "paper-mode run should isolate package/tool caches",
+                strict_only=True,
+            )
         )
     return findings
 
@@ -219,7 +235,9 @@ def audit_command(
     if "/workspace/executable" in command:
         for tool in BINARY_ANALYSIS_TOOLS:
             if uses_tool(command, tool):
-                findings.append(Finding(line_source, f"binary analysis tool used on target executable: {tool}", command))
+                findings.append(
+                    Finding(line_source, f"binary analysis tool used on target executable: {tool}", command)
+                )
     for pattern in SOURCE_LOOKUP_PATTERNS:
         if re.search(pattern, command):
             findings.append(Finding(line_source, f"source/package lookup pattern: {pattern}", command))
@@ -242,7 +260,9 @@ def audit(args: argparse.Namespace) -> None:
     if not (solution_dir / "compile.sh").is_file():
         findings.append(Finding(str(solution_dir / "compile.sh"), "missing ProgramBench compile.sh"))
     if (instance_dir / "submission.tar.gz").is_file() and not (solution_dir / "compile.sh").is_file():
-        findings.append(Finding(str(instance_dir / "submission.tar.gz"), "submission exists but cannot compile without compile.sh"))
+        findings.append(
+            Finding(str(instance_dir / "submission.tar.gz"), "submission exists but cannot compile without compile.sh")
+        )
     findings.extend(audit_solution_files(solution_dir))
     findings.extend(audit_submission_archive(instance_dir))
     findings.extend(audit_paper_settings(run, instance_dir))
@@ -276,7 +296,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Audit a Codex /goal ProgramBench run for cleanroom gaps")
     parser.add_argument("instance_dir")
     parser.add_argument("--codex-sessions", default=str(Path.home() / ".codex" / "sessions"))
-    parser.add_argument("--strict-paper", action="store_true", help="fail on paper-comparability gaps such as host/resources")
+    parser.add_argument(
+        "--strict-paper",
+        action="store_true",
+        help="fail on paper-comparability gaps such as host/resources",
+    )
     audit(parser.parse_args())
 
 

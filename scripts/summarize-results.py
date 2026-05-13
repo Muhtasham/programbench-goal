@@ -37,13 +37,21 @@ class TokenUsage:
 
 def load_programbench(programbench_repo: Path) -> tuple:
     sys.path.insert(0, str(programbench_repo / "src"))
-    from programbench.eval.eval import EvaluationResult
-    from programbench.eval.eval_batch import InstanceEvalSummary
-    from programbench.utils.load_data import get_active_branches, get_ignored_tests, load_all_instances
+    from programbench.eval.eval import EvaluationResult  # ty: ignore[unresolved-import]
+    from programbench.eval.eval_batch import InstanceEvalSummary  # ty: ignore[unresolved-import]
+    from programbench.utils.load_data import (  # ty: ignore[unresolved-import]
+        get_active_branches,
+        get_ignored_tests,
+        load_all_instances,
+    )
 
-    return EvaluationResult, InstanceEvalSummary, get_active_branches, get_ignored_tests, {
-        instance["instance_id"]: instance for instance in load_all_instances(include_tests=True)
-    }
+    return (
+        EvaluationResult,
+        InstanceEvalSummary,
+        get_active_branches,
+        get_ignored_tests,
+        {instance["instance_id"]: instance for instance in load_all_instances(include_tests=True)},
+    )
 
 
 def score_eval(eval_json: Path, programbench: tuple) -> dict:
@@ -143,17 +151,19 @@ def summarize(args: argparse.Namespace) -> None:
         instance_dir = eval_json.parent
         eval_row = score_eval(eval_json, programbench)
         usage = find_codex_usage(instance_dir, Path(args.codex_sessions).expanduser())
-        rows.append({
-            **eval_row,
-            "calls": usage.calls,
-            "input_tokens": usage.input_tokens,
-            "cached_input_tokens": usage.cached_input_tokens,
-            "output_tokens": usage.output_tokens,
-            "reasoning_output_tokens": usage.reasoning_output_tokens,
-            "total_tokens": usage.total_tokens,
-            "estimated_cost_usd": format_cost(usage.estimated_cost_usd),
-            "session_logs": ";".join(usage.session_logs or []),
-        })
+        rows.append(
+            {
+                **eval_row,
+                "calls": usage.calls,
+                "input_tokens": usage.input_tokens,
+                "cached_input_tokens": usage.cached_input_tokens,
+                "output_tokens": usage.output_tokens,
+                "reasoning_output_tokens": usage.reasoning_output_tokens,
+                "total_tokens": usage.total_tokens,
+                "estimated_cost_usd": format_cost(usage.estimated_cost_usd),
+                "session_logs": ";".join(usage.session_logs or []),
+            }
+        )
 
     if args.output:
         with Path(args.output).expanduser().open("w", newline="") as f:
