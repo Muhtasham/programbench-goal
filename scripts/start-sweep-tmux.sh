@@ -9,6 +9,7 @@ ALLOW_PARTIAL="${ALLOW_PARTIAL:-0}"
 PUBLISH="${PUBLISH:-0}"
 OFFLINE_REPORT="${OFFLINE_REPORT:-0}"
 NO_TARGET_REFRESH="${NO_TARGET_REFRESH:-0}"
+SYNC_REPO="${SYNC_REPO:-1}"
 
 usage() {
   cat <<'EOF'
@@ -25,6 +26,7 @@ Environment toggles:
   PUBLISH=1           Commit and push docs/ after rebuilding the report.
   OFFLINE_REPORT=1    Use cached pricing and ProgramBench baseline data.
   NO_TARGET_REFRESH=1 Do not refresh target_sets/all_tasks.txt.
+  SYNC_REPO=0          Do not fetch and fast-forward this repo before launch.
 EOF
 }
 
@@ -36,6 +38,17 @@ fi
 if [[ ! -f "$CONFIG" ]]; then
   echo "config not found: $CONFIG" >&2
   exit 1
+fi
+
+if [[ "$SYNC_REPO" == "1" ]]; then
+  if [[ -n "$(git status --porcelain)" ]]; then
+    echo "repo has local changes; refusing to auto-sync before launch" >&2
+    echo "commit/stash them, or launch with SYNC_REPO=0 for an intentional local run" >&2
+    git status --short >&2
+    exit 1
+  fi
+  git fetch origin main
+  git merge --ff-only origin/main
 fi
 
 if [[ "${SKIP_DOCTOR:-0}" != "1" ]]; then

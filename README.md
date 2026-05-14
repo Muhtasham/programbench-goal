@@ -479,6 +479,16 @@ scripts/start-sweep-tmux.sh configs/nointernet-xhigh.json
 PUBLISH=1 scripts/start-sweep-tmux.sh configs/nointernet-xhigh.json
 ```
 
+Before starting a new tmux sweep, the helper keeps the runner checkout in sync:
+it refuses to launch from a dirty worktree, then runs `git fetch origin main`
+and `git merge --ff-only origin/main`. This means VM launches use the latest
+pushed `main` by default without silently mixing local edits into a benchmark
+run. Set `SYNC_REPO=0` only for an intentional local/debug run:
+
+```bash
+SYNC_REPO=0 scripts/start-sweep-tmux.sh configs/linux-smoke-nointernet-xhigh.json
+```
+
 Use `--offline-report` only when you intentionally want cached pricing and
 cached ProgramBench baseline rows for a reproducible or offline rebuild.
 
