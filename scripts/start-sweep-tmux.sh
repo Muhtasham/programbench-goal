@@ -23,6 +23,7 @@ local_state/logs/. PROGRAMBENCH_REPO is passed through when set; otherwise
 run-sweep.sh auto-detects a sibling ../ProgramBench checkout.
 
 Environment toggles:
+  RUN_VERSION=VERSION  Resume/write a specific run version instead of creating a new one.
   SKIP_DOCTOR=1       Skip the pre-launch scripts/doctor.sh check.
   ALLOW_PARTIAL=1     Permit finalize/report output before all targets finish.
   PUBLISH=1           Commit and push docs/ after rebuilding the report.
@@ -102,7 +103,12 @@ if [[ -n "$MAX_PARALLEL" ]]; then
   cmd+=(--max-parallel "$MAX_PARALLEL")
 fi
 
-tmux new-session -d -s "$SESSION" -c "$PWD" "$(printf '%q ' "${cmd[@]}") 2>&1 | tee -a $(printf '%q' "$log")"
+env_prefix=()
+if [[ -n "${RUN_VERSION:-}" ]]; then
+  env_prefix+=(RUN_VERSION="$RUN_VERSION")
+fi
+
+tmux new-session -d -s "$SESSION" -c "$PWD" "$(printf '%q ' "${env_prefix[@]}" "${cmd[@]}") 2>&1 | tee -a $(printf '%q' "$log")"
 
 echo "started tmux session: $SESSION"
 echo "log: $log"
