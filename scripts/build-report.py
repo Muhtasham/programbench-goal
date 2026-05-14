@@ -1375,7 +1375,7 @@ def render_html(data: dict) -> str:
     </div>
   </header>
   <main>
-    <p class="note">Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in no-internet mode. Paper/cleanroom rows are ProgramBench-style Codex scaffold runs, not official mini-SWE-agent paper baseline reproductions. Open-internet and local-tools runs are intentionally non-compliant and reported separately.</p>
+    <p class="note">Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in no-internet mode. Paper/cleanroom rows are ProgramBench-style Codex scaffold runs, not official mini-SWE-agent paper baseline reproductions. Open-internet and local-tools runs are intentionally non-compliant and reported separately. See the <a href="runbook.md">runbook</a> and <a href="paper-compliance.md">compliance notes</a> for setup and mode details.</p>
     <h2>How To Read Modes</h2>
     <div class="mode-grid">
       <div class="mode-card">
