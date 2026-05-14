@@ -549,9 +549,18 @@ CODEX_BYPASS_FLAG="--yolo"
 if ! codex --yolo --version >/dev/null 2>&1; then
   CODEX_BYPASS_FLAG="--dangerously-bypass-approvals-and-sandbox"
 fi
+CODEX_CONFIG="${{CODEX_HOME:-$HOME/.codex}}/config.toml"
+TRUST_KEY="$(python3 -c 'import json, sys; print(json.dumps(sys.argv[1]))' {shlex.quote(str(solution_dir))})"
+mkdir -p "$(dirname "$CODEX_CONFIG")"
+if ! grep -Fqx "[projects.$TRUST_KEY]" "$CODEX_CONFIG" 2>/dev/null; then
+  {{
+    printf '\\n[projects.%s]\\n' "$TRUST_KEY"
+    printf 'trust_level = "trusted"\\n'
+  }} >> "$CODEX_CONFIG"
+fi
 tmux kill-session -t {shlex.quote(session_name)} >/dev/null 2>&1 || true
 tmux new-session -d -s {shlex.quote(session_name)} -c {shlex.quote(str(solution_dir))} \\
-  "{codex_env} codex --enable goals -m {shlex.quote(args.model)} \\
+  "{codex_env} codex --enable goals --disable plugins --disable apps -m {shlex.quote(args.model)} \\
   -c model_reasoning_effort={shlex.quote(args.reasoning_effort)} \\
   -c trust_level=trusted \\
   -C {shlex.quote(str(solution_dir))} $CODEX_BYPASS_FLAG --no-alt-screen"

@@ -166,9 +166,14 @@ when the installed Codex accepts it, then fall back to the public long flag
 `--dangerously-bypass-approvals-and-sandbox`:
 
 ```bash
-codex --enable goals -m gpt-5.5 -c model_reasoning_effort='xhigh' \
+codex --enable goals --disable plugins --disable apps \
+  -m gpt-5.5 -c model_reasoning_effort='xhigh' \
   --yolo --no-alt-screen
 ```
+
+Each generated script also marks its exact solution directory trusted in the
+local Codex config before launch, so unattended `tmux` runs do not stop at the
+directory trust prompt.
 
 Override `--model` and `--reasoning-effort` when preparing runs if you want a
 separate high/xhigh sweep. These values are written into `run.json` and the
