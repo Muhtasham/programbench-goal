@@ -134,15 +134,17 @@ Use separate batches for each mode. Do not mix them in one result.
 Recommended run order:
 
 On a paper-sized Linux host, use the `full-*` configs. On the current Hetzner
-`cpx62` runner, use the matching `cpx62-*` configs; they keep the same xhigh
-modes but disclose `16 CPU / 30g` instead of `20 CPU / 60g`.
+`cpx62` runner, use the matching `cpx62-*` configs; they disclose
+`16 CPU / 30g` instead of `20 CPU / 60g`.
 
 1. `cpx62-nointernet-xhigh`
-2. `cpx62-paper-xhigh`
-3. `cpx62-localtools-xhigh`
-4. `cpx62-open-xhigh`
+2. `cpx62-nointernet-high`
+3. `cpx62-paper-xhigh`
+4. `cpx62-localtools-xhigh`
+5. `cpx62-open-xhigh`
 
-Defer `high` until xhigh results show it is worth the extra run.
+Run `high` after the xhigh primary run when you want a direct reasoning-effort
+comparison on the same VM/scaffold.
 
 ## Reporting
 
