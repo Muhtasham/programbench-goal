@@ -1144,11 +1144,11 @@ def render_run_plan() -> str:
       <table>
         <thead><tr><th>#</th><th>Track</th><th>Config</th><th>What it answers</th><th>Compliance label</th></tr></thead>
         <tbody>
-          <tr><td>1</td><td>Primary</td><td><code>full-nointernet-xhigh</code></td><td>GPT-5.5 xhigh with Codex <code>/goal</code> on ProgramBench without internet/source lookup.</td><td>Codex no-internet ablation</td></tr>
-          <tr><td>2</td><td>High comparison</td><td><code>full-nointernet-high</code></td><td>Same scaffold and restrictions, lower reasoning effort, so high/xhigh can be compared directly.</td><td>Codex no-internet ablation</td></tr>
-          <tr><td>3</td><td>Strict variant</td><td><code>full-paper-xhigh</code></td><td>ProgramBench-style cleanroom Codex <code>/goal</code> with stricter host/resources/egress/wrapper controls.</td><td>ProgramBench-style only when preflight/audit pass</td></tr>
-          <tr><td>4</td><td>Criticism ablation</td><td><code>full-localtools-xhigh</code></td><td>Tests the tool-starvation critique: still no internet/source lookup, but local binary-analysis/tracing tools are allowed.</td><td>Non-compliant: local/binary tools allowed</td></tr>
-          <tr><td>5</td><td>Ceiling</td><td><code>full-open-xhigh</code></td><td>Measures the full Codex harness with internet/package tooling allowed.</td><td>Non-compliant: internet allowed</td></tr>
+          <tr><td>1</td><td>Primary</td><td><code>cpx62-nointernet-xhigh</code></td><td>GPT-5.5 xhigh with Codex <code>/goal</code> on ProgramBench without internet/source lookup, sized for the current 16 CPU / 30g runner.</td><td>Codex no-internet ablation</td></tr>
+          <tr><td>2</td><td>Prompt variant</td><td><code>cpx62-paper-xhigh</code></td><td>ProgramBench-style prompt/scaffold restrictions on the same smaller runner. Not paper-sized.</td><td>Codex cleanroom-style ablation</td></tr>
+          <tr><td>3</td><td>Criticism ablation</td><td><code>cpx62-localtools-xhigh</code></td><td>Tests the tool-starvation critique: still no internet/source lookup, but local binary-analysis/tracing tools are allowed.</td><td>Non-compliant: local/binary tools allowed</td></tr>
+          <tr><td>4</td><td>Ceiling</td><td><code>cpx62-open-xhigh</code></td><td>Measures the full Codex harness with internet/package tooling allowed.</td><td>Non-compliant: internet allowed</td></tr>
+          <tr><td>5</td><td>Later</td><td><code>full-*</code> / <code>*-high</code></td><td>Use paper-sized configs or high-effort comparisons only after xhigh says the extra run is worthwhile.</td><td>Depends on mode and host preflight</td></tr>
         </tbody>
       </table>
     </div>

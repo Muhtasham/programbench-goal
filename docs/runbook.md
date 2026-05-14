@@ -472,6 +472,15 @@ scripts/run-sweep.sh --dry-run
 scripts/run-sweep.sh
 ```
 
+On the smaller Hetzner `cpx62` runner, use the `cpx62-*` xhigh configs. They
+are explicitly non-paper-sized because they disclose 16 CPU / 30g instead of
+20 CPU / 60g:
+
+```bash
+scripts/run-sweep.sh --config configs/cpx62-nointernet-xhigh.json --dry-run
+scripts/run-sweep.sh --config configs/cpx62-nointernet-xhigh.json --incremental-finalize --publish
+```
+
 By default, `run-sweep.sh` uses `PROGRAMBENCH_REPO` if set, otherwise it
 auto-detects a sibling `../ProgramBench` checkout. Run
 `scripts/bootstrap-programbench.sh` first if that checkout does not exist yet.
@@ -605,6 +614,11 @@ The committed full-run configs all use `gpt-5.5`, 20 CPUs, 60GB RAM, and
 parallelism on smaller VMs with `scripts/run-sweep.sh --max-parallel N` or
 `MAX_PARALLEL=N scripts/start-sweep-tmux.sh ...`. Do not mix reasoning modes in
 one batch.
+
+The `cpx62-*` configs are the same xhigh mode matrix sized for the current
+Hetzner shared runner: 16 CPUs, 30GB RAM, `max_parallel=10`, and no strict
+egress. They are useful for the Codex `/goal` scaffold question, but not for
+paper-sized cleanroom claims.
 
 Prepare with an official prompt template when one is available:
 
