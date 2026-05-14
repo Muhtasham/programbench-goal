@@ -203,6 +203,23 @@ raise SystemExit(0 if items and all(item["status"] in {"evaluated", "failed"} fo
 PY
 }
 
+state_exists() {
+  uv run python - "$CONFIG" "$RUN_VERSION" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+config = json.loads(Path(sys.argv[1]).read_text())
+version = sys.argv[2] or str(config.get("run_version") or "")
+path = (
+    Path("local_state/batches") / config["batch_name"] / version / "state.json"
+    if version
+    else Path("local_state/batches") / f"{config['batch_name']}.json"
+)
+raise SystemExit(0 if path.is_file() else 1)
+PY
+}
+
 run_finalize() {
   finalize_cmd=(uv run python scripts/run-config.py finalize "$CONFIG" --programbench-repo "$PROGRAMBENCH_REPO")
   if [[ "$ALLOW_PARTIAL" -eq 1 ]]; then
@@ -292,6 +309,20 @@ fi
 
 if [[ "$WATCH" -eq 1 && "$INCREMENTAL_FINALIZE" -eq 1 ]]; then
   while true; do
+    if state_exists; then
+      if [[ "$FINALIZE" -eq 1 ]]; then
+        run_finalize
+      fi
+      if [[ "$SITE" -eq 1 ]]; then
+        run_site
+      fi
+      if [[ "$PUBLISH" -eq 1 ]]; then
+        run_publish
+      fi
+      if [[ "$ONCE" -eq 1 ]] || batch_complete; then
+        break
+      fi
+    fi
     watch_cmd=(uv run python scripts/run-config.py watch "$CONFIG" --once)
     if [[ -n "$MAX_PARALLEL" ]]; then
       watch_cmd+=(--max-parallel "$MAX_PARALLEL")
