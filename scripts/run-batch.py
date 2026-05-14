@@ -19,6 +19,7 @@ DONE_MARKERS = ("Goal achieved", "Goal marked complete")
 RATE_LIMIT_MARKERS = ("rate limit", "rate_limit", "429")
 FINALIZE_READY = {"goal_done"}
 TERMINAL_STATUSES = {"goal_done", "packaged", "evaluated", "failed", "finalize_failed"}
+CLEANUP_STATUSES = TERMINAL_STATUSES | {"goal_done"}
 
 
 def now() -> str:
@@ -194,6 +195,7 @@ def refresh_record(record: dict) -> dict:
     output = record_output(record)
     if any(marker in output for marker in DONE_MARKERS):
         cleanup_target_container(record)
+        cleanup_codex_session(record)
         return {**record, "status": "goal_done", "goal_done_at": now(), "last_pane_tail": output[-4000:]}
     if output and any(marker in output.lower() for marker in RATE_LIMIT_MARKERS):
         return {**record, "last_rate_limit_seen_at": now(), "last_pane_tail": output[-4000:]}
@@ -251,6 +253,18 @@ def cleanup_target_container(record: dict) -> None:
         run(["docker", "rm", "-f", record["container_name"]], check=False)
 
 
+def cleanup_codex_session(record: dict) -> None:
+    if record.get("session_name"):
+        run(["tmux", "kill-session", "-t", record["session_name"]], check=False)
+
+
+def cleanup_finished(state: dict) -> None:
+    for record in state["items"].values():
+        if record["status"] in CLEANUP_STATUSES:
+            cleanup_target_container(record)
+            cleanup_codex_session(record)
+
+
 def summarize_state(state: dict) -> dict[str, int]:
     return dict(Counter(record["status"] for record in state["items"].values()))
 
@@ -288,6 +302,7 @@ def watch(args: argparse.Namespace) -> None:
     state["run_version"] = args.run_version
     while True:
         refresh_state(state)
+        cleanup_finished(state)
         launch_ready(args, state, run_root)
         save_state(state)
         print_status(state)
@@ -301,6 +316,7 @@ def watch(args: argparse.Namespace) -> None:
 def status(args: argparse.Namespace) -> None:
     state = load_state(args.batch_name, args.run_version)
     refresh_state(state)
+    cleanup_finished(state)
     save_state(state)
     print_status(state)
 
@@ -328,6 +344,7 @@ def finalize_one(args: argparse.Namespace, record: dict) -> dict:
         return add_error({**record, "status": "finalize_failed", "finalize_failed_at": now()}, e.stdout)
     finally:
         cleanup_target_container(record)
+        cleanup_codex_session(record)
 
 
 def summarize_and_collect(args: argparse.Namespace, state: dict) -> None:
@@ -372,6 +389,7 @@ def summarize_and_collect(args: argparse.Namespace, state: dict) -> None:
 def finalize(args: argparse.Namespace) -> None:
     state = load_state(args.batch_name, args.run_version)
     refresh_state(state)
+    cleanup_finished(state)
     for instance_id, record in list(state["items"].items()):
         if record["status"] in FINALIZE_READY or (args.retry_finalize_failed and record["status"] == "finalize_failed"):
             state["items"][instance_id] = finalize_one(args, record)
