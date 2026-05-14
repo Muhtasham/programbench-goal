@@ -106,7 +106,7 @@ scripts/start-sweep-tmux.sh configs/linux-smoke-paper-xhigh.json
 ```
 
 If you are using a smaller Hetzner shared `cpx62` smoke VM, use the labeled
-16 CPU / 32GB config instead:
+16 CPU / 30GB config instead:
 
 ```bash
 scripts/doctor.sh configs/hetzner-cpx62-smoke-xhigh.json
