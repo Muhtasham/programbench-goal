@@ -37,6 +37,10 @@ class ResultRow:
     score: float
     resolved: bool
     almost_resolved: bool
+    evaluator_problem: bool
+    error_code: str
+    n_system_errors: int
+    n_warnings: int
     n_resolved_tests: int
     n_tests: int
     calls: int
@@ -167,6 +171,10 @@ def read_results(path: Path) -> list[ResultRow]:
                 score=as_float(row["score"]),
                 resolved=as_bool(row["resolved"]),
                 almost_resolved=as_bool(row["almost_resolved"]),
+                evaluator_problem=as_bool(row.get("evaluator_problem", "")),
+                error_code=row.get("error_code", ""),
+                n_system_errors=as_int(row.get("n_system_errors", "")),
+                n_warnings=as_int(row.get("n_warnings", "")),
                 n_resolved_tests=as_int(row["n_resolved_tests"]),
                 n_tests=as_int(row["n_tests"]),
                 calls=as_int(row["calls"]),
@@ -344,6 +352,10 @@ def row_to_dict(row: ResultRow) -> dict:
         "score": row.score,
         "resolved": row.resolved,
         "almost_resolved": row.almost_resolved,
+        "evaluator_problem": row.evaluator_problem,
+        "error_code": row.error_code,
+        "n_system_errors": row.n_system_errors,
+        "n_warnings": row.n_warnings,
         "n_resolved_tests": row.n_resolved_tests,
         "n_tests": row.n_tests,
         "calls": row.calls,
@@ -513,6 +525,10 @@ def official_distribution_svg(rows: list[dict], cumulative: bool) -> str:
             score=float(row["score"] or 0),
             resolved=row["score"] == 1.0,
             almost_resolved=row["score"] is not None and row["score"] >= 0.95,
+            evaluator_problem=False,
+            error_code="",
+            n_system_errors=0,
+            n_warnings=0,
             n_resolved_tests=0,
             n_tests=0,
             calls=int(row["calls"]),
@@ -706,6 +722,7 @@ def render_instances(rows: list[ResultRow]) -> str:
               <td>{cell(model_display(row))}</td>
               <td>{cell(compliance_label(row))}</td>
               <td><span class="status {status}">{status}</span></td>
+              <td>{eval_status(row)}</td>
               <td>{percent(row.score)}</td>
               <td>{row.n_resolved_tests}/{row.n_tests}</td>
               <td>{money(row.estimated_cost_usd)}</td>
@@ -718,6 +735,14 @@ def render_instances(rows: list[ResultRow]) -> str:
             """
         )
     return "\n".join(table_rows)
+
+
+def eval_status(row: ResultRow) -> str:
+    if row.error_code or row.n_system_errors:
+        return f'<span class="status open" title="{cell(row.error_code or "system errors")}">error</span>'
+    if row.n_warnings:
+        return f'<span class="status almost" title="{row.n_warnings} evaluator warning(s)">warn {row.n_warnings}</span>'
+    return '<span class="status resolved">ok</span>'
 
 
 def evidence_links(row: ResultRow, prefix: str = "") -> str:
@@ -863,6 +888,7 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
           <td>{percent(row.score)}</td>
           <td>{"yes" if row.resolved else "no"}</td>
           <td>{"yes" if row.almost_resolved else "no"}</td>
+          <td>{eval_status(row)}</td>
           <td>{row.n_resolved_tests}/{row.n_tests}</td>
           <td>{money(row.estimated_cost_usd)}</td>
           <td>{row.calls}</td>
@@ -904,7 +930,7 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
   <h2>Score by Task</h2>
   <div class="heatmap">{heatmap}</div>
   <table>
-    <thead><tr><th>Instance</th><th>Score</th><th>Resolved</th><th>Almost</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Evidence</th></tr></thead>
+    <thead><tr><th>Instance</th><th>Score</th><th>Resolved</th><th>Almost</th><th>Eval</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Evidence</th></tr></thead>
     <tbody>{table}</tbody>
   </table>
 </body>
@@ -932,6 +958,7 @@ def render_task_detail(instance_id: str, rows: list[ResultRow], official_tasks: 
           <td>{cell(AGENT_NAME)}</td>
           <td>{cell(mode_label(row))}</td>
           <td>{percent(row.score)}</td>
+          <td>{eval_status(row)}</td>
           <td>{row.n_resolved_tests}/{row.n_tests}</td>
           <td>{money(row.estimated_cost_usd)}</td>
           <td>{row.calls}</td>
@@ -979,7 +1006,7 @@ def render_task_detail(instance_id: str, rows: list[ResultRow], official_tasks: 
   </div>
   <h2>Codex Results by Model</h2>
   <table>
-    <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Mode</th><th>Score</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Evidence</th></tr></thead>
+    <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Mode</th><th>Score</th><th>Eval</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Evidence</th></tr></thead>
     <tbody>{result_rows}</tbody>
   </table>
   <h2>Official ProgramBench Results by Model</h2>
@@ -1176,7 +1203,7 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
     <h2>Per-Instance Results</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Instance</th><th>Run</th><th>Mode</th><th>Model</th><th>Compliance</th><th>Status</th><th>Score</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Host</th><th>Docker</th><th>Evidence</th></tr></thead>
+        <thead><tr><th>#</th><th>Instance</th><th>Run</th><th>Mode</th><th>Model</th><th>Compliance</th><th>Status</th><th>Eval</th><th>Score</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Host</th><th>Docker</th><th>Evidence</th></tr></thead>
         <tbody>{render_instances(instances)}</tbody>
       </table>
     </div>
