@@ -796,7 +796,10 @@ RUN_VERSION=20260514-nointernet-xhigh-a \
 The version is written into batch state, `run.json`, `results.csv`,
 `results.json`, and report tables. Re-running the same config/task with a new
 version creates a separate result group instead of overwriting or silently
-merging scores. `uv run python scripts/run-config.py status <config>` uses the
+merging scores. When the report sees more than one version for the same task,
+model, mode, and compliance bucket, it adds a repeatability section with mean,
+standard deviation, and best-worst delta for score, estimated cost, calls, and
+wall-clock time. `uv run python scripts/run-config.py status <config>` uses the
 latest version for that batch unless `RUN_VERSION` is set.
 
 For each evaluated instance, the report also writes `docs/task/<instance_id>/`

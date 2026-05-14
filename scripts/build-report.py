@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from html import unescape
 from itertools import groupby
 from pathlib import Path
+from statistics import mean, stdev
 from urllib.request import Request, urlopen
 
 AGENT_NAME = "Codex /goal"
@@ -203,6 +204,10 @@ def aggregate(rows: list[ResultRow]) -> dict:
     }
 
 
+def stddev(values: list[float]) -> float:
+    return stdev(values) if len(values) > 1 else 0
+
+
 def model_display(row: ResultRow) -> str:
     name = row.model.upper().replace("-", " ", 1).replace("-", ".")
     return f"{name} ({row.reasoning_effort})" if row.reasoning_effort else name
@@ -265,6 +270,58 @@ def result_groups(rows: list[ResultRow]) -> list[dict]:
         key=lambda item: (item["resolved_rate"], item["almost_resolved_rate"], item["average_pass_rate"]),
         reverse=True,
     )
+
+
+def repeatability_groups(rows: list[ResultRow]) -> list[dict]:
+    grouped = groupby(
+        sorted(rows, key=lambda row: (row.instance_id, model_display(row), mode_label(row), compliance_label(row))),
+        key=lambda row: (row.instance_id, model_display(row), mode_label(row), compliance_label(row)),
+    )
+    repeated = []
+    for key, group_rows in grouped:
+        attempts = list(group_rows)
+        versions = sorted({version_label(row.run_version) for row in attempts})
+        if len(versions) < 2:
+            continue
+        scores = [row.score for row in attempts]
+        costs = [row.estimated_cost_usd for row in attempts]
+        calls = [float(row.calls) for row in attempts]
+        walls = [row.wall_clock_seconds / 3600 for row in attempts]
+        repeated.append(
+            {
+                "instance_id": key[0],
+                "model": key[1],
+                "mode": key[2],
+                "compliance": key[3],
+                "attempts": len(attempts),
+                "versions": versions,
+                "score_mean": mean(scores),
+                "score_stdev": stddev(scores),
+                "score_delta": max(scores) - min(scores),
+                "score_min": min(scores),
+                "score_max": max(scores),
+                "cost_mean": mean(costs),
+                "cost_stdev": stddev(costs),
+                "calls_mean": mean(calls),
+                "calls_stdev": stddev(calls),
+                "wall_mean_hours": mean(walls),
+                "wall_stdev_hours": stddev(walls),
+                "resolved_attempts": sum(row.resolved for row in attempts),
+                "almost_attempts": sum(row.almost_resolved for row in attempts),
+            }
+        )
+    return sorted(repeated, key=lambda item: (item["score_delta"], item["score_stdev"]), reverse=True)
+
+
+def repeatability_summary(repeated: list[dict]) -> dict:
+    return {
+        "repeated_cells": len(repeated),
+        "attempts": sum(item["attempts"] for item in repeated),
+        "average_score_stdev": mean([item["score_stdev"] for item in repeated]) if repeated else 0,
+        "max_score_delta": max([item["score_delta"] for item in repeated], default=0),
+        "average_cost_stdev": mean([item["cost_stdev"] for item in repeated]) if repeated else 0,
+        "average_calls_stdev": mean([item["calls_stdev"] for item in repeated]) if repeated else 0,
+    }
 
 
 def row_to_dict(row: ResultRow) -> dict:
@@ -965,6 +1022,62 @@ def render_comparison(groups: list[dict]) -> str:
     """
 
 
+def render_repeatability(data: dict) -> str:
+    repeated = data["repeatability"]
+    if not repeated:
+        return ""
+    summary = data["repeatability_summary"]
+    rows = "\n".join(
+        f"""
+        <tr>
+          <td>{index}</td>
+          <td><a href="task/{cell(str(item["instance_id"]))}/"><code>{cell(str(item["instance_id"]))}</code></a></td>
+          <td>{cell(str(item["model"]))}</td>
+          <td>{cell(str(item["mode"]))}</td>
+          <td>{cell(str(item["compliance"]))}</td>
+          <td>{item["attempts"]}</td>
+          <td><code>{cell(", ".join(item["versions"]))}</code></td>
+          <td>{percent(float(item["score_mean"]))}</td>
+          <td>{percent(float(item["score_stdev"]))}</td>
+          <td>{percent(float(item["score_delta"]))}</td>
+          <td>{money(float(item["cost_mean"]))}</td>
+          <td>{money(float(item["cost_stdev"]))}</td>
+          <td>{item["calls_mean"]:.1f}</td>
+          <td>{item["calls_stdev"]:.1f}</td>
+          <td>{item["wall_mean_hours"]:.2f}h</td>
+          <td>{item["wall_stdev_hours"]:.2f}h</td>
+          <td>{item["resolved_attempts"]}/{item["attempts"]}</td>
+          <td>{item["almost_attempts"]}/{item["attempts"]}</td>
+        </tr>
+        """
+        for index, item in enumerate(repeated, start=1)
+    )
+    return f"""
+    <h2>Repeatability / Variance</h2>
+    <p>This section appears only when the same task, model, mode, and compliance bucket has results from more than one run version. It keeps repeated sweeps visible instead of collapsing them into one row.</p>
+    <div class="cards">
+      <section class="summary-card">
+        <div class="summary-title">Repeated cells</div>
+        <div class="summary-meta">task x model x mode x compliance</div>
+        <div class="metric-grid">
+          <div><strong>{summary["repeated_cells"]}</strong><span>repeated cells</span></div>
+          <div><strong>{summary["attempts"]}</strong><span>attempt rows</span></div>
+          <div><strong>{percent(float(summary["average_score_stdev"]))}</strong><span>avg score stdev</span></div>
+          <div><strong>{percent(float(summary["max_score_delta"]))}</strong><span>max score delta</span></div>
+          <div><strong>{money(float(summary["average_cost_stdev"]))}</strong><span>avg est. cost stdev</span></div>
+          <div><strong>{summary["average_calls_stdev"]:.1f}</strong><span>avg calls stdev</span></div>
+        </div>
+      </section>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Instance</th><th>Model</th><th>Mode</th><th>Compliance</th><th>Attempts</th><th>Versions</th><th>Mean score</th><th>Score stdev</th><th>Score delta</th><th>Mean cost</th><th>Cost stdev</th><th>Mean calls</th><th>Calls stdev</th><th>Mean wall</th><th>Wall stdev</th><th>Resolved</th><th>Almost</th></tr></thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </div>
+    """
+
+
 def render_empty_state() -> str:
     return """
     <section class="empty-state">
@@ -1028,6 +1141,8 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
     <p>These disclosure fields are intentionally outside the mirrored metric table because ProgramBench's public leaderboard does not mix scaffold deviations into the metric columns.</p>
 
     {render_comparison(data["groups"])}
+
+    {render_repeatability(data)}
 
     {render_task_index(data["tasks"])}
 
@@ -1293,12 +1408,15 @@ def build(args: argparse.Namespace) -> None:
                 generated.unlink()
     if args.refresh_baselines:
         refresh_baselines(output_dir)
+    repeated = repeatability_groups(rows)
     data = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "sample_instances": len(rows),
         "programbench_tasks": PROGRAMBENCH_TASKS,
         "groups": result_groups(rows),
         "tasks": task_groups(rows, target_ids, official_tasks),
+        "repeatability": repeated,
+        "repeatability_summary": repeatability_summary(repeated),
         "rows": [row_to_dict(row) for row in rows],
         "baselines": load_baselines(output_dir),
     }

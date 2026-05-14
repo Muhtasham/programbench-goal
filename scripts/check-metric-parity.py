@@ -94,6 +94,49 @@ def check_aggregate(build_report) -> None:
     print("aggregate: resolved=0.5% almost=13.5% total_cost=$1770 total_calls=16320")
 
 
+def check_repeatability(build_report) -> None:
+    rows = [
+        build_report.ResultRow(
+            instance_id="task",
+            run_name=f"synthetic-{index}",
+            run_version=f"v{index}",
+            model="gpt-5.5",
+            reasoning_effort="xhigh",
+            inference_mode="no-internet",
+            paper_compliant=False,
+            score=score,
+            resolved=score == 1.0,
+            almost_resolved=score >= 0.95,
+            n_resolved_tests=int(score * 100),
+            n_tests=100,
+            calls=80 + index,
+            wall_clock_seconds=3600 * index,
+            estimated_cost_usd=8 + index,
+            host_system="Linux",
+            host_machine="x86_64",
+            docker_cpus="20",
+            docker_memory="60g",
+            pricing_source="",
+        )
+        for index, score in enumerate([0.8, 1.0], start=1)
+    ]
+    repeated = build_report.repeatability_groups(rows)
+    if len(repeated) != 1:
+        raise SystemExit(f"repeatability mismatch: {repeated}")
+    expected = {
+        "attempts": 2,
+        "versions": ["v1", "v2"],
+        "resolved_attempts": 1,
+        "almost_attempts": 1,
+    }
+    mismatches = {key: (repeated[0][key], value) for key, value in expected.items() if repeated[0][key] != value}
+    if round(repeated[0]["score_mean"], 6) != 0.9 or round(repeated[0]["score_delta"], 6) != 0.2:
+        mismatches["score_stats"] = (repeated[0]["score_mean"], repeated[0]["score_delta"])
+    if mismatches:
+        raise SystemExit(f"repeatability mismatch: {mismatches}")
+    print("repeatability: repeated version attempts are summarized")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Check ProgramBench metric parity")
     parser.add_argument("--programbench-repo", required=True)
@@ -115,6 +158,7 @@ def main() -> None:
         programbench,
     )
     check_aggregate(build_report)
+    check_repeatability(build_report)
 
 
 if __name__ == "__main__":
