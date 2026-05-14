@@ -57,6 +57,52 @@ The ProgramBench images are published for `linux/amd64`. Docker Desktop on Apple
 Silicon can sometimes emulate them, but serious runs should happen on Linux
 `amd64`.
 
+## Fresh Linux VM Setup
+
+Use a real Ubuntu `amd64` VM for Noam-facing results. Recommended minimum:
+20 vCPU, 60GB RAM, and enough disk for Docker images/eval artifacts; 32 vCPU,
+96-128GB RAM, and 500GB disk leaves more room.
+
+On the VM:
+
+```bash
+git clone git@github.com:Muhtasham/programbench-goal.git
+cd programbench-goal
+scripts/bootstrap-linux-vm.sh
+```
+
+The bootstrap installs base packages, Docker, `uv`, `tmux`, Codex CLI when
+missing, the sibling `../ProgramBench` checkout, and the narrow
+`/usr/local/bin/pb-target-exec` wrapper. If it adds your user to the Docker
+group, log out and back in before running sweeps.
+
+Then authenticate Codex on the VM:
+
+```bash
+codex login
+docker run --rm hello-world
+```
+
+For Codex app remote connections, add the VM to your local `~/.ssh/config`,
+confirm `ssh <alias>` works, enable `remote_connections = true` in local Codex
+config if needed, then open this repo as a remote project.
+
+Run the Linux smoke first:
+
+```bash
+scripts/start-sweep-tmux.sh configs/linux-smoke-nointernet-xhigh.json
+uv run python scripts/run-config.py status configs/linux-smoke-nointernet-xhigh.json
+```
+
+For the stricter paper-mode smoke:
+
+```bash
+scripts/start-sweep-tmux.sh configs/linux-smoke-paper-xhigh.json
+```
+
+Only start full sweeps after a Linux smoke produces `submission.tar.gz`,
+ProgramBench `.eval.json`, `results.csv`, and a clean audit.
+
 ## Isolation Model
 
 In `paper`, `no-internet`, and `no-internet-local-tools` modes, the target
