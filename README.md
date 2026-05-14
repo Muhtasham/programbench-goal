@@ -25,6 +25,33 @@ keeps target probing black-box. It is not a mini-SWE-agent reproduction, but it
 is the cleanest answer to “what happens if GPT-5.5 gets `/goal` and more wall
 clock time on ProgramBench?”
 
+## How It Runs
+
+Codex runs on the Linux VM host, not inside Docker. Docker is used for the
+black-box target containers during inference and for ProgramBench evaluation
+after a submission is packaged.
+
+```text
+Your laptop
+  └─ ssh into Linux amd64 VM
+
+Linux VM
+  ├─ tmux: one Codex CLI /goal session per active task
+  │    └─ writes only that task's solution/ directory
+  ├─ Docker: one offline ProgramBench target container per active task
+  │    └─ exposes /workspace/executable for black-box probing
+  ├─ local_state/: batch state, summaries, public report inputs
+  └─ ~/pb-goal-runs/: per-task prompts, logs, submissions, eval JSON
+
+Later, during evaluation
+  └─ ProgramBench runs submission.tar.gz through its Docker evaluator
+```
+
+Each task has its own `solution/`, `guard-bin/`, `tool-caches/`, target
+container, tmux transcript, and `submission.tar.gz`. `max_parallel` controls
+how many Codex task sessions are active at once; evaluation is run
+sequentially by default for cleaner results.
+
 ## Quick Setup
 
 Use a Linux `amd64` VM for serious runs. ProgramBench publishes task images for
