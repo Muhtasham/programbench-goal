@@ -69,6 +69,8 @@ Harness context:
   `{{target_command}}`
 - The target executable is `/workspace/executable` inside that container.
 - The bundled documentation is inside `/workspace` in that container.
+- Your shell already starts in the solution directory. Use relative paths and
+  do not set explicit workdirs or copy absolute solution paths into commands.
 - Do not inspect files outside `{{solution_dir}}` on the host.
 - Do not run host commands against `..`, parent directories, the run root, or
   any sibling harness files. Parent-directory inspection is disqualifying.

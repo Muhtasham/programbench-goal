@@ -139,7 +139,11 @@ def exec_calls(path: Path) -> list[tuple[int, dict, str]]:
 
 
 def was_blocked(output: str) -> bool:
-    return "blocked " in output or "Failed to create unified exec process" in output
+    return "blocked " in output
+
+
+def was_rejected(output: str) -> bool:
+    return "Failed to create unified exec process" in output
 
 
 def uses_tool(command: str, tool: str) -> bool:
@@ -272,7 +276,7 @@ def audit_command(
     allow_local_tools: bool,
 ) -> list[Finding]:
     findings = []
-    if was_blocked(output):
+    if was_blocked(output) or was_rejected(output):
         return findings
     command = call["cmd"]
     workdir = call.get("workdir", "")
@@ -339,6 +343,7 @@ def audit(args: argparse.Namespace) -> None:
     if run.get("inference_mode") != "open-internet":
         calls = [(log, line, call, output) for log in logs for line, call, output in exec_calls(log)]
         blocked_attempts = sum(was_blocked(output) for _, _, _, output in calls)
+        rejected_attempts = sum(was_rejected(output) for _, _, _, output in calls)
         findings.extend(
             finding
             for log, line, call, output in calls
@@ -359,6 +364,7 @@ def audit(args: argparse.Namespace) -> None:
     print(f"OK audit passed for {instance_dir}")
     print(f"session_logs={';'.join(str(path) for path in logs)}")
     print(f"blocked_attempts={blocked_attempts}")
+    print(f"rejected_exec_attempts={rejected_attempts if run.get('inference_mode') != 'open-internet' else 0}")
 
 
 def failure_text(finding: Finding) -> str:

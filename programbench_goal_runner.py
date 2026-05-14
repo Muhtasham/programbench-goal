@@ -444,7 +444,7 @@ def prepare(args: argparse.Namespace) -> None:
                 "run_version": args.run_version,
                 "image": image,
                 "container_name": container_name,
-                "solution_dir": str(solution_dir),
+                "solution_dir": ".",
                 "target_command": target_command,
                 "package_command": "package-submission",
             },

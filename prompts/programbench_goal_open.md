@@ -39,6 +39,8 @@ Harness context:
   `{{target_command}}`
 - The target executable is `/workspace/executable` inside that container.
 - Bundled documentation is inside `/workspace` in that container.
+- Your shell already starts in the solution directory. Use relative paths and
+  do not set explicit workdirs or copy absolute solution paths into commands.
 
 Complete the implementation in `{{solution_dir}}` so it is ready to package.
 
