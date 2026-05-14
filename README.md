@@ -774,6 +774,21 @@ The summary page also plots ProgramBench-style behavioral pass-rate
 distributions (histogram and cumulative), plus per-task pass rate against
 estimated cost, Codex calls, and wall-clock latency. Calls are the public
 compute proxy; raw token logs remain local unless explicitly exported.
+
+Each sweep gets a `run_version`. `scripts/run-sweep.sh` generates a UTC version
+when `RUN_VERSION` is not set, and you can pin one manually:
+
+```bash
+RUN_VERSION=20260514-nointernet-xhigh-a \
+  PUBLISH=1 scripts/start-sweep-tmux.sh configs/full-nointernet-xhigh.json
+```
+
+The version is written into batch state, `run.json`, `results.csv`,
+`results.json`, and report tables. Re-running the same config/task with a new
+version creates a separate result group instead of overwriting or silently
+merging scores. `uv run python scripts/run-config.py status <config>` uses the
+latest version for that batch unless `RUN_VERSION` is set.
+
 For each evaluated instance, the report also writes `docs/task/<instance_id>/`
 with a ProgramBench-style task detail page: scored behavioral tests, best score,
 results by model/mode, cost, calls, wall time, evidence links, and a link to the

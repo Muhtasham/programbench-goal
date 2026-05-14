@@ -40,12 +40,12 @@ def failed_tests(eval_json: dict) -> list[str]:
     return [result["name"] for result in eval_json.get("test_results", []) if result.get("status") != "passed"]
 
 
-def results_row(results_csv: Path, instance_id: str) -> dict:
+def results_row(results_csv: Path, instance_id: str, run_name: str) -> dict:
     if not results_csv.is_file():
         return {}
     with results_csv.open(newline="") as f:
         for row in csv.DictReader(f):
-            if row["instance_id"] == instance_id:
+            if row["instance_id"] == instance_id and row.get("run_name", "") == run_name:
                 return row
     return {}
 
@@ -87,7 +87,7 @@ def collect(args: argparse.Namespace) -> None:
     eval_path = instance_dir / f"{instance_id}.eval.json"
     eval_json = read_json(eval_path)
     results_csv_path = Path(args.results_csv).expanduser() if args.results_csv else instance_dir.parent / "results.csv"
-    row = results_row(results_csv_path, instance_id)
+    row = results_row(results_csv_path, instance_id, run_name)
     copied_logs = [
         copy_text_if_exists(Path(session_log), output_dir / "codex_logs" / Path(session_log).name)
         for session_log in filter(None, row.get("session_logs", "").split(";"))

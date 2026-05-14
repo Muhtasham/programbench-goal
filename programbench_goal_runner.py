@@ -437,6 +437,7 @@ def prepare(args: argparse.Namespace) -> None:
             {
                 "instance_id": args.instance_id,
                 "run_name": prepared_run_name,
+                "run_version": args.run_version,
                 "image": image,
                 "container_name": container_name,
                 "solution_dir": str(solution_dir),
@@ -644,6 +645,7 @@ def prepare_batch(args: argparse.Namespace) -> None:
                     instance_id=instance_id,
                     run_root=args.run_root,
                     run_name="",
+                    run_version=args.run_version,
                     prompt_template=args.prompt_template,
                     target_access=args.target_access,
                     target_wrapper_command=args.target_wrapper_command,
@@ -663,6 +665,7 @@ def main() -> None:
     prepare_parser.add_argument("instance_id")
     prepare_parser.add_argument("--run-root", default=str(DEFAULT_ROOT))
     prepare_parser.add_argument("--run-name", default="")
+    prepare_parser.add_argument("--run-version", default="")
     prepare_parser.add_argument("--docker-cpus", type=int, default=20)
     prepare_parser.add_argument("--docker-memory", default="60g")
     prepare_parser.add_argument(
@@ -689,6 +692,7 @@ def main() -> None:
     batch_parser = subparsers.add_parser("prepare-batch")
     batch_parser.add_argument("target_file")
     batch_parser.add_argument("--run-root", default=str(DEFAULT_ROOT))
+    batch_parser.add_argument("--run-version", default="")
     batch_parser.add_argument("--docker-cpus", type=int, default=20)
     batch_parser.add_argument("--docker-memory", default="60g")
     batch_parser.add_argument(

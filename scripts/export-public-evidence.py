@@ -130,6 +130,7 @@ def public_manifest(manifest: dict, eval_summary_path: str, eval_json_path: str)
         "collected_at": manifest["collected_at"],
         "instance_id": manifest["run"]["instance_id"],
         "run_name": run_name,
+        "run_version": manifest["run"].get("run_version", ""),
         "model": manifest["run"]["model"],
         "reasoning_effort": manifest["run"]["reasoning_effort"],
         "inference_mode": manifest["run"]["inference_mode"],

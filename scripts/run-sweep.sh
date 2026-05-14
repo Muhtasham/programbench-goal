@@ -2,6 +2,7 @@
 set -euo pipefail
 
 CONFIG="configs/full-nointernet-xhigh.json"
+RUN_VERSION="${RUN_VERSION:-}"
 PROGRAMBENCH_REPO="${PROGRAMBENCH_REPO:-}"
 WATCH=1
 FINALIZE=1
@@ -111,6 +112,12 @@ if [[ ! -f "$CONFIG" ]]; then
   exit 1
 fi
 
+if [[ -z "$RUN_VERSION" ]]; then
+  RUN_VERSION="$(date -u +%Y%m%dT%H%M%SZ)"
+fi
+export RUN_VERSION
+echo "run_version=$RUN_VERSION"
+
 if [[ -z "$PROGRAMBENCH_REPO" ]]; then
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   CANDIDATE_PROGRAMBENCH_REPO="$(cd "$SCRIPT_DIR/.." && pwd)/../ProgramBench"
@@ -150,7 +157,7 @@ PY
 collect_results_csvs() {
   {
     find local_state -maxdepth 1 -type f -name '*results.csv'
-    find local_state/batches -mindepth 2 -maxdepth 2 -type f -name 'results.csv' 2>/dev/null || true
+    find local_state/batches -mindepth 2 -maxdepth 3 -type f -name 'results.csv' 2>/dev/null || true
   } | sort
 }
 

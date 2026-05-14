@@ -288,6 +288,7 @@ def usage_audit(rows: list[dict], pricing_file: Path, pricing_snapshot: dict, ma
             {
                 "instance_id": row["instance_id"],
                 "run_name": row["run_name"],
+                "run_version": row.get("run_version", ""),
                 "model": row["model"],
                 "reasoning_effort": row["reasoning_effort"],
                 "calls": row["calls"],
@@ -343,6 +344,7 @@ def result_row(eval_json: Path, programbench: tuple, codex_sessions: list[Path],
     return {
         **score_eval(eval_json, programbench),
         "run_name": run.get("run_name", ""),
+        "run_version": run.get("run_version", ""),
         "model": model,
         "reasoning_effort": run.get("reasoning_effort", ""),
         "inference_mode": run.get("inference_mode", ""),

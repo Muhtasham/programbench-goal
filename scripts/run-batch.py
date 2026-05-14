@@ -26,17 +26,33 @@ def read_targets(path: Path) -> list[str]:
     return [line.split("#", 1)[0].strip() for line in path.read_text().splitlines() if line.split("#", 1)[0].strip()]
 
 
-def state_path(batch_name: str) -> Path:
-    return DEFAULT_STATE_ROOT / f"{batch_name}.json"
+def latest_path(batch_name: str) -> Path:
+    return DEFAULT_STATE_ROOT / f"{batch_name}.latest"
 
 
-def load_state(batch_name: str) -> dict:
-    path = state_path(batch_name)
+def state_path(batch_name: str, run_version: str = "") -> Path:
+    return (
+        DEFAULT_STATE_ROOT / batch_name / run_version / "state.json"
+        if run_version
+        else DEFAULT_STATE_ROOT / f"{batch_name}.json"
+    )
+
+
+def resolved_run_version(batch_name: str, run_version: str = "") -> str:
+    if run_version or not latest_path(batch_name).is_file():
+        return run_version
+    return latest_path(batch_name).read_text().strip()
+
+
+def load_state(batch_name: str, run_version: str = "") -> dict:
+    version = resolved_run_version(batch_name, run_version)
+    path = state_path(batch_name, version)
     return (
         json.loads(path.read_text())
         if path.is_file()
         else {
             "batch_name": batch_name,
+            "run_version": version,
             "created_at": now(),
             "updated_at": now(),
             "items": {},
@@ -45,10 +61,12 @@ def load_state(batch_name: str) -> dict:
 
 
 def save_state(state: dict) -> None:
-    path = state_path(state["batch_name"])
+    path = state_path(state["batch_name"], state.get("run_version", ""))
     path.parent.mkdir(parents=True, exist_ok=True)
     state["updated_at"] = now()
     path.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n")
+    if state.get("run_version"):
+        latest_path(state["batch_name"]).write_text(state["run_version"] + "\n")
 
 
 def run(cmd: list[str], cwd: Path = REPO, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -109,11 +127,14 @@ def prepare_instance(args: argparse.Namespace, instance_id: str, run_root: Path)
         args.model,
         "--reasoning-effort",
         args.reasoning_effort,
+        "--run-version",
+        args.run_version,
     ]
     if args.strict_egress:
         cmd.append("--strict-egress")
     if args.run_name_prefix:
-        cmd.extend(["--run-name", f"{args.run_name_prefix}-{instance_id.replace('__', '-').split('.', 1)[0]}"])
+        version = f"{args.run_version}-" if args.run_version else ""
+        cmd.extend(["--run-name", f"{args.run_name_prefix}-{version}{instance_id.replace('__', '-').split('.', 1)[0]}"])
     output = run(cmd).stdout.splitlines()
     instance_dir = Path(next(line for line in output if line.startswith("/"))).resolve()
     run_json = json.loads((instance_dir / "run.json").read_text())
@@ -122,6 +143,7 @@ def prepare_instance(args: argparse.Namespace, instance_id: str, run_root: Path)
         "status": "prepared",
         "instance_dir": str(instance_dir),
         "run_name": run_json["run_name"],
+        "run_version": run_json.get("run_version", ""),
         "session_name": run_json["session_name"],
         "container_name": run_json["container_name"],
         "inference_mode": run_json["inference_mode"],
@@ -220,10 +242,17 @@ def print_status(state: dict) -> None:
 
 
 def watch(args: argparse.Namespace) -> None:
-    state = load_state(args.batch_name)
+    state = load_state(args.batch_name, args.run_version)
     update_targets(state, read_targets(Path(args.target_file).expanduser()))
-    run_root = Path(args.run_root).expanduser() if args.run_root else DEFAULT_RUNS_ROOT / args.batch_name
+    run_root = (
+        Path(args.run_root).expanduser()
+        if args.run_root
+        else DEFAULT_RUNS_ROOT / args.batch_name / args.run_version
+        if args.run_version
+        else DEFAULT_RUNS_ROOT / args.batch_name
+    )
     state["run_root"] = str(run_root)
+    state["run_version"] = args.run_version
     while True:
         refresh_state(state)
         launch_ready(args, state, run_root)
@@ -239,7 +268,7 @@ def watch(args: argparse.Namespace) -> None:
 
 
 def status(args: argparse.Namespace) -> None:
-    state = load_state(args.batch_name)
+    state = load_state(args.batch_name, args.run_version)
     refresh_state(state)
     save_state(state)
     print_status(state)
@@ -266,7 +295,11 @@ def summarize_and_collect(args: argparse.Namespace, state: dict) -> None:
     if not args.programbench_repo:
         return
     run_root = Path(state["run_root"])
-    output = DEFAULT_STATE_ROOT / state["batch_name"] / "results.csv"
+    output = (
+        DEFAULT_STATE_ROOT / state["batch_name"] / state["run_version"] / "results.csv"
+        if state.get("run_version")
+        else DEFAULT_STATE_ROOT / state["batch_name"] / "results.csv"
+    )
     output.parent.mkdir(parents=True, exist_ok=True)
     run(
         [
@@ -298,7 +331,7 @@ def summarize_and_collect(args: argparse.Namespace, state: dict) -> None:
 
 
 def finalize(args: argparse.Namespace) -> None:
-    state = load_state(args.batch_name)
+    state = load_state(args.batch_name, args.run_version)
     refresh_state(state)
     for instance_id, record in list(state["items"].items()):
         if record["status"] in FINALIZE_READY:
@@ -316,7 +349,7 @@ def finalize(args: argparse.Namespace) -> None:
 
 
 def retry(args: argparse.Namespace) -> None:
-    state = load_state(args.batch_name)
+    state = load_state(args.batch_name, args.run_version)
     wanted = set(args.instance or [])
     state["items"] = {
         instance_id: retry_record(record, args.failed) if not wanted or instance_id in wanted else record
@@ -338,6 +371,7 @@ def retry_record(record: dict, failed: bool) -> dict:
 
 def add_common_run_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--batch-name", required=True)
+    parser.add_argument("--run-version", default="")
     parser.add_argument("--run-root", default="")
     parser.add_argument("--max-parallel", type=int, default=1)
     parser.add_argument("--poll-seconds", type=int, default=60)
@@ -369,10 +403,12 @@ def main() -> None:
 
     status_parser = subparsers.add_parser("status")
     status_parser.add_argument("--batch-name", required=True)
+    status_parser.add_argument("--run-version", default="")
     status_parser.set_defaults(func=status)
 
     finalize_parser = subparsers.add_parser("finalize")
     finalize_parser.add_argument("--batch-name", required=True)
+    finalize_parser.add_argument("--run-version", default="")
     finalize_parser.add_argument("--programbench-repo", default="")
     finalize_parser.add_argument("--strict-paper", action="store_true")
     finalize_parser.add_argument("--allow-partial", action="store_true")
@@ -380,6 +416,7 @@ def main() -> None:
 
     retry_parser = subparsers.add_parser("retry")
     retry_parser.add_argument("--batch-name", required=True)
+    retry_parser.add_argument("--run-version", default="")
     retry_parser.add_argument("--failed", action="store_true")
     retry_parser.add_argument("--instance", action="append")
     retry_parser.set_defaults(func=retry)

@@ -28,6 +28,7 @@ TAG_RE = re.compile(r"<[^>]+>")
 class ResultRow:
     instance_id: str
     run_name: str
+    run_version: str
     model: str
     reasoning_effort: str
     inference_mode: str
@@ -157,6 +158,7 @@ def read_results(path: Path) -> list[ResultRow]:
             ResultRow(
                 instance_id=row["instance_id"],
                 run_name=row["run_name"],
+                run_version=row.get("run_version", ""),
                 model=row["model"],
                 reasoning_effort=row["reasoning_effort"],
                 inference_mode=row["inference_mode"],
@@ -239,8 +241,8 @@ def compliance_label(row: ResultRow) -> str:
     return "Local smoke: host/resources differ"
 
 
-def group_key(row: ResultRow) -> tuple[str, str, str, str]:
-    return (model_display(row), AGENT_NAME, mode_label(row), compliance_label(row))
+def group_key(row: ResultRow) -> tuple[str, str, str, str, str]:
+    return (model_display(row), AGENT_NAME, mode_label(row), compliance_label(row), row.run_version)
 
 
 def result_groups(rows: list[ResultRow]) -> list[dict]:
@@ -252,6 +254,7 @@ def result_groups(rows: list[ResultRow]) -> list[dict]:
             "agent": key[1],
             "mode": key[2],
             "compliance": key[3],
+            "run_version": key[4],
             "score_distribution": distribution_bins(group_rows),
             **aggregate(group_rows),
         }
@@ -269,6 +272,7 @@ def row_to_dict(row: ResultRow) -> dict:
     return {
         "instance_id": row.instance_id,
         "run_name": row.run_name,
+        "run_version": row.run_version,
         "evidence_path": evidence_path if Path("docs", evidence_path).is_file() else "",
         "task_path": f"task/{row.instance_id}/",
         "model": row.model,
@@ -444,6 +448,7 @@ def official_distribution_svg(rows: list[dict], cumulative: bool) -> str:
         ResultRow(
             instance_id=row["instance_id"],
             run_name="official",
+            run_version="",
             model="official",
             reasoning_effort="",
             inference_mode="official",
@@ -558,7 +563,7 @@ def render_summary_cards(label: str, summary: dict) -> str:
     return f"""
       <section class="summary-card">
         <div class="summary-title">{cell(label)}</div>
-        <div class="summary-meta">{cell(str(summary["compliance"]))}</div>
+        <div class="summary-meta">{cell(str(summary["compliance"]))} · run {cell(version_label(str(summary.get("run_version", ""))))}</div>
         <div class="metric-grid">
           <div><strong>{summary["instances"]}</strong><span>instances</span></div>
           <div><strong>{percent(summary["resolved_rate"])}</strong><span>resolved</span></div>
@@ -588,12 +593,17 @@ def run_metric_cards(group: dict) -> str:
     """
 
 
+def version_label(version: str) -> str:
+    return version or "unversioned"
+
+
 def render_leaderboard(groups: list[dict]) -> str:
     return "\n".join(
         f"""
             <tr>
               <td>{index}</td>
               <td><a href="run/{cell(str(group["slug"]))}/">{cell(str(group["model"]))}</a></td>
+              <td><code>{cell(version_label(str(group.get("run_version", ""))))}</code></td>
               <td>{cell(str(group["agent"]))}</td>
               <td>{result_count(group, "resolved")}</td>
               <td>{result_count(group, "almost_resolved")}</td>
@@ -611,6 +621,7 @@ def render_disclosures(groups: list[dict]) -> str:
             <tr>
               <td>{index}</td>
               <td>{cell(str(group["model"]))}</td>
+              <td><code>{cell(version_label(str(group.get("run_version", ""))))}</code></td>
               <td>{cell(str(group["mode"]))}</td>
               <td>{cell(str(group["compliance"]))}</td>
               <td>{group["instances"]}/{PROGRAMBENCH_TASKS}</td>
@@ -633,6 +644,7 @@ def render_instances(rows: list[ResultRow]) -> str:
             <tr>
               <td>{index}</td>
               <td><a href="task/{cell(row.instance_id)}/"><code>{cell(row.instance_id)}</code></a></td>
+              <td><code>{cell(version_label(row.run_version))}</code></td>
               <td>{cell(mode_label(row))}</td>
               <td>{cell(model_display(row))}</td>
               <td>{cell(compliance_label(row))}</td>
@@ -778,7 +790,10 @@ def heat_color(score: float) -> str:
 
 def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
     matching = [
-        row for row in rows if group_key(row) == (group["model"], group["agent"], group["mode"], group["compliance"])
+        row
+        for row in rows
+        if group_key(row)
+        == (group["model"], group["agent"], group["mode"], group["compliance"], group.get("run_version", ""))
     ]
     heatmap = "\n".join(
         f'<a class="heat-cell" style="background:{heat_color(row.score)}" title="{cell(row.instance_id)}: {percent(row.score)}" href="../../{task_page_link(row)}"></a>'
@@ -825,7 +840,7 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
 <body>
   <p><a href="../../">← Back to summary</a></p>
   <h1>{cell(str(group["model"]))}</h1>
-  <p class="muted">{cell(str(group["agent"]))} · {cell(str(group["mode"]))} · {cell(str(group["compliance"]))}</p>
+  <p class="muted">{cell(str(group["agent"]))} · run {cell(version_label(str(group.get("run_version", ""))))} · {cell(str(group["mode"]))} · {cell(str(group["compliance"]))}</p>
   {run_metric_cards(group)}
   <p>Avg. pass {percent(group["average_pass_rate"])} · Avg. est. cost / task {money(group["average_cost_usd"])} · Avg. calls / task {group["average_calls"]:.1f}</p>
   {render_score_distribution(matching)}
@@ -856,6 +871,7 @@ def render_task_detail(instance_id: str, rows: list[ResultRow], official_tasks: 
         <tr>
           <td>{index}</td>
           <td>{cell(model_display(row))}</td>
+          <td><code>{cell(version_label(row.run_version))}</code></td>
           <td>{cell(AGENT_NAME)}</td>
           <td>{cell(mode_label(row))}</td>
           <td>{percent(row.score)}</td>
@@ -871,7 +887,7 @@ def render_task_detail(instance_id: str, rows: list[ResultRow], official_tasks: 
     else:
         result_rows = """
         <tr>
-          <td colspan="10">No Codex results published for this task yet.</td>
+          <td colspan="11">No Codex results published for this task yet.</td>
         </tr>
         """
     return f"""<!doctype html>
@@ -906,7 +922,7 @@ def render_task_detail(instance_id: str, rows: list[ResultRow], official_tasks: 
   </div>
   <h2>Codex Results by Model</h2>
   <table>
-    <thead><tr><th>#</th><th>Model</th><th>Agent</th><th>Mode</th><th>Score</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Evidence</th></tr></thead>
+    <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Mode</th><th>Score</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Evidence</th></tr></thead>
     <tbody>{result_rows}</tbody>
   </table>
   <h2>Official ProgramBench Results by Model</h2>
@@ -981,7 +997,7 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
     """
     return f"""
     <div class="cards">
-      {"".join(render_summary_cards(f"{group['model']} / {group['mode']}", group) for group in data["groups"])}
+      {"".join(render_summary_cards(f"{group['model']} / {group['mode']} / {version_label(str(group.get('run_version', '')))}", group) for group in data["groups"])}
     </div>
 
     <h2>Score by Model × Task</h2>
@@ -996,16 +1012,16 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
     <h2>Extended Results</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Model</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Avg. est. cost</th><th>Avg. calls</th></tr></thead>
+        <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Avg. est. cost</th><th>Avg. calls</th></tr></thead>
         <tbody>{render_leaderboard(data["groups"])}</tbody>
       </table>
     </div>
-    <p>Columns mirror ProgramBench's extended leaderboard shape: resolved and almost-resolved rates, average estimated API cost per task instance, and average calls per task instance. ProgramBench run-detail pages show total cost and total calls; our run-detail pages do the same. Mode and compliance are shown in Run Disclosures and Per-Instance Results so the mirrored metric table stays close to ProgramBench's shape.</p>
+    <p>Columns mirror ProgramBench's extended leaderboard shape: resolved and almost-resolved rates, average estimated API cost per task instance, and average calls per task instance. ProgramBench run-detail pages show total cost and total calls; our run-detail pages do the same. Run versions keep repeated same-config sweeps separate instead of silently merging attempts. Mode and compliance are shown in Run Disclosures and Per-Instance Results so the mirrored metric table stays close to ProgramBench's shape.</p>
 
     <h2>Run Disclosures</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Model</th><th>Mode</th><th>Compliance</th><th>Tasks</th><th>Avg. pass</th><th>Wall</th></tr></thead>
+        <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Mode</th><th>Compliance</th><th>Tasks</th><th>Avg. pass</th><th>Wall</th></tr></thead>
         <tbody>{render_disclosures(data["groups"])}</tbody>
       </table>
     </div>
@@ -1018,7 +1034,7 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
     <h2>Per-Instance Results</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Instance</th><th>Mode</th><th>Model</th><th>Compliance</th><th>Status</th><th>Score</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Host</th><th>Docker</th><th>Evidence</th></tr></thead>
+        <thead><tr><th>#</th><th>Instance</th><th>Run</th><th>Mode</th><th>Model</th><th>Compliance</th><th>Status</th><th>Score</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Host</th><th>Docker</th><th>Evidence</th></tr></thead>
         <tbody>{render_instances(instances)}</tbody>
       </table>
     </div>

@@ -58,6 +58,7 @@ def check_aggregate(build_report) -> None:
         build_report.ResultRow(
             instance_id=str(index),
             run_name="synthetic",
+            run_version="",
             model="gpt-5.5",
             reasoning_effort="xhigh",
             inference_mode="no-internet",
