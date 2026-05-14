@@ -139,7 +139,7 @@ def exec_calls(path: Path) -> list[tuple[int, dict, str]]:
 
 
 def was_blocked(output: str) -> bool:
-    return "blocked " in output
+    return "blocked " in output or "Failed to create unified exec process" in output
 
 
 def uses_tool(command: str, tool: str) -> bool:
