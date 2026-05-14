@@ -47,6 +47,21 @@ print(json.loads(open(sys.argv[1]).read())[sys.argv[2]])
 PY
 }
 
+memory_gib() {
+  uv run python - "$1" <<'PY'
+import re
+import sys
+
+match = re.fullmatch(r"\s*([0-9.]+)\s*([kmgt]?)(i?b)?\s*", sys.argv[1].lower())
+if not match:
+    raise SystemExit(f"cannot parse memory value: {sys.argv[1]}")
+value = float(match[1])
+unit = match[2] or "b"
+scale = {"b": 1 / 1024**3, "k": 1 / 1024**2, "m": 1 / 1024, "g": 1, "t": 1024}[unit]
+print(f"{value * scale:.1f}")
+PY
+}
+
 if [[ ! -f "$CONFIG" ]]; then
   fail "config not found: $CONFIG"
 else
@@ -79,6 +94,25 @@ if command -v docker >/dev/null && docker info >/tmp/pb-doctor-docker-info.txt 2
   docker_cpus="$(docker info --format '{{.NCPU}}' 2>/dev/null || echo 0)"
   docker_mem_gib="$(docker info --format '{{.MemTotal}}' 2>/dev/null | uv run python -c 'import sys; print(f"{int(sys.stdin.read() or 0) / (1024**3):.1f}")')"
   ok "docker resources: ${docker_cpus} CPUs, ${docker_mem_gib} GiB"
+  if [[ -f "$CONFIG" ]]; then
+    required_cpus="$(config_value docker_cpus)"
+    required_mem_gib="$(memory_gib "$(config_value docker_memory)")"
+    if (( docker_cpus < required_cpus )); then
+      fail "docker CPUs below config: have ${docker_cpus}, need ${required_cpus}"
+    else
+      ok "docker CPUs satisfy config: ${required_cpus}"
+    fi
+    if uv run python - "$docker_mem_gib" "$required_mem_gib" <<'PY'
+import sys
+
+raise SystemExit(0 if float(sys.argv[1]) >= float(sys.argv[2]) else 1)
+PY
+    then
+      ok "docker memory satisfies config: ${required_mem_gib} GiB"
+    else
+      fail "docker memory below config: have ${docker_mem_gib} GiB, need ${required_mem_gib} GiB"
+    fi
+  fi
 else
   fail "docker daemon not reachable"
 fi

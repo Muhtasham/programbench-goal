@@ -5,6 +5,10 @@ CONFIG="${1:-configs/linux-smoke-nointernet-xhigh.json}"
 SESSION="${2:-}"
 PROGRAMBENCH_REPO="${PROGRAMBENCH_REPO:-}"
 SKIP_DOCTOR=0
+ALLOW_PARTIAL="${ALLOW_PARTIAL:-0}"
+PUBLISH="${PUBLISH:-0}"
+OFFLINE_REPORT="${OFFLINE_REPORT:-0}"
+NO_TARGET_REFRESH="${NO_TARGET_REFRESH:-0}"
 
 usage() {
   cat <<'EOF'
@@ -15,7 +19,12 @@ Starts scripts/run-sweep.sh in a detached tmux session and logs output under
 local_state/logs/. PROGRAMBENCH_REPO is passed through when set; otherwise
 run-sweep.sh auto-detects a sibling ../ProgramBench checkout.
 
-Set SKIP_DOCTOR=1 to skip the pre-launch scripts/doctor.sh check.
+Environment toggles:
+  SKIP_DOCTOR=1       Skip the pre-launch scripts/doctor.sh check.
+  ALLOW_PARTIAL=1     Permit finalize/report output before all targets finish.
+  PUBLISH=1           Commit and push docs/ after rebuilding the report.
+  OFFLINE_REPORT=1    Use cached pricing and ProgramBench baseline data.
+  NO_TARGET_REFRESH=1 Do not refresh target_sets/all_tasks.txt.
 EOF
 }
 
@@ -53,9 +62,21 @@ if tmux has-session -t "$SESSION" 2>/dev/null; then
   exit 1
 fi
 
-cmd=(scripts/run-sweep.sh --config "$CONFIG" --allow-partial)
+cmd=(scripts/run-sweep.sh --config "$CONFIG")
 if [[ -n "$PROGRAMBENCH_REPO" ]]; then
   cmd+=(--programbench-repo "$PROGRAMBENCH_REPO")
+fi
+if [[ "$ALLOW_PARTIAL" == "1" ]]; then
+  cmd+=(--allow-partial)
+fi
+if [[ "$PUBLISH" == "1" ]]; then
+  cmd+=(--publish)
+fi
+if [[ "$OFFLINE_REPORT" == "1" ]]; then
+  cmd+=(--offline-report)
+fi
+if [[ "$NO_TARGET_REFRESH" == "1" ]]; then
+  cmd+=(--no-target-refresh)
 fi
 
 tmux new-session -d -s "$SESSION" -c "$PWD" "$(printf '%q ' "${cmd[@]}") 2>&1 | tee -a $(printf '%q' "$log")"

@@ -96,6 +96,9 @@ uv run python scripts/run-config.py status configs/linux-smoke-nointernet-xhigh.
 tail -f local_state/logs/pb-goal-linux-smoke-nointernet-xhigh.log
 ```
 
+For smoke-only debugging, set `ALLOW_PARTIAL=1` if you want the report to
+rebuild before every target finishes. Do not use that for a public full run.
+
 For the stricter paper-mode smoke:
 
 ```bash
@@ -316,9 +319,9 @@ scripts/doctor.sh configs/linux-smoke-nointernet-xhigh.json
 ```
 
 It checks the selected config, required commands, host architecture, Docker
-daemon/resources, ProgramBench checkout, wrapper access, target set, and Codex
-version. `scripts/start-sweep-tmux.sh` runs the same check before launching
-unless `SKIP_DOCTOR=1` is set.
+daemon/resources against the config, ProgramBench checkout, wrapper access,
+target set, and Codex version. `scripts/start-sweep-tmux.sh` runs the same
+check before launching unless `SKIP_DOCTOR=1` is set.
 
 Before a serious run, check metric parity against ProgramBench's scoring code
 and bundled fixture runs:
@@ -417,6 +420,13 @@ rebuild:
 ```bash
 scripts/run-sweep.sh --publish
 scripts/run-sweep.sh --skip-watch --publish
+```
+
+The tmux helper uses the same defaults without publishing:
+
+```bash
+scripts/start-sweep-tmux.sh configs/nointernet-xhigh.json
+PUBLISH=1 scripts/start-sweep-tmux.sh configs/nointernet-xhigh.json
 ```
 
 Use `--offline-report` only when you intentionally want cached pricing and
