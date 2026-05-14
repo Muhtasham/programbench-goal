@@ -409,17 +409,21 @@ def retry(args: argparse.Namespace) -> None:
     state = load_state(args.batch_name, args.run_version)
     wanted = set(args.instance or [])
     state["items"] = {
-        instance_id: retry_record(record, args.failed) if not wanted or instance_id in wanted else record
+        instance_id: retry_record(record, args.failed, args.rerun_finalize_failed)
+        if not wanted or instance_id in wanted
+        else record
         for instance_id, record in state["items"].items()
     }
     save_state(state)
     print_status(state)
 
 
-def retry_record(record: dict, failed: bool) -> dict:
+def retry_record(record: dict, failed: bool, rerun_finalize_failed: bool) -> dict:
     return (
         {**record, "status": "pending", "last_error": "", "retried_at": now()}
         if failed and record["status"] == "failed"
+        else {**record, "status": "pending", "last_error": "", "retried_at": now()}
+        if rerun_finalize_failed and record["status"] == "finalize_failed"
         else {**record, "status": "goal_done", "last_error": "", "retried_at": now()}
         if failed and record["status"] == "finalize_failed"
         else record
@@ -477,6 +481,7 @@ def main() -> None:
     retry_parser.add_argument("--batch-name", required=True)
     retry_parser.add_argument("--run-version", default="")
     retry_parser.add_argument("--failed", action="store_true")
+    retry_parser.add_argument("--rerun-finalize-failed", action="store_true")
     retry_parser.add_argument("--instance", action="append")
     retry_parser.set_defaults(func=retry)
 
