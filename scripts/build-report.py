@@ -1086,18 +1086,45 @@ def render_empty_state() -> str:
       <div class="mode-grid">
         <div class="mode-card">
           <strong>Primary run</strong>
-          <p><code>configs/full-nointernet-xhigh.json</code> measures the Codex scaffold without internet and is the clean default for the Noam/Jake question.</p>
+          <p><code>configs/full-nointernet-xhigh.json</code> is the headline Noam/Jake run: GPT-5.5 xhigh with Codex <code>/goal</code>, no internet/source lookup, black-box target access.</p>
         </div>
         <div class="mode-card">
-          <strong>Paper-comparable run</strong>
-          <p><code>configs/full-paper-xhigh.json</code> should run only on Linux amd64 with 20 CPU, 60g RAM, strict egress, and wrapper-only target access.</p>
+          <strong>High comparison</strong>
+          <p><code>configs/full-nointernet-high.json</code> keeps the same scaffold and mode, changing only reasoning effort for high-vs-xhigh comparison.</p>
         </div>
         <div class="mode-card">
-          <strong>Open-internet ablation</strong>
-          <p><code>configs/full-open-xhigh.json</code> is intentionally non-compliant and stays separate from cleanroom results.</p>
+          <strong>Strict cleanroom variant</strong>
+          <p><code>configs/full-paper-xhigh.json</code> is ProgramBench-style cleanroom for Codex <code>/goal</code>, not a paper baseline reproduction. It needs Linux amd64, 20 CPU / 60g, strict egress, and wrapper-only target access.</p>
+        </div>
+        <div class="mode-card">
+          <strong>Tool-starvation ablation</strong>
+          <p><code>configs/full-localtools-xhigh.json</code> keeps internet/source lookup blocked but allows local binary-analysis/tracing tools. It is intentionally non-compliant.</p>
+        </div>
+        <div class="mode-card">
+          <strong>Open-internet ceiling</strong>
+          <p><code>configs/full-open-xhigh.json</code> allows internet/package tooling and is only a non-compliant ceiling experiment.</p>
         </div>
       </div>
     </section>
+    """
+
+
+def render_run_plan() -> str:
+    return """
+    <h2>Recommended Run Order</h2>
+    <p>This site keeps each scaffold and mode separate. The intended sequence is:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Track</th><th>Config</th><th>What it answers</th><th>Compliance label</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Primary</td><td><code>full-nointernet-xhigh</code></td><td>GPT-5.5 xhigh with Codex <code>/goal</code> on ProgramBench without internet/source lookup.</td><td>Codex no-internet ablation</td></tr>
+          <tr><td>2</td><td>High comparison</td><td><code>full-nointernet-high</code></td><td>Same scaffold and restrictions, lower reasoning effort, so high/xhigh can be compared directly.</td><td>Codex no-internet ablation</td></tr>
+          <tr><td>3</td><td>Strict variant</td><td><code>full-paper-xhigh</code></td><td>ProgramBench-style cleanroom Codex <code>/goal</code> with stricter host/resources/egress/wrapper controls.</td><td>ProgramBench-style only when preflight/audit pass</td></tr>
+          <tr><td>4</td><td>Criticism ablation</td><td><code>full-localtools-xhigh</code></td><td>Tests the tool-starvation critique: still no internet/source lookup, but local binary-analysis/tracing tools are allowed.</td><td>Non-compliant: local/binary tools allowed</td></tr>
+          <tr><td>5</td><td>Ceiling</td><td><code>full-open-xhigh</code></td><td>Measures the full Codex harness with internet/package tooling allowed.</td><td>Non-compliant: internet allowed</td></tr>
+        </tbody>
+      </table>
+    </div>
     """
 
 
@@ -1348,20 +1375,20 @@ def render_html(data: dict) -> str:
     </div>
   </header>
   <main>
-    <p class="note">Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. Open-internet runs are intentionally non-compliant with ProgramBench cleanroom rules and are reported separately from paper/cleanroom runs.</p>
+    <p class="note">Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in no-internet mode. Paper/cleanroom rows are ProgramBench-style Codex scaffold runs, not official mini-SWE-agent paper baseline reproductions. Open-internet and local-tools runs are intentionally non-compliant and reported separately.</p>
     <h2>How To Read Modes</h2>
     <div class="mode-grid">
       <div class="mode-card">
         <strong>No internet</strong>
-        <p>Primary Codex <code>/goal</code> scaffold for the Noam/Jake question: internet/source/package lookup blocked and target binary analysis still banned.</p>
+        <p>Primary Codex <code>/goal</code> scaffold for the Noam/Jake question: internet/source/package lookup blocked, target binary analysis banned, and target probing stays black-box.</p>
       </div>
       <div class="mode-card">
         <strong>Paper / cleanroom</strong>
-        <p>Black-box mode matching ProgramBench rules as closely as this scaffold can. Only ProgramBench-comparable on Linux amd64 with 20 CPU / 60g and strict egress.</p>
+        <p>Stricter ProgramBench-style cleanroom mode for Codex <code>/goal</code>. It is only ProgramBench-comparable on Linux amd64 with 20 CPU / 60g, strict egress, wrapper-only target access, and clean audit; it is not a mini-SWE-agent paper reproduction.</p>
       </div>
       <div class="mode-card">
         <strong>No internet + local tools</strong>
-        <p>Non-compliant ablation for the tool-starvation critique: no external internet/source lookup, but local binary-analysis/tracing tools are allowed.</p>
+        <p>Non-compliant ablation for the tool-starvation critique: external internet/source lookup remains blocked, but local binary-analysis/tracing tools are allowed.</p>
       </div>
       <div class="mode-card">
         <strong>Open internet</strong>
@@ -1369,6 +1396,7 @@ def render_html(data: dict) -> str:
       </div>
     </div>
     <p><a href="data/results.json">Download results.json</a> · <a href="data/results.csv">Download results.csv</a></p>
+    {render_run_plan()}
     {render_results_sections(data, instances)}
 
     <h2>Official Baseline Context</h2>
