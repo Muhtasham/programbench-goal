@@ -244,6 +244,11 @@ def refresh_state(state: dict) -> None:
     state["items"] = {instance_id: refresh_record(record) for instance_id, record in state["items"].items()}
 
 
+def cleanup_target_container(record: dict) -> None:
+    if record.get("container_name"):
+        run(["docker", "rm", "-f", record["container_name"]], check=False)
+
+
 def summarize_state(state: dict) -> dict[str, int]:
     return dict(Counter(record["status"] for record in state["items"].values()))
 
@@ -321,6 +326,8 @@ def finalize_one(args: argparse.Namespace, record: dict) -> dict:
         )
     except subprocess.CalledProcessError as e:
         return add_error({**record, "status": "finalize_failed", "finalize_failed_at": now()}, e.stdout)
+    finally:
+        cleanup_target_container(record)
 
 
 def summarize_and_collect(args: argparse.Namespace, state: dict) -> None:
