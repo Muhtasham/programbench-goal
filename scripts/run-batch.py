@@ -5,6 +5,7 @@ import argparse
 import csv
 import json
 import os
+import pwd
 import signal
 import subprocess
 import sys
@@ -308,12 +309,15 @@ def print_status(state: dict) -> None:
 def watch(args: argparse.Namespace) -> None:
     state = load_state(args.batch_name, args.run_version)
     update_targets(state, read_targets(Path(args.target_file).expanduser()))
+    default_runs_root = (
+        Path(pwd.getpwnam(args.codex_user).pw_dir) / "pb-goal-runs" if args.codex_user else DEFAULT_RUNS_ROOT
+    )
     run_root = (
         Path(args.run_root).expanduser()
         if args.run_root
-        else DEFAULT_RUNS_ROOT / args.batch_name / args.run_version
+        else default_runs_root / args.batch_name / args.run_version
         if args.run_version
-        else DEFAULT_RUNS_ROOT / args.batch_name
+        else default_runs_root / args.batch_name
     )
     state["run_root"] = str(run_root)
     state["run_version"] = args.run_version
