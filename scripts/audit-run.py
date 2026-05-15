@@ -82,13 +82,13 @@ HARNESS_PARENT_PATH = re.compile(
     r"\.\./(?:package-submission|start-target|check-compliance|eval-submission|run\.json|GOAL_PROMPT|GOAL_OBJECTIVE)"
 )
 WRAPPER_PATTERNS = (
-    r"/workspace/executable",
     r"\bdocker\s+exec\b",
     r"/ProgramBench(?:/|\b)",
     r"\bprogrambench\s+(?:eval|run|solve|benchmark)\b",
     r"\bprogrambench/",
-    r"\bsubprocess\.[^(]+\(.*executable",
-    r"\bCommand::new\([^)]*executable",
+    r"\bsubprocess\.[^(]+\([^)\n]*(?:/workspace/executable|['\"]executable['\"])",
+    r"\bos\.(?:system|popen|execv|execve|spawnv|spawnve)\([^)\n]*/workspace/executable",
+    r"\bCommand::new\([^)]*/workspace/executable",
 )
 PAPER_CACHE_ENV = {
     "CARGO_HOME",
