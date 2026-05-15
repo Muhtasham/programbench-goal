@@ -43,8 +43,6 @@ def common_watch_args(config: dict[str, Any], args: argparse.Namespace) -> list[
         "model",
         "reasoning_effort",
         "run_name_prefix",
-        "min_goal_seconds",
-        "min_goal_calls",
     )
     return [
         sys.executable,

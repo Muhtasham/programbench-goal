@@ -352,22 +352,6 @@ def strict_paper_compliant(args: argparse.Namespace) -> bool:
     )
 
 
-def goal_budget_text(args: argparse.Namespace) -> str:
-    requirements = []
-    if args.min_goal_seconds:
-        hours = args.min_goal_seconds / 3600
-        requirements.append(f"work for at least {args.min_goal_seconds} seconds ({hours:g} hours) wall-clock")
-    if args.min_goal_calls:
-        requirements.append(f"use at least {args.min_goal_calls} model-call checkpoints")
-    return (
-        "Minimum goal budget: "
-        + " and ".join(requirements)
-        + ". This is part of the initial run contract; if you finish earlier, the run is incomplete. "
-        if requirements
-        else ""
-    )
-
-
 def prepare(args: argparse.Namespace) -> None:
     if args.inference_mode == "paper" and args.target_access != "wrapper":
         raise SystemExit("paper mode requires --target-access wrapper; use no-internet for direct-docker ablations")
@@ -412,7 +396,6 @@ def prepare(args: argparse.Namespace) -> None:
         "packaging works or representative probes pass; complete only after solution/compile.sh builds "
         "./executable, package-submission succeeds, and .goal/BEHAVIOR_AUDIT.md documents adversarial probe "
         "coverage, comparisons, mismatches fixed, known gaps, and stopping rationale. "
-        f"{goal_budget_text(args)}"
         "Do not inspect parent directories or files outside the solution directory."
     )
 
@@ -432,7 +415,6 @@ def prepare(args: argparse.Namespace) -> None:
             "values, probe valid/invalid values, case variants for word values, and combinations with help/version. "
             "Treat hidden tests as adversarial edge-case tests; do not call remaining gaps low-value without "
             "evidence. Add generated/fuzzed target-vs-local probe classes after the first implementation works. "
-            f"{goal_budget_text(args)}"
             "Keep .goal/BEHAVIOR_AUDIT.md "
             "with the behavioral probe matrix, target-vs-local comparisons, known gaps, and stopping rationale. "
             "Do not mark the goal complete merely because package-submission succeeds.\n"
@@ -694,8 +676,6 @@ def prepare_batch(args: argparse.Namespace) -> None:
                     model=args.model,
                     reasoning_effort=args.reasoning_effort,
                     strict_egress=args.strict_egress,
-                    min_goal_seconds=args.min_goal_seconds,
-                    min_goal_calls=args.min_goal_calls,
                 )
             )
 
@@ -724,8 +704,6 @@ def main() -> None:
     prepare_parser.add_argument("--target-wrapper-command", default="sudo -n /usr/local/bin/pb-target-exec")
     prepare_parser.add_argument("--model", default=DEFAULT_MODEL)
     prepare_parser.add_argument("--reasoning-effort", default=DEFAULT_REASONING_EFFORT)
-    prepare_parser.add_argument("--min-goal-seconds", type=int, default=0)
-    prepare_parser.add_argument("--min-goal-calls", type=int, default=0)
     prepare_parser.add_argument("--strict-egress", action="store_true")
     prepare_parser.add_argument(
         "--prompt-template",
@@ -753,8 +731,6 @@ def main() -> None:
     batch_parser.add_argument("--target-wrapper-command", default="sudo -n /usr/local/bin/pb-target-exec")
     batch_parser.add_argument("--model", default=DEFAULT_MODEL)
     batch_parser.add_argument("--reasoning-effort", default=DEFAULT_REASONING_EFFORT)
-    batch_parser.add_argument("--min-goal-seconds", type=int, default=0)
-    batch_parser.add_argument("--min-goal-calls", type=int, default=0)
     batch_parser.add_argument("--strict-egress", action="store_true")
     batch_parser.add_argument(
         "--prompt-template",

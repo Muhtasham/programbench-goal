@@ -19,7 +19,7 @@ DEFAULT_STATE_ROOT = REPO / "local_state" / "batches"
 DONE_MARKERS = ("Goal achieved", "Goal marked complete")
 RATE_LIMIT_MARKERS = ("rate limit", "rate_limit", "429")
 FINALIZE_READY = {"goal_done"}
-TERMINAL_STATUSES = {"goal_done", "early_goal_done", "packaged", "evaluated", "failed", "finalize_failed"}
+TERMINAL_STATUSES = {"goal_done", "packaged", "evaluated", "failed", "finalize_failed"}
 CLEANUP_STATUSES = TERMINAL_STATUSES
 
 
@@ -126,54 +126,6 @@ def record_output(record: dict) -> str:
     return tmux_capture(record["session_name"]) + "\n" + transcript_tail(record)
 
 
-def parse_time(value: str) -> datetime:
-    return datetime.fromisoformat(value.replace("Z", "+00:00"))
-
-
-def session_stats(record: dict) -> dict:
-    solution_dir = str(Path(record["instance_dir"]) / "solution")
-    timestamps = []
-    calls = 0
-    logs = 0
-    for root in [Path.home() / ".codex" / "sessions", Path.home() / ".codex" / "archived_sessions"]:
-        if not root.is_dir():
-            continue
-        for path in root.glob("**/*.jsonl"):
-            meta = None
-            with path.open(errors="replace") as f:
-                for line in f:
-                    event = json.loads(line)
-                    if event.get("type") == "session_meta":
-                        meta = event["payload"]
-                        break
-            if not meta or meta.get("cwd") != solution_dir:
-                continue
-            logs += 1
-            with path.open(errors="replace") as f:
-                for line in f:
-                    event = json.loads(line)
-                    if event.get("timestamp"):
-                        timestamps.append(event["timestamp"])
-                    payload = event.get("payload", {})
-                    if (
-                        event.get("type") == "event_msg"
-                        and payload.get("type") == "token_count"
-                        and payload.get("info")
-                    ):
-                        calls += 1
-    return {
-        "calls": calls,
-        "logs": logs,
-        "wall_seconds": int((parse_time(max(timestamps)) - parse_time(min(timestamps))).total_seconds())
-        if timestamps
-        else 0,
-    }
-
-
-def completion_gate(state: dict) -> dict:
-    return state.get("completion_gate", {})
-
-
 def add_error(record: dict, error: str) -> dict:
     return {
         **record,
@@ -204,10 +156,6 @@ def prepare_instance(args: argparse.Namespace, instance_id: str, run_root: Path)
         args.model,
         "--reasoning-effort",
         args.reasoning_effort,
-        "--min-goal-seconds",
-        str(args.min_goal_seconds),
-        "--min-goal-calls",
-        str(args.min_goal_calls),
         "--run-version",
         args.run_version,
     ]
@@ -242,34 +190,14 @@ def start_instance(record: dict) -> dict:
     return {**record, "status": "running", "started_at": now(), "last_error": ""}
 
 
-def refresh_record(record: dict, gate: dict | None = None) -> dict:
+def refresh_record(record: dict) -> dict:
     if record["status"] != "running":
         return record
     output = record_output(record)
     if any(marker in output for marker in DONE_MARKERS):
-        gate = gate or {}
-        min_goal_seconds = int(gate.get("min_goal_seconds") or 0)
-        min_goal_calls = int(gate.get("min_goal_calls") or 0)
-        stats = session_stats(record)
-        too_early = stats["wall_seconds"] < min_goal_seconds or stats["calls"] < min_goal_calls
         cleanup_target_container(record)
         cleanup_codex_session(record)
-        if too_early:
-            return {
-                **record,
-                "status": "early_goal_done",
-                "early_goal_done_at": now(),
-                "last_goal_stats": stats,
-                "last_error": f"goal completed before minimum gate: {stats}",
-                "last_pane_tail": output[-4000:],
-            }
-        return {
-            **record,
-            "status": "goal_done",
-            "goal_done_at": now(),
-            "last_goal_stats": stats,
-            "last_pane_tail": output[-4000:],
-        }
+        return {**record, "status": "goal_done", "goal_done_at": now(), "last_pane_tail": output[-4000:]}
     if output and any(marker in output.lower() for marker in RATE_LIMIT_MARKERS):
         return {**record, "last_rate_limit_seen_at": now(), "last_pane_tail": output[-4000:]}
     if not tmux_has_session(record["session_name"]):
@@ -318,8 +246,7 @@ def launch_ready(args: argparse.Namespace, state: dict, run_root: Path) -> None:
 
 
 def refresh_state(state: dict) -> None:
-    gate = completion_gate(state)
-    state["items"] = {instance_id: refresh_record(record, gate) for instance_id, record in state["items"].items()}
+    state["items"] = {instance_id: refresh_record(record) for instance_id, record in state["items"].items()}
 
 
 def cleanup_target_container(record: dict) -> None:
@@ -383,10 +310,6 @@ def watch(args: argparse.Namespace) -> None:
     )
     state["run_root"] = str(run_root)
     state["run_version"] = args.run_version
-    state["completion_gate"] = {
-        "min_goal_seconds": args.min_goal_seconds,
-        "min_goal_calls": args.min_goal_calls,
-    }
     while True:
         refresh_state(state)
         cleanup_finished(state)
@@ -574,9 +497,6 @@ def add_common_run_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--reasoning-effort", default="xhigh")
     parser.add_argument("--strict-egress", action="store_true")
     parser.add_argument("--run-name-prefix", default="")
-    parser.add_argument("--min-goal-seconds", type=int, default=0)
-    parser.add_argument("--min-goal-calls", type=int, default=0)
-    parser.add_argument("--max-goal-continuations", type=int, default=0, help=argparse.SUPPRESS)
 
 
 def main() -> None:
