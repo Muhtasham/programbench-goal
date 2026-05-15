@@ -20,6 +20,7 @@ def main() -> None:
     parser.add_argument("--programbench-repo", required=True)
     parser.add_argument("--expected-count", type=int, default=200)
     parser.add_argument("--include-fixtures", action="store_true")
+    parser.add_argument("--allow-subset", action="store_true")
     args = parser.parse_args()
 
     expected = [
@@ -29,7 +30,7 @@ def main() -> None:
     ]
     actual = target_ids(Path(args.target_file).expanduser())
     duplicates = sorted({instance_id for instance_id in actual if actual.count(instance_id) > 1})
-    missing = sorted(set(expected) - set(actual))
+    missing = [] if args.allow_subset else sorted(set(expected) - set(actual))
     extra = sorted(set(actual) - set(expected))
     if len(actual) != args.expected_count or duplicates or missing or extra:
         raise SystemExit(
