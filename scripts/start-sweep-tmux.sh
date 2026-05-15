@@ -107,6 +107,11 @@ env_prefix=()
 if [[ -n "${RUN_VERSION:-}" ]]; then
   env_prefix+=(RUN_VERSION="$RUN_VERSION")
 fi
+for key in HTTP_PROXY HTTPS_PROXY ALL_PROXY NO_PROXY http_proxy https_proxy all_proxy no_proxy; do
+  if [[ -n "${!key:-}" ]]; then
+    env_prefix+=("$key=${!key}")
+  fi
+done
 
 tmux new-session -d -s "$SESSION" -c "$PWD" "$(printf '%q ' "${env_prefix[@]}" "${cmd[@]}") 2>&1 | tee -a $(printf '%q' "$log")"
 
