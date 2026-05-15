@@ -915,6 +915,7 @@
     }
   ],
   "public_redactions": {
+    "extra_text": "redacted",
     "log_output": "redacted",
     "long_extra_text": "truncated to 2000 chars"
   },
@@ -1485,8 +1486,6 @@
       "branch": "d161b26b57a6",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_workspace = PosixPath('/tmp/tmp_de0ur0p')\n\n    def test_invalid_nix_syntax_error(temp_workspace):\n        \"\"\"Test error handling for invalid .nix syntax.\"\"\"\n        nix_file = create_nix_file(temp_workspace / \"invalid.nix\", \"let invalid syntax }\")\n    \n        result = run(str(nix_file))\n        assert result.returncode == 0  # Parse errors don't cause non-zero exit\n>       assert b\"Error\" in result.stderr or b\"error\" in result.stderr.lower()\nE       AssertionError\n\neval/tests/test_input_handling.py:124: AssertionError",
-        "text_original_chars": 529,
         "time": 0.141
       },
       "name": "eval.tests.test_input_handling.test_invalid_nix_syntax_error",
@@ -1544,8 +1543,6 @@
       "branch": "d161b26b57a6",
       "extra": {
         "message": "json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
-        "text": "temp_workspace = PosixPath('/tmp/tmpt62f_qn5')\n\n    def test_json_output_parse_error(temp_workspace):\n        \"\"\"Test JSON output format for parse errors.\"\"\"\n        nix_file = create_nix_file(temp_workspace / \"invalid.nix\",\n                                    \"let invalid syntax }\")\n    \n        result = run(\"-o\", \"json\", str(nix_file))\n        assert result.returncode == 0\n>       output = json.loads(result.stdout.decode())\n\neval/tests/test_output_formats.py:163: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/usr/lib/python3.10/json/__init__.py:346: in loads\n    return _default_decoder.decode(s)\n/usr/lib/python3.10/json/decoder.py:337: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <json.decoder.JSONDecoder object at 0x7c8da8d3f3a0>, s = '', idx = 0\n\n    def raw_decode(self, s, idx=0):\n        \"\"\"Decode a JSON document from ``s`` (a ``str`` beginning with\n        a JSON document) and return a 2-tuple of the Python\n        representation and the index in ``s`` where the document ended.\n    \n        This can be used to decode a JSON document from a string that may\n        have extraneous data at the end.\n    \n        \"\"\"\n        try:\n            obj, end = self.scan_once(s, idx)\n        except StopIteration as err:\n>           raise JSONDecodeError(\"Expecting value\", s, err.value) from None\nE           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n\n/usr/lib/python3.10/json/decoder.py:355: JSONDecodeError",
-        "text_original_chars": 1595,
         "time": 0.139
       },
       "name": "eval.tests.test_output_formats.test_json_output_parse_error",
@@ -1563,8 +1560,6 @@
       "branch": "d161b26b57a6",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_workspace = PosixPath('/tmp/tmpd8dsokgl')\n\n    def test_deadnix_skip_pragma(temp_workspace):\n        \"\"\"Test # deadnix: skip pragma skips next line.\"\"\"\n        nix_file = create_nix_file(temp_workspace / \"test.nix\", \"\"\"let\n      # deadnix: skip\n      skipped = 42;\n      reported = 43;\n    in true\"\"\")\n    \n        result = run(str(nix_file))\n        assert result.returncode == 0\n        # skipped should not be reported\n>       assert b\"skipped\" not in result.stdout or b\"Unused\" not in result.stdout\nE       AssertionError\n\neval/tests/test_special_features.py:16: AssertionError",
-        "text_original_chars": 586,
         "time": 0.165
       },
       "name": "eval.tests.test_special_features.test_deadnix_skip_pragma",
@@ -1574,8 +1569,6 @@
       "branch": "d161b26b57a6",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_workspace = PosixPath('/tmp/tmpo3q09p16')\n\n    def test_case_insensitive_nix_extension(temp_workspace):\n        \"\"\"Test that .NIX, .Nix extensions are recognized.\"\"\"\n        # Create files with different case extensions\n        file1 = temp_workspace / \"test.NIX\"\n        file1.write_text(\"let unused = 42; in true\")\n        file2 = temp_workspace / \"test2.Nix\"\n        file2.write_text(\"let unused2 = 42; in true\")\n    \n        result = run(str(temp_workspace))\n        assert result.returncode == 0\n        # Both files should be scanned\n>       assert b\"test.NIX\" in result.stdout or b\"unused\" in result.stdout\nE       AssertionError\n\neval/tests/test_special_features.py:99: AssertionError",
-        "text_original_chars": 697,
         "time": 0.13
       },
       "name": "eval.tests.test_special_features.test_case_insensitive_nix_extension",
@@ -1593,8 +1586,6 @@
       "branch": "d161b26b57a6",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_workspace = PosixPath('/tmp/tmp0yqespb_')\n\n    def test_complex_pragma_usage(temp_workspace):\n        \"\"\"Test multiple deadnix: skip pragmas.\"\"\"\n        nix_file = create_nix_file(temp_workspace / \"test.nix\", \"\"\"let\n      # deadnix: skip\n      skipped1 = 1;\n      reported1 = 2;\n      # deadnix: skip\n      skipped2 = 3;\n      reported2 = 4;\n    in true\"\"\")\n    \n        result = run(str(nix_file))\n        assert result.returncode == 0\n        # Skipped should not be reported\n        output = result.stdout.decode()\n>       assert \"skipped1\" not in output or \"Unused\" not in output.split(\"skipped1\")[0][-20:]\nE       AssertionError\n\neval/tests/test_special_features.py:82: AssertionError",
-        "text_original_chars": 694,
         "time": 0.125
       },
       "name": "eval.tests.test_special_features.test_complex_pragma_usage",
@@ -2012,8 +2003,6 @@
       "branch": "8a961ab581f3",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_deadnix_skip_pragma():\n        \"\"\"Test deadnix: skip pragma to skip checking next line.\"\"\"\n        with TempFiles() as tmp:\n            test_file = tmp.create(\"test.nix\", \"\"\"\n    let\n      # deadnix: skip\n      unused_but_skipped = 1;\n      unused_not_skipped = 2;\n      used = 3;\n    in used\n    \"\"\")\n            result = run(str(test_file))\n            assert result.returncode == 0\n            # Should skip the line after the pragma\n>           assert b\"unused_but_skipped\" not in result.stdout\nE           AssertionError\n\neval/tests/test_deadnix.py:552: AssertionError",
-        "text_original_chars": 582,
         "time": 0.16
       },
       "name": "eval.tests.test_deadnix.test_deadnix_skip_pragma",
@@ -2279,8 +2268,6 @@
       "branch": "8a961ab581f3",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_multiple_pragmas():\n        \"\"\"Test multiple skip pragmas in same file.\"\"\"\n        with TempFiles() as tmp:\n            test_file = tmp.create(\"test.nix\", \"\"\"\n    let\n      # deadnix: skip\n      skip1 = 1;\n      unused1 = 2;\n      # deadnix: skip\n      skip2 = 3;\n      unused2 = 4;\n      used = 5;\n    in used\n    \"\"\")\n            result = run(str(test_file))\n            assert result.returncode == 0\n            output = result.stdout.decode()\n            # Should skip skip1 and skip2\n>           assert \"skip1\" not in output\nE           AssertionError\n\neval/tests/test_deadnix.py:1169: AssertionError",
-        "text_original_chars": 614,
         "time": 0.172
       },
       "name": "eval.tests.test_deadnix.test_multiple_pragmas",
@@ -2458,8 +2445,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:225: in test_parse_error_human_readable\n    assert \"Error parsing file\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 0.201
       },
       "name": "tests.test_cli.test_parse_error_human_readable",
@@ -2501,8 +2486,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:458: in test_multiple_parse_errors_json_format\n    assert len(parsed[\"results\"]) >= 2  # Multiple parse errors\nE   AssertionError",
-        "text_original_chars": 147,
         "time": 0.175
       },
       "name": "tests.test_cli.test_multiple_parse_errors_json_format",
@@ -2696,8 +2679,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_analysis.py:305: in test_pragma_skip_selective\n    assert len(results) == 1\nE   AssertionError",
-        "text_original_chars": 110,
         "time": 0.121
       },
       "name": "tests.test_core_analysis.test_pragma_skip_selective",
@@ -2731,8 +2712,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_analysis.py:659: in test_pragma_skip_inherit_statement\n    assert len(results) == 2\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.165
       },
       "name": "tests.test_core_analysis.test_pragma_skip_inherit_statement",
@@ -2830,8 +2809,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:35: in test_edit_multiple_unused_bindings\n    assert edited == \"let alive = 4; in alive\"\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.162
       },
       "name": "tests.test_edit_mode.test_edit_multiple_unused_bindings",
@@ -2865,8 +2842,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:66: in test_edit_empty_let_removal\n    assert edited == \"alive\"\nE   AssertionError",
-        "text_original_chars": 106,
         "time": 0.142
       },
       "name": "tests.test_edit_mode.test_edit_empty_let_removal",
@@ -2892,8 +2867,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:111: in test_edit_lambda_arg_unused\n    assert edited == \"_dead: false\"\nE   AssertionError",
-        "text_original_chars": 114,
         "time": 0.133
       },
       "name": "tests.test_edit_mode.test_edit_lambda_arg_unused",
@@ -2903,8 +2876,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:96: in test_edit_inherit_all_dead\n    assert edited == \"alive\"\nE   AssertionError",
-        "text_original_chars": 105,
         "time": 0.12
       },
       "name": "tests.test_edit_mode.test_edit_inherit_all_dead",
@@ -2930,8 +2901,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
-        "text": "tests/test_core_analysis.py:972: in test_let_shadowed_by_rec_attrset_attribute\n    data = json.loads(result.stdout)\n/usr/lib/python3.10/json/__init__.py:346: in loads\n    return _default_decoder.decode(s)\n/usr/lib/python3.10/json/decoder.py:337: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n/usr/lib/python3.10/json/decoder.py:355: in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\nE   json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
-        "text_original_chars": 509,
         "time": 0.153
       },
       "name": "tests.test_core_analysis.test_let_shadowed_by_rec_attrset_attribute",
@@ -2957,8 +2926,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:235: in test_edit_with_quiet_flag\n    assert edited == \"let alive = 2; in alive\"\nE   AssertionError",
-        "text_original_chars": 123,
         "time": 0.125
       },
       "name": "tests.test_edit_mode.test_edit_with_quiet_flag",
@@ -2968,8 +2935,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:217: in test_edit_nested_let_expressions\n    assert edited == \"let outer = 2; in outer\"\nE   AssertionError",
-        "text_original_chars": 130,
         "time": 0.127
       },
       "name": "tests.test_edit_mode.test_edit_nested_let_expressions",
@@ -2979,8 +2944,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:251: in test_edit_with_fail_flag\n    assert edited == \"let alive = 2; in alive\"\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.126
       },
       "name": "tests.test_edit_mode.test_edit_with_fail_flag",
@@ -2998,8 +2961,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:320: in test_edit_directory_recursion\n    assert top_file.read_text() == \"let alive_top = 2; in alive_top\"\nE   AssertionError",
-        "text_original_chars": 149,
         "time": 0.134
       },
       "name": "tests.test_edit_mode.test_edit_directory_recursion",
@@ -3009,8 +2970,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:381: in test_edit_inherit_from_all_dead\n    assert edited == \"alive\"\nE   AssertionError",
-        "text_original_chars": 111,
         "time": 0.124
       },
       "name": "tests.test_edit_mode.test_edit_inherit_from_all_dead",
@@ -3020,8 +2979,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:396: in test_edit_mixed_let_and_inherit\n    assert edited == \"let alive = true; in alive\"\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.127
       },
       "name": "tests.test_edit_mode.test_edit_mixed_let_and_inherit",
@@ -3055,8 +3012,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:509: in test_edit_deeply_nested_patterns\n    assert edited == \"_a: _b: _c: { alive, ... }: alive\"\nE   AssertionError",
-        "text_original_chars": 140,
         "time": 0.111
       },
       "name": "tests.test_edit_mode.test_edit_deeply_nested_patterns",
@@ -3066,8 +3021,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:245: in test_parse_error_json_format\n    assert \"unexpected end of file\" in item[\"message\"]\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 0.139
       },
       "name": "tests.test_cli.test_parse_error_json_format",
@@ -3101,8 +3054,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:557: in test_edit_all_bindings_dead_nested\n    assert edited == \"3\"\nE   AssertionError",
-        "text_original_chars": 110,
         "time": 0.169
       },
       "name": "tests.test_edit_mode.test_edit_all_bindings_dead_nested",
@@ -3152,8 +3103,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:81: in test_edit_inherit_dead_entries\n    assert edited == \"let inherit alive; in alive\"\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.144
       },
       "name": "tests.test_edit_mode.test_edit_inherit_dead_entries",
@@ -3179,8 +3128,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors_and_edges.py:43: in test_unclosed_brace_parse_error\n    assert \"unexpected TOKEN_IN at 22..24\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 148,
         "time": 0.135
       },
       "name": "tests.test_errors_and_edges.test_unclosed_brace_parse_error",
@@ -3198,8 +3145,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:366: in test_edit_inherit_from_source\n    assert edited == \"let inherit (x) alive; in alive\"\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 0.16
       },
       "name": "tests.test_edit_mode.test_edit_inherit_from_source",
@@ -3209,8 +3154,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:20: in test_edit_single_unused_binding\n    assert edited == \"let alive = 23; in alive\"\nE   AssertionError",
-        "text_original_chars": 129,
         "time": 0.154
       },
       "name": "tests.test_edit_mode.test_edit_single_unused_binding",
@@ -3220,8 +3163,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:351: in test_edit_no_trailing_comma_in_pattern\n    assert edited == \"{ bar }: bar\"\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 0.174
       },
       "name": "tests.test_edit_mode.test_edit_no_trailing_comma_in_pattern",
@@ -3231,8 +3172,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors_and_edges.py:93: in test_only_comment_file\n    assert \"unexpected end of file\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.149
       },
       "name": "tests.test_errors_and_edges.test_only_comment_file",
@@ -3242,8 +3181,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors_and_edges.py:61: in test_incomplete_let_expression\n    assert \"unexpected end of file\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 140,
         "time": 0.16
       },
       "name": "tests.test_errors_and_edges.test_incomplete_let_expression",
@@ -3269,8 +3206,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:442: in test_edit_complex_nested_structure\n    assert edited == \"let outer = let inner2 = 2; in inner2; in outer\"\nE   AssertionError",
-        "text_original_chars": 156,
         "time": 0.151
       },
       "name": "tests.test_edit_mode.test_edit_complex_nested_structure",
@@ -3288,8 +3223,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:302: in test_edit_multiple_files\n    assert file1.read_text() == \"let alive1 = 2; in alive1\"\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 0.116
       },
       "name": "tests.test_edit_mode.test_edit_multiple_files",
@@ -3299,8 +3232,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors_and_edges.py:124: in test_invalid_token_sequence\n    assert \"unexpected TOKEN_AT at 8..9\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 143,
         "time": 0.137
       },
       "name": "tests.test_errors_and_edges.test_invalid_token_sequence",
@@ -3366,8 +3297,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:524: in test_edit_empty_inherit_removal\n    assert edited == \"alive\"\nE   AssertionError",
-        "text_original_chars": 111,
         "time": 0.134
       },
       "name": "tests.test_edit_mode.test_edit_empty_inherit_removal",
@@ -3409,8 +3338,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError: Expected at least 3 parse errors, got 0",
-        "text": "tests/test_errors_and_edges.py:555: in test_multiple_parse_errors_same_file\n    assert error_count >= 3, f\"Expected at least 3 parse errors, got {error_count}\"\nE   AssertionError: Expected at least 3 parse errors, got 0",
-        "text_original_chars": 219,
         "time": 0.142
       },
       "name": "tests.test_errors_and_edges.test_multiple_parse_errors_same_file",
@@ -3460,8 +3387,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_file_discovery.py:43: in test_nonexistent_file_error_message\n    assert data[\"results\"][0][\"message\"] == \"No such file or directory (os error 2)\"\nE   AssertionError",
-        "text_original_chars": 175,
         "time": 0.123
       },
       "name": "tests.test_file_discovery.test_nonexistent_file_error_message",
@@ -3559,8 +3484,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_file_discovery.py:323: in test_invalid_syntax_reported_per_file\n    assert len(invalid_result[\"results\"]) == 3\nE   AssertionError",
-        "text_original_chars": 140,
         "time": 0.146
       },
       "name": "tests.test_file_discovery.test_invalid_syntax_reported_per_file",
@@ -3570,8 +3493,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edit_mode.py:541: in test_edit_combined_flags_quiet_fail\n    assert edited == \"let alive = 2; in alive\"\nE   AssertionError",
-        "text_original_chars": 133,
         "time": 0.201
       },
       "name": "tests.test_edit_mode.test_edit_combined_flags_quiet_fail",
@@ -3589,8 +3510,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors_and_edges.py:78: in test_empty_file_parse_error\n    assert \"unexpected end of file\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.14
       },
       "name": "tests.test_errors_and_edges.test_empty_file_parse_error",
@@ -3600,8 +3519,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors_and_edges.py:108: in test_only_whitespace_file\n    assert \"unexpected end of file\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 136,
         "time": 0.129
       },
       "name": "tests.test_errors_and_edges.test_only_whitespace_file",
@@ -3707,8 +3624,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
-        "text": "tests/test_errors_and_edges.py:308: in test_json_output_parse_error\n    data = json.loads(result.stdout)\n/usr/lib/python3.10/json/__init__.py:346: in loads\n    return _default_decoder.decode(s)\n/usr/lib/python3.10/json/decoder.py:337: in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n/usr/lib/python3.10/json/decoder.py:355: in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\nE   json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
-        "text_original_chars": 498,
         "time": 0.141
       },
       "name": "tests.test_errors_and_edges.test_json_output_parse_error",
@@ -3806,8 +3721,6 @@
       "branch": "fcc1fea12b08",
       "extra": {
         "message": "AssertionError: Expected 2 files, got 0: []",
-        "text": "tests/test_file_discovery.py:377: in test_case_insensitive_nix_extension\n    assert len(files) == 2, f\"Expected 2 files, got {len(files)}: {files}\"\nE   AssertionError: Expected 2 files, got 0: []",
-        "text_original_chars": 195,
         "time": 0.172
       },
       "name": "tests.test_file_discovery.test_case_insensitive_nix_extension",
@@ -3889,8 +3802,6 @@
       "branch": "e3e25cae89e9",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_exclude_cannot_be_used_multiple_times_errors_exit_code_2():\n        p = run([\"--exclude\", \"./example.nix\", \"--exclude\", \"./src\"])\n>       assert p.returncode == 2\nE       AssertionError\n\neval/tests/test_argparse_validation.py:93: AssertionError",
-        "text_original_chars": 253,
         "time": 0.191
       },
       "name": "eval.tests.test_argparse_validation.test_exclude_cannot_be_used_multiple_times_errors_exit_code_2",
@@ -3900,8 +3811,6 @@
       "branch": "e3e25cae89e9",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_output_format_cannot_be_specified_multiple_times_errors_exit_code_2():\n        p = run([\"-o\", \"json\", \"--output-format\", \"human-readable\"])\n>       assert p.returncode == 2\nE       AssertionError\n\neval/tests/test_argparse_validation.py:115: AssertionError",
-        "text_original_chars": 264,
         "time": 0.168
       },
       "name": "eval.tests.test_argparse_validation.test_output_format_cannot_be_specified_multiple_times_errors_exit_code_2",
@@ -3911,8 +3820,6 @@
       "branch": "e3e25cae89e9",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_missing_value_for_output_format_errors_and_exit_code_2():\n        p = run([\"--output-format\"])\n        assert p.returncode == 2\n        err = strip_ansi(p.stderr)\n        assert \"a value is required for '--output-format <OUTPUT_FORMAT>'\" in err\n>       assert \"[possible values: human-readable, json]\" in err\nE       AssertionError\n\neval/tests/test_argparse_validation.py:48: AssertionError",
-        "text_original_chars": 399,
         "time": 0.196
       },
       "name": "eval.tests.test_argparse_validation.test_missing_value_for_output_format_errors_and_exit_code_2",
@@ -4466,8 +4373,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_skip_no_multiline():\n        \"\"\"Externalized from: src/dead_code_tests.rs::skip_no_multiline\"\"\"\n        p = write_tmp_nix(\"\\n# deadnix: skip\\nlet dead1 = 0;\\n    dead2 = 1;\\nin alive\\n\")\n        j = analyze_json(p)\n>       assert json_messages(j) == [\"Unused let binding: dead2\"]\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:315: AssertionError",
-        "text_original_chars": 386,
         "time": 0.167
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_skip_no_multiline",
@@ -4485,8 +4390,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_rec_attrset_shadowed():\n        \"\"\"Externalized from: src/dead_code_tests.rs::rec_attrset_shadowed\"\"\"\n        p = write_tmp_nix(\"let dead = false; in rec { dead = true; alive = dead; }\\n\")\n        j = analyze_json(p)\n>       assert json_messages(j) == [\"Unused let binding: dead\"]\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:282: AssertionError",
-        "text_original_chars": 387,
         "time": 0.183
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_rec_attrset_shadowed",
@@ -4576,8 +4479,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_lambda_at_pattern_alive():\n        \"\"\"Externalized from: src/dead_code_tests.rs::lambda_at_pattern_alive\"\"\"\n        p = write_tmp_nix(\"alive@{ x ? alive, ... }: x\\n\")\n        j = analyze_json(p)\n>       assert j[\"results\"] == []\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:219: AssertionError",
-        "text_original_chars": 335,
         "time": 0.162
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_lambda_at_pattern_alive",
@@ -4587,8 +4488,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_skip():\n        \"\"\"Externalized from: src/dead_code_tests.rs::skip\n    \n        Original: deadnix skip pragma suppresses checking of next line's binding.\n    \n        Downward: no results.\n        \"\"\"\n        p = write_tmp_nix(\"\\n# deadnix: skip\\nlet dead = 0;\\nin alive\\n\")\n        j = analyze_json(p)\n>       assert j[\"results\"] == []\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:308: AssertionError",
-        "text_original_chars": 443,
         "time": 0.139
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_skip",
@@ -4630,8 +4529,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_skip_lambda_arg():\n        \"\"\"Externalized from: src/dead_code_tests.rs::skip_lambda_arg\"\"\"\n        p = write_tmp_nix(\"\\n# deadnix: skip\\ndead1:\\ndead2:\\nalive\\n\")\n        j = analyze_json(p)\n>       assert json_messages(j) == [\"Unused lambda argument: dead2\"]\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:345: AssertionError",
-        "text_original_chars": 367,
         "time": 0.125
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_skip_lambda_arg",
@@ -4641,8 +4538,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_skip_attrset():\n        \"\"\"Externalized from: src/dead_code_tests.rs::skip_attrset\"\"\"\n        p = write_tmp_nix(\"\\n# deadnix: skip\\n{ dead1\\n, dead2\\n}:\\nalive\\n\")\n        j = analyze_json(p)\n>       assert json_messages(j) == [\"Unused lambda pattern: dead2\"]\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:331: AssertionError",
-        "text_original_chars": 366,
         "time": 0.139
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_skip_attrset",
@@ -4652,8 +4547,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_skip_multiple_lambda_args():\n        \"\"\"Externalized from: src/dead_code_tests.rs::skip_multiple_lambda_args\"\"\"\n        p = write_tmp_nix(\"\\n# deadnix: skip\\ndead1: dead2:\\nalive\\n\")\n        j = analyze_json(p)\n>       assert j[\"results\"] == []\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:352: AssertionError",
-        "text_original_chars": 351,
         "time": 0.143
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_skip_multiple_lambda_args",
@@ -4679,8 +4572,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_skip_multiple_inherits():\n        \"\"\"Externalized from: src/dead_code_tests.rs::skip_multiple_inherits\"\"\"\n        p = write_tmp_nix(\"\\nlet\\n  # deadnix: skip\\n  inherit dead1 dead2;\\nin alive\\n\")\n        j = analyze_json(p)\n>       assert j[\"results\"] == []\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:366: AssertionError",
-        "text_original_chars": 364,
         "time": 0.153
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_skip_multiple_inherits",
@@ -4706,8 +4597,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_skip_inherit():\n        \"\"\"Externalized from: src/dead_code_tests.rs::skip_inherit\"\"\"\n        p = write_tmp_nix(\"\\nlet\\n  # deadnix: skip\\n  inherit dead1;\\n  inherit dead2;\\nin alive\\n\")\n        j = analyze_json(p)\n>       assert json_messages(j) == [\"Unused let binding: dead2\"]\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:359: AssertionError",
-        "text_original_chars": 387,
         "time": 0.151
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_skip_inherit",
@@ -4733,8 +4622,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_let_attrset_splice():\n        \"\"\"Externalized from: src/dead_code_tests.rs::let_attrset_splice\"\"\"\n        p = write_tmp_nix(\n            \"\\n let\\n  alive = \\\"foo\\\";\\n  attrset.${alive} = 23;\\n in attrset\\n\"\n        )\n        j = analyze_json(p)\n>       assert j[\"results\"] == []\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:449: AssertionError",
-        "text_original_chars": 385,
         "time": 0.15
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_let_attrset_splice",
@@ -4752,8 +4639,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_let_in_alive_dead():\n        \"\"\"Externalized from: src/edit_tests.rs::let_in_alive_dead\n    \n        Original: removes dead binding from let-in.\n        \"\"\"\n        edited = run_edit(\"let alive = 42; dead = 23; in alive\\n\")\n>       assert edited == \"let alive = 42; in alive\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:556: AssertionError",
-        "text_original_chars": 379,
         "time": 0.117
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_let_in_alive_dead",
@@ -4771,8 +4656,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_let_inherit_in_alive_dead():\n        \"\"\"Externalized from: src/edit_tests.rs::let_inherit_in_alive_dead\"\"\"\n        edited = run_edit(\"let inherit alive dead; in alive\\n\")\n>       assert edited == \"let inherit alive; in alive\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:574: AssertionError",
-        "text_original_chars": 329,
         "time": 0.147
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_let_inherit_in_alive_dead",
@@ -4782,8 +4665,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_let_inherit_in_dead_only():\n        \"\"\"Externalized from: src/edit_tests.rs::let_inherit_in_dead_only\"\"\"\n        edited = run_edit(\"let inherit dead; in alive\\n\")\n>       assert edited == \"alive\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:586: AssertionError",
-        "text_original_chars": 299,
         "time": 0.119
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_let_inherit_in_dead_only",
@@ -4793,8 +4674,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_let_inherit_dead_let_alive_in_dead():\n        \"\"\"Externalized from: src/edit_tests.rs::let_inherit_dead_let_alive_in_dead\"\"\"\n        edited = run_edit(\"let inherit dead; alive = true; in alive\\n\")\n>       assert edited == \"let alive = true; in alive\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:580: AssertionError",
-        "text_original_chars": 354,
         "time": 0.125
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_let_inherit_dead_let_alive_in_dead",
@@ -4812,8 +4691,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_let_inherit_multi_in_dead_only():\n        \"\"\"Externalized from: src/edit_tests.rs::let_inherit_multi_in_dead_only\"\"\"\n        edited = run_edit(\"let inherit dead1 dead2 dead3; in alive\\n\")\n>       assert edited == \"alive\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:592: AssertionError",
-        "text_original_chars": 324,
         "time": 0.111
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_let_inherit_multi_in_dead_only",
@@ -4831,8 +4708,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_lambda_arg_dead():\n        \"\"\"Externalized from: src/edit_tests.rs::lambda_arg_dead\n    \n        Original: unused lambda arg is renamed to _dead.\n        \"\"\"\n        edited = run_edit(\"dead: false\\n\")\n>       assert edited == \"_dead: false\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:643: AssertionError",
-        "text_original_chars": 344,
         "time": 0.11
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_lambda_arg_dead",
@@ -4858,8 +4733,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_let_inherit_in_let_inherit_alive():\n        \"\"\"Externalized from: src/dead_code_tests.rs::let_inherit_in_let_inherit_alive\"\"\"\n        p = write_tmp_nix(\"let alive = true; in let inherit alive; in alive\\n\")\n        j = analyze_json(p)\n>       assert j[\"results\"] == []\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:289: AssertionError",
-        "text_original_chars": 374,
         "time": 0.197
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_let_inherit_in_let_inherit_alive",
@@ -4885,8 +4758,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_dead_code_skip_complete_attrset():\n        \"\"\"Externalized from: src/dead_code_tests.rs::skip_complete_attrset\"\"\"\n        p = write_tmp_nix(\"\\n# deadnix: skip\\n{ dead1,  dead2 }:\\nalive\\n\")\n        j = analyze_json(p)\n>       assert j[\"results\"] == []\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:338: AssertionError",
-        "text_original_chars": 348,
         "time": 0.161
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_dead_code_skip_complete_attrset",
@@ -4928,8 +4799,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_lambda_trail_at_space_dead():\n        \"\"\"Externalized from: src/edit_tests.rs::lambda_trail_at_space_dead\"\"\"\n        edited = run_edit(\"{ ... } @ dead: false\\n\")\n>       assert edited == \"{ ... }: false\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:679: AssertionError",
-        "text_original_chars": 307,
         "time": 0.168
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_lambda_trail_at_space_dead",
@@ -4971,8 +4840,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_let_dead_only_whitespacing():\n        \"\"\"Externalized from: src/edit_tests.rs::let_dead_only_whitespacing\"\"\"\n        edited = run_edit(\"{ used }: let unused = {}; in used\\n\")\n>       assert edited == \"{ used }: used\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:598: AssertionError",
-        "text_original_chars": 320,
         "time": 0.147
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_let_dead_only_whitespacing",
@@ -4982,8 +4849,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_let_in_dead_only():\n        \"\"\"Externalized from: src/edit_tests.rs::let_in_dead_only\"\"\"\n        edited = run_edit(\"let dead = 42; in alive\\n\")\n>       assert edited == \"alive\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:562: AssertionError",
-        "text_original_chars": 280,
         "time": 0.158
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_let_in_dead_only",
@@ -5009,8 +4874,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_let_inherit_from_dead_let_alive_in_dead():\n        \"\"\"Externalized from: src/edit_tests.rs::let_inherit_from_dead_let_alive_in_dead\"\"\"\n        edited = run_edit(\"let inherit (x) dead; alive = true; in alive\\n\")\n>       assert edited == \"let alive = true; in alive\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:616: AssertionError",
-        "text_original_chars": 368,
         "time": 0.14
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_let_inherit_from_dead_let_alive_in_dead",
@@ -5028,8 +4891,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_let_inherit_from_in_alive_dead():\n        \"\"\"Externalized from: src/edit_tests.rs::let_inherit_from_in_alive_dead\"\"\"\n        edited = run_edit(\"let inherit (x) alive dead; in alive\\n\")\n>       assert edited == \"let inherit (x) alive; in alive\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:610: AssertionError",
-        "text_original_chars": 347,
         "time": 0.171
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_let_inherit_from_in_alive_dead",
@@ -5039,8 +4900,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_let_inherit_from_in_dead_only():\n        \"\"\"Externalized from: src/edit_tests.rs::let_inherit_from_in_dead_only\"\"\"\n        edited = run_edit(\"let inherit (x) dead; in alive\\n\")\n>       assert edited == \"alive\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:622: AssertionError",
-        "text_original_chars": 313,
         "time": 0.16
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_let_inherit_from_in_dead_only",
@@ -5050,8 +4909,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_let_inherit_from_multi_in_dead_only():\n        \"\"\"Externalized from: src/edit_tests.rs::let_inherit_from_multi_in_dead_only\"\"\"\n        edited = run_edit(\"let inherit (grave) dead1 dead2 dead3; in alive\\n\")\n>       assert edited == \"alive\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:628: AssertionError",
-        "text_original_chars": 342,
         "time": 0.145
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_let_inherit_from_multi_in_dead_only",
@@ -5085,8 +4942,6 @@
       "branch": "4bfe2d6b12de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_edit_attrset_no_trailing_comma():\n        \"\"\"Externalized from: src/edit_tests.rs::attrset_no_trailing_comma\"\"\"\n        edited = run_edit(\"{ bar, foo }: bar\\n\")\n>       assert edited == \"{ bar }: bar\\n\"\nE       AssertionError\n\neval/tests/test_deadnix_externalized.py:721: AssertionError",
-        "text_original_chars": 299,
         "time": 0.157
       },
       "name": "eval.tests.test_deadnix_externalized.test_ext_edit_attrset_no_trailing_comma",
@@ -5408,8 +5263,6 @@
       "branch": "7e4732df1e1c",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_edge_cases.TestEdgeCases object at 0x79a2d61cee60>\n\n    def test_invalid_syntax(self):\n        \"\"\"Test file with invalid syntax.\"\"\"\n        result = run_executable(str(FIXTURES / \"invalid_syntax.nix\"))\n        # Should handle parse errors gracefully\n>       assert \"error\" in result.stderr.lower() or \"Error\" in result.stdout\nE       AssertionError\n\ntests/test_edge_cases.py:27: AssertionError",
-        "text_original_chars": 406,
         "time": 0.18
       },
       "name": "tests.test_edge_cases.TestEdgeCases.test_invalid_syntax",
@@ -5659,8 +5512,6 @@
       "branch": "7e4732df1e1c",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_pragma_support.TestPragmaSupport object at 0x778eee32dba0>\n\n    def test_skip_pragma(self):\n        \"\"\"Test deadnix: skip pragma.\"\"\"\n        result = run_executable(\n            \"-o\", \"json\",\n            str(FIXTURES / \"with_skip_pragma.nix\")\n        )\n        assert result.returncode == 0\n        # The \"unused\" binding should be skipped\n        if result.stdout:\n            data = json.loads(result.stdout)\n            messages = [r[\"message\"] for r in data[\"results\"]]\n            # Should not report the skipped binding\n            unused_reports = [m for m in messages if \"unused\" in m and \"let binding\" in m]\n>           assert len(unused_reports) == 0\nE           AssertionError\n\ntests/test_pragma_support.py:37: AssertionError",
-        "text_original_chars": 749,
         "time": 0.169
       },
       "name": "tests.test_pragma_support.TestPragmaSupport.test_skip_pragma",
@@ -5814,8 +5665,6 @@
       "branch": "473cc426ac1d",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_edge_cases.TestEdgeCases object at 0x74e44ff43af0>\ntmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw11/test_pragma_on_lambda2')\n\n        def test_pragma_on_lambda(self, tmp_path):\n            \"\"\"Test pragma works on lambda functions.\"\"\"\n            test_file = tmp_path / \"pragma2.nix\"\n            test_file.write_text(\"\"\"\n    let\n      # deadnix: skip\n      f = x: 42;\n    in f 1\n    \"\"\")\n            result = run_deadnix([\"-o\", \"json\", str(test_file)])\n            assert result.returncode == 0\n            # With pragma, the function binding f is skipped\n            # So there should be no issues reported\n            if result.stdout.strip():\n                data = json.loads(result.stdout)\n                # f is used and pragma skips checking it, so no issues\n>               assert len(data[\"results\"]) == 0\nE               AssertionError\n\neval/tests/test_edge_cases.py:140: AssertionError",
-        "text_original_chars": 921,
         "time": 0.215
       },
       "name": "eval.tests.test_edge_cases.TestEdgeCases.test_pragma_on_lambda",
@@ -5881,8 +5730,6 @@
       "branch": "473cc426ac1d",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_edge_cases.TestEdgeCases object at 0x75c4269e31f0>\ntmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw10/test_pragma_skip2')\n\n        def test_pragma_skip(self, tmp_path):\n            \"\"\"Test deadnix: skip pragma.\"\"\"\n            test_file = tmp_path / \"pragma.nix\"\n            test_file.write_text(\"\"\"\n    let\n      # deadnix: skip\n      unused1 = 1;\n      unused2 = 2;\n      used = 3;\n    in used\n    \"\"\")\n            result = run_deadnix([\"-o\", \"json\", str(test_file)])\n            assert result.returncode == 0\n            data = json.loads(result.stdout)\n    \n            # Should skip unused1 but detect unused2\n            messages = [r[\"message\"] for r in data[\"results\"]]\n>           assert not any(\"unused1\" in msg for msg in messages)\nE           AssertionError\n\neval/tests/test_edge_cases.py:121: AssertionError",
-        "text_original_chars": 843,
         "time": 0.178
       },
       "name": "eval.tests.test_edge_cases.TestEdgeCases.test_pragma_skip",
@@ -5940,8 +5787,6 @@
       "branch": "473cc426ac1d",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_cli.TestBasicCLI object at 0x704e0da9bc40>\ntmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw2/test_invalid_nix_file2')\n\n    def test_invalid_nix_file(self, tmp_path):\n        \"\"\"Test invalid .nix syntax produces error message.\"\"\"\n        test_file = tmp_path / \"invalid.nix\"\n        test_file.write_text(\"{ invalid syntax\")\n        result = run_deadnix([str(test_file)])\n        # May not fail with non-zero exit code, but should print parse error\n        output = result.stdout + result.stderr\n>       assert \"Error\" in output or \"error\" in output or \"parse\" in output.lower()\nE       AssertionError\n\neval/tests/test_cli.py:50: AssertionError",
-        "text_original_chars": 666,
         "time": 0.17
       },
       "name": "eval.tests.test_cli.TestBasicCLI.test_invalid_nix_file",
@@ -6015,8 +5860,6 @@
       "branch": "473cc426ac1d",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_exit_codes.TestExitCodes object at 0x759e7ce67130>\ntmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw0/test_exit_invalid_file2')\n\n    def test_exit_invalid_file(self, tmp_path):\n        \"\"\"Test behavior for invalid nix file.\"\"\"\n        test_file = tmp_path / \"invalid.nix\"\n        test_file.write_text(\"{ invalid syntax\")\n        result = run_deadnix([str(test_file)])\n        # Should have error output (exit code may be 0)\n        output = result.stdout + result.stderr\n>       assert \"Error\" in output or \"error\" in output\nE       AssertionError\n\neval/tests/test_exit_codes.py:44: AssertionError",
-        "text_original_chars": 620,
         "time": 0.127
       },
       "name": "eval.tests.test_exit_codes.TestExitCodes.test_exit_invalid_file",
@@ -6330,8 +6173,6 @@
       "branch": "f69fe6cac123",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw15/test_edit_lambda2')\n\n    def test_edit_lambda(tmp_path):\n        # Setup\n        content = \"unused: used: used\\n\"\n        nix_file = tmp_path / \"test.nix\"\n        nix_file.write_text(content)\n    \n        # Run deadnix with --edit\n        subprocess.run([\"./executable\", \"--edit\", str(nix_file)], capture_output=True, text=True)\n    \n        # Verify: it should probably change it to something like \"_unused: used: used\"\n        # or just \"used: used\"\n        new_content = nix_file.read_text()\n>       assert \"unused\" not in new_content or \"_unused\" in new_content\nE       AssertionError\n\neval/tests/test_edit.py:31: AssertionError",
-        "text_original_chars": 694,
         "time": 0.182
       },
       "name": "eval.tests.test_edit.test_edit_lambda",
@@ -6341,8 +6182,6 @@
       "branch": "f69fe6cac123",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_pragma_skip():\n        content = \"\"\"\n        let\n          # deadnix: skip\n          unused = 1;\n          used = 2;\n        in\n        used\n        \"\"\"\n        with open(\"test_pragma.nix\", \"w\") as f:\n            f.write(content)\n    \n        result = run_deadnix([\"test_pragma.nix\"])\n>       assert \"unused\" not in result.stdout\nE       AssertionError\n\neval/tests/test_edge_cases.py:37: AssertionError",
-        "text_original_chars": 411,
         "time": 0.213
       },
       "name": "eval.tests.test_edge_cases.test_pragma_skip",
@@ -6464,8 +6303,6 @@
       "branch": "48f1aa1adb48",
       "extra": {
         "message": "test_no_lambda_arg_flag_suppresses depends on test_no_lambda_arg_default_finds_unused_arg",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_no_lambda_arg_flag_suppresses depends on test_no_lambda_arg_default_finds_unused_arg",
-        "text_original_chars": 155,
         "time": 0.0
       },
       "name": "eval.tests.test_options_and_exit_codes.test_no_lambda_arg_flag_suppresses",
@@ -6499,8 +6336,6 @@
       "branch": "48f1aa1adb48",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw1/test_deadnix_skip_pragma_skips2')\n\n    def test_deadnix_skip_pragma_skips_next_line(tmp_path: Path):\n        p = tmp_path / \"skip.nix\"\n        p.write_text(\n            \"let\\n\"\n            \"  # deadnix: skip\\n\"\n            \"  unused = 1;\\n\"\n            \"  unused2 = 2;\\n\"\n            \"in 0\\n\",\n            encoding=\"utf-8\",\n        )\n        res = run_executable([\"-o\", \"json\", str(p)])\n        assert res.returncode == 0\n        doc = json.loads(res.stdout)\n        msgs = [r[\"message\"] for r in doc[\"results\"]]\n>       assert \"Unused let binding: unused\" not in msgs\nE       AssertionError\n\neval/tests/test_edit_and_pragmas.py:52: AssertionError",
-        "text_original_chars": 708,
         "time": 0.193
       },
       "name": "eval.tests.test_edit_and_pragmas.test_deadnix_skip_pragma_skips_next_line",
@@ -6534,8 +6369,6 @@
       "branch": "48f1aa1adb48",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_example_json_output_schema_and_order():\n        res = run_executable([\"-o\", \"json\", str(EXAMPLE)])\n        assert res.returncode == 0\n        doc = json.loads(res.stdout)\n    \n        assert doc[\"file\"].endswith(\"example.nix\")\n        results = doc[\"results\"]\n        assert isinstance(results, list)\n>       assert len(results) == 8\nE       AssertionError\n\neval/tests/test_example_outputs.py:34: AssertionError",
-        "text_original_chars": 420,
         "time": 0.189
       },
       "name": "eval.tests.test_example_outputs.test_example_json_output_schema_and_order",
@@ -6545,8 +6378,6 @@
       "branch": "48f1aa1adb48",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw9/test_exclude_can_exclude_entir2')\n\n    def test_exclude_can_exclude_entire_directory(tmp_path: Path):\n        (tmp_path / \"keep.nix\").write_text(\"let x = 1; unused = 2; in x\\n\", encoding=\"utf-8\")\n    \n        # Excluding the only directory results in no output.\n        res = run_executable([\"-o\", \"json\", \"--exclude\", str(tmp_path), str(tmp_path)], cwd=tmp_path)\n        assert res.returncode == 0\n>       assert res.stdout.strip() == \"\"\nE       AssertionError\n\neval/tests/test_filesystem_and_exclude.py:35: AssertionError",
-        "text_original_chars": 584,
         "time": 0.176
       },
       "name": "eval.tests.test_filesystem_and_exclude.test_exclude_can_exclude_entire_directory",

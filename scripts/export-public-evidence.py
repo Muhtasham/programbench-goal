@@ -87,6 +87,7 @@ def public_eval(eval_json: dict) -> dict:
         "executable_hash": eval_json.get("executable_hash"),
         "warnings": eval_json.get("warnings", []),
         "public_redactions": {
+            "extra_text": "redacted",
             "log_output": "redacted",
             "long_extra_text": f"truncated to {MAX_TEXT_CHARS} chars",
         },
@@ -97,9 +98,6 @@ def public_extra(extra: dict) -> dict:
     allowed = {key: extra[key] for key in ("time", "message") if key in extra}
     if "message" in allowed:
         allowed["message"] = truncate(str(allowed["message"]))
-    if "text" in extra:
-        allowed["text"] = truncate(str(extra["text"]))
-        allowed["text_original_chars"] = len(str(extra["text"]))
     return allowed
 
 

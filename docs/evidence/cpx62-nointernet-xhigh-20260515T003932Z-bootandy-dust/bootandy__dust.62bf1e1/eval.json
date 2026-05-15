@@ -855,6 +855,7 @@
     }
   ],
   "public_redactions": {
+    "extra_text": "redacted",
     "log_output": "redacted",
     "long_extra_text": "truncated to 2000 chars"
   },
@@ -896,8 +897,6 @@
       "branch": "2670a863a199",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_files = <conftest.temp_files.<locals>.TempFiles object at 0x78ff3f5c9150>\n\n    def test_config_with_ignore_hidden(temp_files):\n        \"\"\"Test config file with ignore-hidden option.\"\"\"\n        temp_files.create(\"visible.txt\", \"content\")\n        temp_files.create(\".hidden.txt\", \"content\")\n    \n        config = temp_files.create(\"config.toml\", \"ignore-hidden=true\\n\")\n    \n        result = run(\"-P\", \"--config\", str(config), temp_files.path())\n        assert result.returncode == 0\n        # Hidden files should not appear\n>       assert b\".hidden\" not in result.stdout\nE       AssertionError\n\neval/tests/test_configuration_files.py:81: AssertionError",
-        "text_original_chars": 656,
         "time": 0.18
       },
       "name": "eval.tests.test_configuration_files.test_config_with_ignore_hidden",
@@ -1123,8 +1122,6 @@
       "branch": "2670a863a199",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_files = <conftest.temp_files.<locals>.TempFiles object at 0x7abb8bc17c10>\n\n    def test_config_with_display_options(temp_files):\n        \"\"\"Test config file with display options.\"\"\"\n        temp_files.create(\"file.txt\", \"content\")\n    \n        config = temp_files.create(\"config.toml\", \"\"\"\n    display-full-paths=true\n    no-bars=true\n    skip-total=true\n    \"\"\")\n    \n        result = run(\"-P\", \"--config\", str(config), temp_files.path())\n        assert result.returncode == 0\n        # Should show file without bars\n        assert b\"file\" in result.stdout\n>       assert b\"%\" not in result.stdout\nE       AssertionError\n\neval/tests/test_configuration_files.py:48: AssertionError",
-        "text_original_chars": 685,
         "time": 0.143
       },
       "name": "eval.tests.test_configuration_files.test_config_with_display_options",
@@ -1398,8 +1395,6 @@
       "branch": "2670a863a199",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_files = <conftest.temp_files.<locals>.TempFiles object at 0x791ee36e3c70>\n\n    def test_invalid_regex_error(temp_files):\n        \"\"\"Test error handling for invalid regex.\"\"\"\n        temp_files.create(\"file.txt\", \"content\")\n    \n        # Invalid regex pattern\n        result = run(\"-P\", \"-e\", \"[invalid(regex\", temp_files.path())\n        # Should handle error gracefully\n>       assert result.returncode != 0 or b\"regex\" in result.stderr.lower() or len(result.stderr) > 0\nE       AssertionError\n\neval/tests/test_error_handling.py:27: AssertionError",
-        "text_original_chars": 553,
         "time": 0.176
       },
       "name": "eval.tests.test_error_handling.test_invalid_regex_error",
@@ -1617,8 +1612,6 @@
       "branch": "2670a863a199",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_files = <conftest.temp_files.<locals>.TempFiles object at 0x7c6af71c35b0>\n\n    def test_depth_zero(temp_files):\n        \"\"\"Test depth 0 shows only top-level.\"\"\"\n        temp_files.create(\"dir1/file1.txt\", \"content1\")\n        temp_files.create(\"dir2/file2.txt\", \"content2\")\n    \n        tempdir = Path(temp_files.path())\n        result = run(\"-P\", \"-d\", \"0\", str(tempdir / \"dir1\"), str(tempdir / \"dir2\"))\n        assert result.returncode == 0\n>       assert b\"dir1\" in result.stdout\nE       AssertionError\n\neval/tests/test_size_filtering.py:32: AssertionError",
-        "text_original_chars": 563,
         "time": 0.17
       },
       "name": "eval.tests.test_size_filtering.test_depth_zero",
@@ -1820,8 +1813,6 @@
       "branch": "24c039380685",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_files = <conftest.temp_files.<locals>.TempFiles object at 0x7e3dd01135b0>\n\n    def test_config_with_number_of_lines(temp_files):\n        \"\"\"Test config with number-of-lines option.\"\"\"\n        for i in range(20):\n            temp_files.create(f\"file{i}.txt\", \"content\")\n    \n        config = temp_files.create(\"config.toml\", \"number-of-lines=5\\nno-colors=true\\n\")\n    \n        result = run(\"-P\", \"--config\", str(config), str(temp_files.path()))\n        assert result.returncode == 0\n        assert len(result.stdout) > 0\n        lines = [l for l in result.stdout.split(b\"\\n\") if l.strip()]\n        # Should be limited\n>       assert len(lines) <= 10\nE       AssertionError\n\neval/tests/test_config.py:44: AssertionError",
-        "text_original_chars": 722,
         "time": 0.141
       },
       "name": "eval.tests.test_config.test_config_with_number_of_lines",
@@ -2079,8 +2070,6 @@
       "branch": "24c039380685",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_nonexistent_ignore_file():\n        \"\"\"Test error handling for nonexistent ignore file.\"\"\"\n        result = run(\"-I\", \"/nonexistent/ignorefile\", \".\")\n>       assert result.returncode != 0\nE       AssertionError\n\neval/tests/test_error_handling.py:79: AssertionError",
-        "text_original_chars": 272,
         "time": 0.169
       },
       "name": "eval.tests.test_error_handling.test_nonexistent_ignore_file",
@@ -2626,8 +2615,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:193: in test_terminal_width_override\n    assert result.stdout == (RESOURCES / \"terminal_width_60.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 154,
         "time": 0.167
       },
       "name": "tests.test_cli.test_terminal_width_override",
@@ -2637,8 +2624,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:391: in test_output_format_tib\n    assert result.stdout == (RESOURCES / \"output_tib.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.209
       },
       "name": "tests.test_cli.test_output_format_tib",
@@ -2648,8 +2633,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:225: in test_combined_ignore_hidden_only_file\n    assert result.stdout == (RESOURCES / \"ignore_hidden_only_file.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 169,
         "time": 0.211
       },
       "name": "tests.test_cli.test_combined_ignore_hidden_only_file",
@@ -2659,8 +2642,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:97: in test_full_paths_flag\n    assert result.stdout == (RESOURCES / \"full_paths.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 138,
         "time": 0.208
       },
       "name": "tests.test_cli.test_full_paths_flag",
@@ -2670,8 +2651,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:423: in test_depth_zero\n    assert result.stdout == (RESOURCES / \"depth_0.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.208
       },
       "name": "tests.test_cli.test_depth_zero",
@@ -2681,8 +2660,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:60: in test_no_percent_bars_flag\n    assert result.stdout == (RESOURCES / \"no_bars.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 140,
         "time": 0.201
       },
       "name": "tests.test_cli.test_no_percent_bars_flag",
@@ -2692,8 +2669,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:353: in test_conflicting_file_types_depth\n    assert result.stderr == expected\nE   AssertionError",
-        "text_original_chars": 115,
         "time": 0.193
       },
       "name": "tests.test_cli.test_conflicting_file_types_depth",
@@ -2703,8 +2678,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Config no-bars=true should hide percent bars, found in: 4.0K   \u250c\u2500\u2500 file.txt   \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502  25%",
-        "text": "tests/test_config_file.py:47: in test_explicit_config_file_with_no_bars_and_depth\n    assert \"\u2588\" not in line, f\"Config no-bars=true should hide percent bars, found in: {line}\"\nE   AssertionError: Config no-bars=true should hide percent bars, found in: 4.0K   \u250c\u2500\u2500 file.txt   \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502  25%",
-        "text_original_chars": 332,
         "time": 0.198
       },
       "name": "tests.test_config_file.test_explicit_config_file_with_no_bars_and_depth",
@@ -2714,8 +2687,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:296: in test_invalid_stack_size\n    assert result.returncode == 2\nE   AssertionError",
-        "text_original_chars": 102,
         "time": 0.229
       },
       "name": "tests.test_cli.test_invalid_stack_size",
@@ -2725,8 +2696,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:161: in test_filecount_flag\n    assert result.stdout == (RESOURCES / \"filecount.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.233
       },
       "name": "tests.test_cli.test_filecount_flag",
@@ -2736,8 +2705,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Output structure mismatch.\nExpected:\n SIZE \u250c\u2500\u2500 .hidden_file\n SIZE \u251c\u2500\u2500 file.txt\n SIZE \u2502 \u250c\u2500\u2500 file SIZE txt\n SIZE \u251c\u2500\u2534 subdir\n SIZE \u250c\u2500\u2534 test_dir\n\nActual:\n SIZE \u250c\u2500\u2500 .hidden_file\u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502 SIZE %\n SIZE \u251c\u2500\u2500 file.txt    \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502 SIZE %\n SIZE \u2502 \u250c\u2500\u2500 file SIZE txt \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591                              \u2502 SIZE %\n SIZE \u251c\u2500\u2534 subdir      \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                             \u2502 SIZE %\n SIZE \u250c\u2500\u2534 test_dir      \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2502 SIZE %",
-        "text": "tests/test_config_file.py:231: in test_cli_output_format_overrides_config\n    assert actual == expected, f\"Output structure mismatch.\\nExpected:\\n{expected}\\n\\nActual:\\n{actual}\"\nE   AssertionError: Output structure mismatch.\nE   Expected:\nE    SIZE \u250c\u2500\u2500 .hidden_file\nE    SIZE \u251c\u2500\u2500 file.txt\nE    SIZE \u2502 \u250c\u2500\u2500 file SIZE txt\nE    SIZE \u251c\u2500\u2534 subdir\nE    SIZE \u250c\u2500\u2534 test_dir\nE   \nE   Actual:\nE    SIZE \u250c\u2500\u2500 .hidden_file\u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502 SIZE %\nE    SIZE \u251c\u2500\u2500 file.txt    \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502 SIZE %\nE    SIZE \u2502 \u250c\u2500\u2500 file SIZE txt \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591                              \u2502 SIZE %\nE    SIZE \u251c\u2500\u2534 subdir      \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                             \u2502 SIZE %\nE    SIZE \u250c\u2500\u2534 test_dir      \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2502 SIZE %",
-        "text_original_chars": 806,
         "time": 0.213
       },
       "name": "tests.test_config_file.test_cli_output_format_overrides_config",
@@ -2755,8 +2722,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:129: in test_only_directories_flag\n    assert result.stdout == (RESOURCES / \"only_dir.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 143,
         "time": 0.202
       },
       "name": "tests.test_cli.test_only_directories_flag",
@@ -2774,8 +2739,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:469: in test_depth_with_number_of_lines\n    assert result.stdout == (RESOURCES / \"depth1_lines3.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 153,
         "time": 0.173
       },
       "name": "tests.test_cli.test_depth_with_number_of_lines",
@@ -2785,8 +2748,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:272: in test_invalid_threads_value\n    assert result.returncode == 2\nE   AssertionError",
-        "text_original_chars": 105,
         "time": 0.175
       },
       "name": "tests.test_cli.test_invalid_threads_value",
@@ -2820,8 +2781,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:49: in test_no_colors_flag\n    assert result.stdout == (RESOURCES / \"no_colors.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 136,
         "time": 0.118
       },
       "name": "tests.test_cli.test_no_colors_flag",
@@ -2831,8 +2790,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: only-file=true should hide directory entries, but found: ['8.0K   \u251c\u2500\u2534 subdir     \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                               \u2502  40%']",
-        "text": "tests/test_config_file.py:608: in test_config_only_file\n    assert len(subdir_as_dir) == 0, f\"only-file=true should hide directory entries, but found: {subdir_as_dir}\"\nE   AssertionError: only-file=true should hide directory entries, but found: ['8.0K   \u251c\u2500\u2534 subdir     \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                               \u2502  40%']",
-        "text_original_chars": 329,
         "time": 0.116
       },
       "name": "tests.test_config_file.test_config_only_file",
@@ -2842,8 +2799,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:201: in test_output_format_kib\n    assert result.stdout == (RESOURCES / \"output_kib.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.173
       },
       "name": "tests.test_cli.test_output_format_kib",
@@ -2853,8 +2808,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:105: in test_output_format_si\n    assert result.stdout == (RESOURCES / \"output_si.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 139,
         "time": 0.164
       },
       "name": "tests.test_cli.test_output_format_si",
@@ -2864,8 +2817,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Config no-bars=true should still apply, found bars in: 4.0K   \u250c\u2500\u2500 file.txt   \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502  25%",
-        "text": "tests/test_config_file.py:98: in test_cli_flag_overrides_config_depth\n    assert \"\u2588\" not in line, f\"Config no-bars=true should still apply, found bars in: {line}\"\nE   AssertionError: Config no-bars=true should still apply, found bars in: 4.0K   \u250c\u2500\u2500 file.txt   \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502  25%",
-        "text_original_chars": 318,
         "time": 0.172
       },
       "name": "tests.test_config_file.test_cli_flag_overrides_config_depth",
@@ -2875,8 +2826,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:360: in test_conflicting_file_types_only_dir\n    assert result.returncode == 2\nE   AssertionError",
-        "text_original_chars": 115,
         "time": 0.143
       },
       "name": "tests.test_cli.test_conflicting_file_types_only_dir",
@@ -2894,8 +2843,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:137: in test_only_files_flag\n    assert result.stdout == (RESOURCES / \"only_file.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 138,
         "time": 0.143
       },
       "name": "tests.test_cli.test_only_files_flag",
@@ -2905,8 +2852,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:68: in test_reverse_flag\n    assert result.stdout == (RESOURCES / \"reverse.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.164
       },
       "name": "tests.test_cli.test_reverse_flag",
@@ -2916,8 +2861,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:233: in test_combined_apparent_size_si\n    assert result.stdout == (RESOURCES / \"apparent_size_si.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 155,
         "time": 0.164
       },
       "name": "tests.test_cli.test_combined_apparent_size_si",
@@ -2927,8 +2870,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:169: in test_screen_reader_mode\n    assert result.stdout == (RESOURCES / \"screen_reader.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.147
       },
       "name": "tests.test_cli.test_screen_reader_mode",
@@ -2938,8 +2879,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:399: in test_output_format_kilobytes\n    assert result.stdout == (RESOURCES / \"output_kb.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.164
       },
       "name": "tests.test_cli.test_output_format_kilobytes",
@@ -2949,8 +2888,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:433: in test_multiple_paths\n    assert result.stdout == (RESOURCES / \"multiple_paths.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 142,
         "time": 0.144
       },
       "name": "tests.test_cli.test_multiple_paths",
@@ -2960,8 +2897,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:477: in test_output_format_mebibytes\n    assert result.stdout == (RESOURCES / \"output_mib.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 147,
         "time": 0.154
       },
       "name": "tests.test_cli.test_output_format_mebibytes",
@@ -2979,8 +2914,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:311: in test_conflicting_only_dir_only_file\n    assert result.stderr == expected\nE   AssertionError",
-        "text_original_chars": 117,
         "time": 0.143
       },
       "name": "tests.test_cli.test_conflicting_only_dir_only_file",
@@ -2998,8 +2931,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: ~/.dust.toml depth=1 should take precedence over .config/dust/config.toml depth=2",
-        "text": "tests/test_config_file.py:401: in test_config_file_precedence_dot_dust_over_xdg\n    assert not any(\"file2.txt\" in line for line in lines), \\\nE   AssertionError: ~/.dust.toml depth=1 should take precedence over .config/dust/config.toml depth=2",
-        "text_original_chars": 242,
         "time": 0.126
       },
       "name": "tests.test_config_file.test_config_file_precedence_dot_dust_over_xdg",
@@ -3017,8 +2948,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Config no-bars=true should hide percent bars, found in: 4.0K   \u250c\u2500\u2500 .hidden_file\u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                        \u2502  20%",
-        "text": "tests/test_config_file.py:343: in test_home_directory_config_discovery\n    assert \"\u2588\" not in line, f\"Config no-bars=true should hide percent bars, found in: {line}\"\nE   AssertionError: Config no-bars=true should hide percent bars, found in: 4.0K   \u250c\u2500\u2500 .hidden_file\u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                        \u2502  20%",
-        "text_original_chars": 321,
         "time": 0.114
       },
       "name": "tests.test_config_file.test_home_directory_config_discovery",
@@ -3028,8 +2957,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: number-of-lines=3 should limit output, got 11 lines: ['4.0K   \u250c\u2500\u2500 file0.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file1.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file2.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file3.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file4.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file5.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file6.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file7.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file8.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file9.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', ' 44K \u250c\u2500\u2534 test_dir   \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2502 100%']",
-        "text": "tests/test_config_file.py:633: in test_config_number_of_lines\n    assert len(lines) <= 5, f\"number-of-lines=3 should limit output, got {len(lines)} lines: {lines}\"\nE   AssertionError: number-of-lines=3 should limit output, got 11 lines: ['4.0K   \u250c\u2500\u2500 file0.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file1.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file2.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file3.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file4.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file5.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file6.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file7.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file8.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', '4.0K   \u251c\u2500\u2500 file9.txt\u2502\u2588\u2588\u2588\u2588\u2588                                                \u2502   9%', ' 44K \u250c\u2500\u2534 test_dir   \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 \u2502 100%']",
-        "text_original_chars": 1161,
         "time": 0.135
       },
       "name": "tests.test_config_file.test_config_number_of_lines",
@@ -3047,8 +2974,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:148: in test_multiple_nonexistent_files_exits_with_error\n    assert stderr_clean in [\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.112
       },
       "name": "tests.test_coverage_push.test_multiple_nonexistent_files_exits_with_error",
@@ -3058,8 +2983,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:375: in test_bars_on_right_flag\n    assert result.stdout == (RESOURCES / \"bars_on_right.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.179
       },
       "name": "tests.test_cli.test_bars_on_right_flag",
@@ -3077,8 +3000,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:113: in test_output_format_bytes\n    assert result.stdout == (RESOURCES / \"output_bytes.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.19
       },
       "name": "tests.test_cli.test_output_format_bytes",
@@ -3088,8 +3009,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:81: in test_depth_limit\n    assert result.stdout == (RESOURCES / \"depth1.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 130,
         "time": 0.175
       },
       "name": "tests.test_cli.test_depth_limit",
@@ -3099,8 +3018,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:209: in test_output_format_mb\n    assert result.stdout == (RESOURCES / \"output_mb.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 139,
         "time": 0.16
       },
       "name": "tests.test_cli.test_output_format_mb",
@@ -3110,8 +3027,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:441: in test_combined_screen_reader_full_paths\n    assert result.stdout == (RESOURCES / \"screen_reader_full_paths.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 171,
         "time": 0.183
       },
       "name": "tests.test_cli.test_combined_screen_reader_full_paths",
@@ -3121,8 +3036,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:177: in test_skip_total_flag\n    assert result.stdout == (RESOURCES / \"skip_total.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 139,
         "time": 0.196
       },
       "name": "tests.test_cli.test_skip_total_flag",
@@ -3132,8 +3045,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:318: in test_conflicting_filter_invert_filter\n    assert result.returncode == 2\nE   AssertionError",
-        "text_original_chars": 116,
         "time": 0.158
       },
       "name": "tests.test_cli.test_conflicting_filter_invert_filter",
@@ -3151,8 +3062,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Config ignore-hidden=true should hide dotfiles, but found: 4.0K   \u250c\u2500\u2500 .hidden_file\u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                        \u2502  20%",
-        "text": "tests/test_config_file.py:132: in test_config_ignore_hidden\n    assert \".hidden_file\" not in line, \\\nE   AssertionError: Config ignore-hidden=true should hide dotfiles, but found: 4.0K   \u250c\u2500\u2500 .hidden_file\u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                        \u2502  20%",
-        "text_original_chars": 260,
         "time": 0.193
       },
       "name": "tests.test_config_file.test_config_ignore_hidden",
@@ -3162,8 +3071,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:407: in test_output_format_gigabytes\n    assert result.stdout == (RESOURCES / \"output_gb.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.164
       },
       "name": "tests.test_cli.test_output_format_gigabytes",
@@ -3173,8 +3080,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:485: in test_output_format_terabytes\n    assert result.stdout == (RESOURCES / \"output_tb.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.174
       },
       "name": "tests.test_cli.test_output_format_terabytes",
@@ -3184,8 +3089,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: only-dir=true should hide files, found: 4.0K   \u250c\u2500\u2500 file.txt   \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502  25%",
-        "text": "tests/test_config_file.py:444: in test_config_multiple_options_combined\n    assert \"file.txt\" not in line, f\"only-dir=true should hide files, found: {line}\"\nE   AssertionError: only-dir=true should hide files, found: 4.0K   \u250c\u2500\u2500 file.txt   \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502  25%",
-        "text_original_chars": 297,
         "time": 0.161
       },
       "name": "tests.test_config_file.test_config_multiple_options_combined",
@@ -3195,8 +3098,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:153: in test_invert_filter_regex\n    assert result.stdout == (RESOURCES / \"invert_filter_bin.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 150,
         "time": 0.135
       },
       "name": "tests.test_cli.test_invert_filter_regex",
@@ -3214,8 +3115,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:31: in test_invalid_regex_invert_filter_exits_with_error\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.158
       },
       "name": "tests.test_coverage_push.test_invalid_regex_invert_filter_exits_with_error",
@@ -3233,8 +3132,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:394: in test_skip_total_row\n    assert result.stdout == (RESOURCES / \"skip_total.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 148,
         "time": 0.136
       },
       "name": "tests.test_coverage_push.test_skip_total_row",
@@ -3244,8 +3141,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:180: in test_filetime_accessed_mode\n    assert actual == expected\nE   AssertionError",
-        "text_original_chars": 112,
         "time": 0.112
       },
       "name": "tests.test_coverage_push.test_filetime_accessed_mode",
@@ -3255,8 +3150,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Config no-bars=true should apply despite comments, found in: 4.0K   \u250c\u2500\u2500 file.txt   \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502  25%",
-        "text": "tests/test_config_file.py:701: in test_config_with_comments\n    assert \"\u2588\" not in line, f\"Config no-bars=true should apply despite comments, found in: {line}\"\nE   AssertionError: Config no-bars=true should apply despite comments, found in: 4.0K   \u250c\u2500\u2500 file.txt   \u2502\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588                                       \u2502  25%",
-        "text_original_chars": 320,
         "time": 0.115
       },
       "name": "tests.test_config_file.test_config_with_comments",
@@ -3266,8 +3159,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:332: in test_conflicting_file_types_filter\n    assert result.returncode == 2\nE   AssertionError",
-        "text_original_chars": 113,
         "time": 0.165
       },
       "name": "tests.test_cli.test_conflicting_file_types_filter",
@@ -3277,8 +3168,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:217: in test_combined_reverse_depth_nobars\n    assert result.stdout == (RESOURCES / \"reverse_depth1_nobars.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 164,
         "time": 0.168
       },
       "name": "tests.test_cli.test_combined_reverse_depth_nobars",
@@ -3288,8 +3177,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:415: in test_threads_single\n    assert result.stdout == (RESOURCES / \"threads_1.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.16
       },
       "name": "tests.test_cli.test_threads_single",
@@ -3299,8 +3186,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:449: in test_combined_filecount_only_dir\n    assert result.stdout == (RESOURCES / \"filecount_only_dir.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 159,
         "time": 0.171
       },
       "name": "tests.test_cli.test_combined_filecount_only_dir",
@@ -3310,8 +3195,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:383: in test_output_format_gib\n    assert result.stdout == (RESOURCES / \"output_gib.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.159
       },
       "name": "tests.test_cli.test_output_format_gib",
@@ -3321,8 +3204,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:330: in test_ignore_hidden_files\n    assert result_default.stdout == (RESOURCES / \"default_with_hidden.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 170,
         "time": 0.166
       },
       "name": "tests.test_coverage_push.test_ignore_hidden_files",
@@ -3332,8 +3213,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:89: in test_ignore_hidden_flag\n    assert result.stdout == (RESOURCES / \"ignore_hidden.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 144,
         "time": 0.184
       },
       "name": "tests.test_cli.test_ignore_hidden_flag",
@@ -3343,8 +3222,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:255: in test_filter_with_accessed_time_comparison\n    assert result.stdout == (RESOURCES / \"atime_less_1.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 172,
         "time": 0.189
       },
       "name": "tests.test_coverage_push.test_filter_with_accessed_time_comparison",
@@ -3354,8 +3231,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:121: in test_apparent_size_flag\n    assert result.stdout == (RESOURCES / \"apparent_size.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.169
       },
       "name": "tests.test_cli.test_apparent_size_flag",
@@ -3373,8 +3248,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:185: in test_number_of_lines_limit\n    assert result.stdout == (RESOURCES / \"number_of_lines_5.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 152,
         "time": 0.172
       },
       "name": "tests.test_cli.test_number_of_lines_limit",
@@ -3384,8 +3257,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:62: in test_file_types_with_filetime_modified\n    assert actual == expected\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.156
       },
       "name": "tests.test_coverage_push.test_file_types_with_filetime_modified",
@@ -3395,8 +3266,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: min-size=10K should filter out file.txt (~4K)",
-        "text": "tests/test_config_file.py:488: in test_config_min_size_filtering\n    assert not any(\"file.txt\" in line for line in lines), \\\nE   AssertionError: min-size=10K should filter out file.txt (~4K)",
-        "text_original_chars": 190,
         "time": 0.151
       },
       "name": "tests.test_config_file.test_config_min_size_filtering",
@@ -3406,8 +3275,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:405: in test_no_percent_bars\n    assert result.stdout == (RESOURCES / \"no_bars.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.158
       },
       "name": "tests.test_coverage_push.test_no_percent_bars",
@@ -3425,8 +3292,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:206: in test_full_paths_display\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 109,
         "time": 0.14
       },
       "name": "tests.test_edge_cases.test_full_paths_display",
@@ -3436,8 +3301,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:18: in test_invalid_regex_filter_exits_with_error\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 130,
         "time": 0.137
       },
       "name": "tests.test_coverage_push.test_invalid_regex_filter_exits_with_error",
@@ -3447,8 +3310,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:229: in test_dereference_symlinks_follows_and_reports_broken\n    assert stderr_clean == expected_msg\nE   AssertionError",
-        "text_original_chars": 147,
         "time": 0.115
       },
       "name": "tests.test_coverage_push.test_dereference_symlinks_follows_and_reports_broken",
@@ -3458,8 +3319,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:495: in test_custom_terminal_width\n    assert result.stdout == (RESOURCES / \"terminal_width_60.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 162,
         "time": 0.172
       },
       "name": "tests.test_coverage_push.test_custom_terminal_width",
@@ -3501,8 +3360,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:60: in test_terminal_width_extremely_wide\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 119,
         "time": 0.183
       },
       "name": "tests.test_edge_cases.test_terminal_width_extremely_wide",
@@ -3512,8 +3369,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:347: in test_ignore_specific_directory\n    assert result.stdout == (RESOURCES / \"ignore_subdir.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 162,
         "time": 0.179
       },
       "name": "tests.test_coverage_push.test_ignore_specific_directory",
@@ -3523,8 +3378,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:266: in test_filter_with_changed_time_comparison\n    assert result.stdout == (RESOURCES / \"ctime_less_1.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 171,
         "time": 0.172
       },
       "name": "tests.test_coverage_push.test_filter_with_changed_time_comparison",
@@ -3534,8 +3387,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:147: in test_filetype_aggregation_others_node\n    assert result.stdout.strip() == golden.strip()\nE   AssertionError",
-        "text_original_chars": 140,
         "time": 0.186
       },
       "name": "tests.test_edge_cases.test_filetype_aggregation_others_node",
@@ -3545,8 +3396,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:74: in test_empty_stdin_files_from_defaults_to_current_directory\n    assert \"No files provided, defaulting to current directory\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 192,
         "time": 0.18
       },
       "name": "tests.test_coverage_push.test_empty_stdin_files_from_defaults_to_current_directory",
@@ -3572,8 +3421,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:221: in test_regex_filter_simple_pattern\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.176
       },
       "name": "tests.test_edge_cases.test_regex_filter_simple_pattern",
@@ -3591,8 +3438,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:451: in test_min_size_filter\n    assert result.stdout == (RESOURCES / \"min_size_filter.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 154,
         "time": 0.141
       },
       "name": "tests.test_coverage_push.test_min_size_filter",
@@ -3602,8 +3447,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:416: in test_screen_reader_mode\n    assert result.stdout == (RESOURCES / \"screen_reader.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 155,
         "time": 0.185
       },
       "name": "tests.test_coverage_push.test_screen_reader_mode",
@@ -3621,8 +3464,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:243: in test_filter_with_modified_time_exact_day\n    assert result.stdout == (RESOURCES / \"mtime_exact_0.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 172,
         "time": 0.167
       },
       "name": "tests.test_coverage_push.test_filter_with_modified_time_exact_day",
@@ -3632,8 +3473,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_dir_walker.py:431: in test_mixed_absolute_and_relative_symlinks\n    assert re.search(r'0B\\s+.*abs_link', result.stdout)\nE   AssertionError",
-        "text_original_chars": 149,
         "time": 0.176
       },
       "name": "tests.test_dir_walker.test_mixed_absolute_and_relative_symlinks",
@@ -3659,8 +3498,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: link_to_external should be 0B without -L",
-        "text": "tests/test_dir_walker.py:131: in test_symlink_outside_scan_directory\n    assert re.search(r'0B\\s+.*link_to_external', result.stdout), \"link_to_external should be 0B without -L\"\nE   AssertionError: link_to_external should be 0B without -L",
-        "text_original_chars": 237,
         "time": 0.131
       },
       "name": "tests.test_dir_walker.test_symlink_outside_scan_directory",
@@ -3670,8 +3507,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:319: in test_empty_directory\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 106,
         "time": 0.122
       },
       "name": "tests.test_edge_cases.test_empty_directory",
@@ -3713,8 +3548,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:32: in test_terminal_width_panic_too_narrow\n    assert \"Not enough terminal width\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 143,
         "time": 0.123
       },
       "name": "tests.test_edge_cases.test_terminal_width_panic_too_narrow",
@@ -3732,8 +3565,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:409: in test_no_colors_flag\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 105,
         "time": 0.121
       },
       "name": "tests.test_edge_cases.test_no_colors_flag",
@@ -3743,8 +3574,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:364: in test_screen_reader_mode\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 109,
         "time": 0.131
       },
       "name": "tests.test_edge_cases.test_screen_reader_mode",
@@ -3762,8 +3591,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:279: in test_file_types_with_more_types_than_display_limit\n    assert result.stdout == (RESOURCES / \"file_types_n2.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 182,
         "time": 0.158
       },
       "name": "tests.test_coverage_push.test_file_types_with_more_types_than_display_limit",
@@ -3773,8 +3600,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:80: in test_filecount_output_format_count\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 119,
         "time": 0.175
       },
       "name": "tests.test_edge_cases.test_filecount_output_format_count",
@@ -3784,8 +3609,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:360: in test_ignore_patterns_from_file\n    assert result.stdout == (RESOURCES / \"ignore_from_file.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 165,
         "time": 0.191
       },
       "name": "tests.test_coverage_push.test_ignore_patterns_from_file",
@@ -3803,8 +3626,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:159: in test_equal_size_files_sorted_by_name\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.19
       },
       "name": "tests.test_edge_cases.test_equal_size_files_sorted_by_name",
@@ -3814,8 +3635,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:236: in test_regex_filter_alternation\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 115,
         "time": 0.174
       },
       "name": "tests.test_edge_cases.test_regex_filter_alternation",
@@ -3825,8 +3644,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:266: in test_depth_limit\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 102,
         "time": 0.167
       },
       "name": "tests.test_edge_cases.test_depth_limit",
@@ -3836,8 +3653,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:462: in test_depth_limit_zero\n    assert result.stdout == (RESOURCES / \"depth_0.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 147,
         "time": 0.175
       },
       "name": "tests.test_coverage_push.test_depth_limit_zero",
@@ -3847,8 +3662,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:334: in test_ignore_hidden_files\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 110,
         "time": 0.164
       },
       "name": "tests.test_edge_cases.test_ignore_hidden_files",
@@ -3858,8 +3671,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:429: in test_reverse_sort_order\n    assert result.stdout == (RESOURCES / \"reverse_order.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 155,
         "time": 0.156
       },
       "name": "tests.test_coverage_push.test_reverse_sort_order",
@@ -3877,8 +3688,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:525: in test_limit_filesystem_boundary\n    assert result.stdout == (RESOURCES / \"limit_filesystem.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 165,
         "time": 0.165
       },
       "name": "tests.test_coverage_push.test_limit_filesystem_boundary",
@@ -3896,8 +3705,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:108: in test_null_terminated_paths_from_stdin\n    assert result.stdout == (RESOURCES / \"null_terminated_paths.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 177,
         "time": 0.159
       },
       "name": "tests.test_coverage_push.test_null_terminated_paths_from_stdin",
@@ -3939,8 +3746,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Missing path /missing/1 in stderr: 'No such file or directory: /missing/0\\n'",
-        "text": "tests/test_error_paths.py:107: in test_file_not_found_error_aggregation_order_independence\n    assert path in result.stderr, f\"Missing path {path} in stderr: {result.stderr!r}\"\nE   AssertionError: Missing path /missing/1 in stderr: 'No such file or directory: /missing/0\\n'",
-        "text_original_chars": 273,
         "time": 0.12
       },
       "name": "tests.test_error_paths.test_file_not_found_error_aggregation_order_independence",
@@ -3950,8 +3755,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:427: in test_number_of_lines_limit\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 112,
         "time": 0.108
       },
       "name": "tests.test_edge_cases.test_number_of_lines_limit",
@@ -3961,8 +3764,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Expected comma-space separator in: 'No such file or directory: /err1'",
-        "text": "tests/test_error_paths.py:188: in test_multiple_errors_exact_format_with_commas\n    assert \", \" in error_line, f\"Expected comma-space separator in: {error_line!r}\"\nE   AssertionError: Expected comma-space separator in: 'No such file or directory: /err1'",
-        "text_original_chars": 253,
         "time": 0.117
       },
       "name": "tests.test_error_paths.test_multiple_errors_exact_format_with_commas",
@@ -3972,8 +3773,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Expected exit code 0 with valid paths present, got 1",
-        "text": "tests/test_error_paths.py:240: in test_mixed_valid_and_invalid_preserves_valid_output\n    assert result.returncode == 0, f\"Expected exit code 0 with valid paths present, got {result.returncode}\"\nE   AssertionError: Expected exit code 0 with valid paths present, got 1",
-        "text_original_chars": 267,
         "time": 0.136
       },
       "name": "tests.test_error_paths.test_mixed_valid_and_invalid_preserves_valid_output",
@@ -3983,8 +3782,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:379: in test_skip_total_row\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 105,
         "time": 0.131
       },
       "name": "tests.test_edge_cases.test_skip_total_row",
@@ -3994,8 +3791,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:291: in test_apparent_size_vs_block_size\n    assert result_default.stdout == (RESOURCES / \"default_size.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 171,
         "time": 0.141
       },
       "name": "tests.test_coverage_push.test_apparent_size_vs_block_size",
@@ -4005,8 +3800,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:281: in test_reverse_sort\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 103,
         "time": 0.133
       },
       "name": "tests.test_edge_cases.test_reverse_sort",
@@ -4016,8 +3809,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:96: in test_mtime_multiple_top_level_paths_max_aggregation\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 136,
         "time": 0.139
       },
       "name": "tests.test_edge_cases.test_mtime_multiple_top_level_paths_max_aggregation",
@@ -4027,8 +3818,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:251: in test_unicode_filenames\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 108,
         "time": 0.181
       },
       "name": "tests.test_edge_cases.test_unicode_filenames",
@@ -4038,8 +3827,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:349: in test_minimum_size_filter\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 110,
         "time": 0.166
       },
       "name": "tests.test_edge_cases.test_minimum_size_filter",
@@ -4049,8 +3836,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:175: in test_symlink_follow_with_dereference_links\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 0.162
       },
       "name": "tests.test_edge_cases.test_symlink_follow_with_dereference_links",
@@ -4060,8 +3845,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:371: in test_output_format_si_prefix\n    assert result.stdout == (RESOURCES / \"output_si.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 156,
         "time": 0.167
       },
       "name": "tests.test_coverage_push.test_output_format_si_prefix",
@@ -4071,8 +3854,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:440: in test_full_paths_no_shortening\n    assert result.stdout == (RESOURCES / \"full_paths.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 158,
         "time": 0.174
       },
       "name": "tests.test_coverage_push.test_full_paths_no_shortening",
@@ -4082,8 +3863,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:473: in test_depth_limit_one\n    assert result.stdout == (RESOURCES / \"depth_1.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.159
       },
       "name": "tests.test_coverage_push.test_depth_limit_one",
@@ -4101,8 +3880,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: dir1 should be 4.0K",
-        "text": "tests/test_dir_walker.py:35: in test_symlinks_not_followed_by_default\n    assert re.search(r'4\\.0K\\s+.*dir1', result.stdout), \"dir1 should be 4.0K\"\nE   AssertionError: dir1 should be 4.0K",
-        "text_original_chars": 187,
         "time": 0.157
       },
       "name": "tests.test_dir_walker.test_symlinks_not_followed_by_default",
@@ -4112,8 +3889,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Expected:\n'\\n \\nNo such file or directory: /does/not/exist\\n'\nGot:\n'No such file or directory: /does/not/exist\\n'",
-        "text": "tests/test_error_paths.py:129: in test_error_message_format_exact_prefix\n    assert normalized_stderr == normalized_golden, \\\nE   AssertionError: Expected:\nE   '\\n \\nNo such file or directory: /does/not/exist\\n'\nE   Got:\nE   'No such file or directory: /does/not/exist\\n'",
-        "text_original_chars": 271,
         "time": 0.138
       },
       "name": "tests.test_error_paths.test_error_message_format_exact_prefix",
@@ -4123,8 +3898,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:442: in test_single_thread_execution\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 114,
         "time": 0.127
       },
       "name": "tests.test_edge_cases.test_single_thread_execution",
@@ -4134,8 +3907,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Missing path /path/two in stderr: 'No such file or directory: /path/one\\n'",
-        "text": "tests/test_error_paths.py:49: in test_multiple_nonexistent_paths_comma_separated\n    assert path in result.stderr, f\"Missing path {path} in stderr: {result.stderr!r}\"\nE   AssertionError: Missing path /path/two in stderr: 'No such file or directory: /path/one\\n'",
-        "text_original_chars": 261,
         "time": 0.132
       },
       "name": "tests.test_error_paths.test_multiple_nonexistent_paths_comma_separated",
@@ -4145,8 +3916,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Missing path /nonexistent/path/number/0001 in large aggregation",
-        "text": "tests/test_error_paths.py:216: in test_large_number_of_nonexistent_paths\n    assert path in result.stderr, f\"Missing path {path} in large aggregation\"\nE   AssertionError: Missing path /nonexistent/path/number/0001 in large aggregation",
-        "text_original_chars": 234,
         "time": 0.129
       },
       "name": "tests.test_error_paths.test_large_number_of_nonexistent_paths",
@@ -4156,8 +3925,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: All three paths must appear in error: 'No such file or directory: /nonexistent/bad1\\n'",
-        "text": "tests/test_error_paths.py:276: in test_error_exit_code_only_when_all_paths_invalid\n    assert all(p in result1.stderr for p in paths_to_check), \\\nE   AssertionError: All three paths must appear in error: 'No such file or directory: /nonexistent/bad1\\n'",
-        "text_original_chars": 252,
         "time": 0.112
       },
       "name": "tests.test_error_paths.test_error_exit_code_only_when_all_paths_invalid",
@@ -4167,8 +3934,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:394: in test_output_format_si_units\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 113,
         "time": 0.13
       },
       "name": "tests.test_edge_cases.test_output_format_si_units",
@@ -4186,8 +3951,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:296: in test_apparent_size_flag\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 109,
         "time": 0.176
       },
       "name": "tests.test_edge_cases.test_apparent_size_flag",
@@ -4197,8 +3960,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:122: in test_filetype_aggregation_basic\n    assert result.stdout.strip() == golden.strip()\nE   AssertionError",
-        "text_original_chars": 134,
         "time": 0.183
       },
       "name": "tests.test_edge_cases.test_filetype_aggregation_basic",
@@ -4208,8 +3969,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths.py:415: in test_multiple_args_some_empty_some_nonexistent\n    assert result.returncode == 0  # Has valid paths\nE   AssertionError",
-        "text_original_chars": 152,
         "time": 0.171
       },
       "name": "tests.test_error_paths.test_multiple_args_some_empty_some_nonexistent",
@@ -4219,8 +3978,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:191: in test_broken_symlink_handling\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 114,
         "time": 0.171
       },
       "name": "tests.test_edge_cases.test_broken_symlink_handling",
@@ -4230,8 +3987,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Expected error about broken_link in stderr, got:",
-        "text": "tests/test_dir_walker.py:63: in test_symlinks_followed_with_L_flag\n    assert len(broken_errors) >= 1, f\"Expected error about broken_link in stderr, got: {result.stderr}\"\nE   AssertionError: Expected error about broken_link in stderr, got:",
-        "text_original_chars": 239,
         "time": 0.173
       },
       "name": "tests.test_dir_walker.test_symlinks_followed_with_L_flag",
@@ -4241,8 +3996,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:382: in test_output_format_kilobytes\n    assert result.stdout == (RESOURCES / \"output_kb.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 156,
         "time": 0.157
       },
       "name": "tests.test_coverage_push.test_output_format_kilobytes",
@@ -4276,8 +4029,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_coverage_push.py:484: in test_bars_on_right_side\n    assert result.stdout == (RESOURCES / \"bars_right.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 152,
         "time": 0.171
       },
       "name": "tests.test_coverage_push.test_bars_on_right_side",
@@ -4295,8 +4046,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Expected exit code 0 with mixed paths, got 1",
-        "text": "tests/test_error_paths.py:71: in test_nonexistent_with_valid_path_mixed\n    assert result.returncode == 0, f\"Expected exit code 0 with mixed paths, got {result.returncode}\"\nE   AssertionError: Expected exit code 0 with mixed paths, got 1",
-        "text_original_chars": 237,
         "time": 0.139
       },
       "name": "tests.test_error_paths.test_nonexistent_with_valid_path_mixed",
@@ -4306,8 +4055,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Path \"/path/with'quotes/missing\" missing or mangled in: 'No such file or directory: /path with spaces/missing\\n'",
-        "text": "tests/test_error_paths.py:153: in test_nonexistent_paths_with_special_chars\n    assert path in result.stderr, f\"Path {path!r} missing or mangled in: {result.stderr!r}\"\nE   AssertionError: Path \"/path/with'quotes/missing\" missing or mangled in: 'No such file or directory: /path with spaces/missing\\n'",
-        "text_original_chars": 300,
         "time": 0.158
       },
       "name": "tests.test_error_paths.test_nonexistent_paths_with_special_chars",
@@ -4357,8 +4104,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths.py:325: in test_print_errors_flag_does_not_affect_file_not_found\n    assert \"/missing1\" in error1 and \"/missing2\" in error1\nE   AssertionError",
-        "text_original_chars": 165,
         "time": 0.263
       },
       "name": "tests.test_error_paths.test_print_errors_flag_does_not_affect_file_not_found",
@@ -4384,8 +4129,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Unicode path '/missing/\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac' missing or mangled in: 'No such file or directory: /missing/\u65e5\u672c\u8a9e\\n'",
-        "text": "tests/test_error_paths.py:397: in test_error_with_unicode_paths\n    assert path in result.stderr, \\\nE   AssertionError: Unicode path '/missing/\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac' missing or mangled in: 'No such file or directory: /missing/\u65e5\u672c\u8a9e\\n'",
-        "text_original_chars": 219,
         "time": 0.121
       },
       "name": "tests.test_error_paths.test_error_with_unicode_paths",
@@ -4411,8 +4154,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:43: in test_ignore_file_not_found_panic\n    assert result.returncode != 0\nE   AssertionError",
-        "text_original_chars": 115,
         "time": 0.148
       },
       "name": "tests.test_gap_fill.test_ignore_file_not_found_panic",
@@ -4438,8 +4179,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:122: in test_json_output_format_bytes\n    assert data[\"size\"] == \"4096B\"\nE   AssertionError",
-        "text_original_chars": 114,
         "time": 0.121
       },
       "name": "tests.test_gap_fill.test_json_output_format_bytes",
@@ -4465,8 +4204,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:216: in test_invalid_invert_filter_regex\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 116,
         "time": 0.127
       },
       "name": "tests.test_gap_fill.test_invalid_invert_filter_regex",
@@ -4476,8 +4213,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:226: in test_invalid_filter_regex\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 109,
         "time": 0.142
       },
       "name": "tests.test_gap_fill.test_invalid_filter_regex",
@@ -4487,8 +4222,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:261: in test_empty_directory\n    assert \"0B\" in empty_line\nE   AssertionError",
-        "text_original_chars": 100,
         "time": 0.115
       },
       "name": "tests.test_gap_fill.test_empty_directory",
@@ -4562,8 +4295,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths.py:446: in test_relative_nonexistent_paths\n    assert \"also/missing\" in result.stderr or \"/also/missing\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 163,
         "time": 0.145
       },
       "name": "tests.test_error_paths.test_relative_nonexistent_paths",
@@ -4581,8 +4312,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Expected exit code 1 for invalid regex",
-        "text": "tests/test_filtering.py:386: in test_invalid_regex_pattern_cmdline\n    assert result.returncode == 1, f\"Expected exit code 1 for invalid regex\"\nE   AssertionError: Expected exit code 1 for invalid regex",
-        "text_original_chars": 202,
         "time": 0.176
       },
       "name": "tests.test_filtering.test_invalid_regex_pattern_cmdline",
@@ -4616,8 +4345,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:444: in test_files_from_with_empty_file\n    assert \"(total)\" in names\nE   AssertionError",
-        "text_original_chars": 112,
         "time": 0.178
       },
       "name": "tests.test_filtering.test_files_from_with_empty_file",
@@ -4635,8 +4362,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:368: in test_files_from_with_nonexistent_path\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.152
       },
       "name": "tests.test_filtering.test_files_from_with_nonexistent_path",
@@ -4654,8 +4379,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:75: in test_multiple_nonexistent_paths\n    assert \"/no/such/path2\" in stderr\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.133
       },
       "name": "tests.test_gap_fill.test_multiple_nonexistent_paths",
@@ -4705,8 +4428,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:58: in test_stdin_empty_defaults_to_current_dir\n    assert \"No files provided, defaulting to current directory\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 170,
         "time": 0.162
       },
       "name": "tests.test_gap_fill.test_stdin_empty_defaults_to_current_dir",
@@ -4716,8 +4437,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:142: in test_json_output_format_kilobytes\n    assert data[\"size\"] == \"4K\"\nE   AssertionError",
-        "text_original_chars": 115,
         "time": 0.145
       },
       "name": "tests.test_gap_fill.test_json_output_format_kilobytes",
@@ -4751,8 +4470,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:639: in test_file_types_with_limit\n    assert len(lines) <= 4\nE   AssertionError",
-        "text_original_chars": 103,
         "time": 0.127
       },
       "name": "tests.test_gap_fill.test_file_types_with_limit",
@@ -4762,8 +4479,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:656: in test_file_types_json_output\n    assert data[\"name\"] == \"(total)\"\nE   AssertionError",
-        "text_original_chars": 114,
         "time": 0.146
       },
       "name": "tests.test_gap_fill.test_file_types_json_output",
@@ -4773,8 +4488,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:16: in test_invalid_regex_error_message\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 115,
         "time": 0.153
       },
       "name": "tests.test_gap_fill.test_invalid_regex_error_message",
@@ -4784,8 +4497,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:242: in test_multiple_output_format_flags\n    assert \"--output-format\" in result.stderr\nE   AssertionError",
-        "text_original_chars": 129,
         "time": 0.113
       },
       "name": "tests.test_gap_fill.test_multiple_output_format_flags",
@@ -4819,8 +4530,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "Permission test doesn't work as root",
-        "text": "/workspace/eval/tests/test_harvest.py:175: Permission test doesn't work as root",
-        "text_original_chars": 79,
         "time": 0.0
       },
       "name": "tests.test_harvest.test_permission_flag",
@@ -4830,8 +4539,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "Permission test doesn't work as root",
-        "text": "/workspace/eval/tests/test_harvest.py:157: Permission test doesn't work as root",
-        "text_original_chars": 79,
         "time": 0.0
       },
       "name": "tests.test_harvest.test_permission_normal",
@@ -4873,8 +4580,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_harvest.py:231: in test_output_no_bars_means_no_excess_spaces\n    assert output.strip() == golden.strip()\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 0.142
       },
       "name": "tests.test_harvest.test_output_no_bars_means_no_excess_spaces",
@@ -4892,8 +4597,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_harvest.py:273: in test_d0_works_on_multiple\n    assert \"test_dir\" in output\nE   AssertionError",
-        "text_original_chars": 106,
         "time": 0.125
       },
       "name": "tests.test_harvest.test_d0_works_on_multiple",
@@ -4911,8 +4614,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_harvest.py:286: in test_threads_flag_works\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 106,
         "time": 0.132
       },
       "name": "tests.test_harvest.test_threads_flag_works",
@@ -4962,8 +4663,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_harvest.py:439: in test_show_files_by_type\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 106,
         "time": 0.134
       },
       "name": "tests.test_harvest.test_show_files_by_type",
@@ -5005,8 +4704,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_harvest.py:518: in test_show_files_by_regex_match_nothing\n    assert \"0 \u250c\u2500\u2500 test_dir2\" in output\nE   AssertionError",
-        "text_original_chars": 126,
         "time": 0.148
       },
       "name": "tests.test_harvest.test_show_files_by_regex_match_nothing",
@@ -5016,8 +4713,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths.py:465: in test_dot_and_dotdot_nonexistent\n    assert result.stderr.count(',') >= 1\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 0.182
       },
       "name": "tests.test_error_paths.test_dot_and_dotdot_nonexistent",
@@ -5035,8 +4730,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gap_fill.py:99: in test_json_output_format_si\n    assert data[\"size\"] == \"4.1K\"\nE   AssertionError",
-        "text_original_chars": 109,
         "time": 0.147
       },
       "name": "tests.test_gap_fill.test_json_output_format_si",
@@ -5102,8 +4795,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_harvest.py:120: in test_substring_of_names_and_long_names\n    assert \"long_dir_name_what_a_very_long_dir_name_what_happens_when_this_goes..\" in output\nE   AssertionError",
-        "text_original_chars": 180,
         "time": 0.17
       },
       "name": "tests.test_harvest.test_substring_of_names_and_long_names",
@@ -5145,8 +4836,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_harvest.py:631: in test_handle_duplicate_names\n    assert \"test_dir2\" in output\nE   AssertionError",
-        "text_original_chars": 109,
         "time": 0.134
       },
       "name": "tests.test_harvest.test_handle_duplicate_names",
@@ -5164,8 +4853,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_harvest.py:695: in test_hard_sym_link\n    assert \"the_link\" not in output\nE   AssertionError",
-        "text_original_chars": 103,
         "time": 0.18
       },
       "name": "tests.test_harvest.test_hard_sym_link",
@@ -5175,8 +4862,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError: Must show exactly one hard link name, not both or neither",
-        "text": "tests/test_harvest.py:725: in test_hard_sym_link_no_dup_multi_arg\n    assert has_notes != has_link, \"Must show exactly one hard link name, not both or neither\"\nE   AssertionError: Must show exactly one hard link name, not both or neither",
-        "text_original_chars": 237,
         "time": 0.143
       },
       "name": "tests.test_harvest.test_hard_sym_link_no_dup_multi_arg",
@@ -5314,8 +4999,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_time_and_output.py:584: in test_mtime_day_zero_boundary\n    assert 'file_twodays_boundary.txt' in result.stdout\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.143
       },
       "name": "tests.test_time_and_output.test_mtime_day_zero_boundary",
@@ -5381,8 +5064,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_time_and_output.py:956: in test_config_multiple_options\n    assert 'nested.txt' not in result.stdout\nE   AssertionError",
-        "text_original_chars": 130,
         "time": 0.119
       },
       "name": "tests.test_time_and_output.test_config_multiple_options",
@@ -5408,8 +5089,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_time_and_output.py:925: in test_json_with_multiple_flags\n    assert any('file3_jsonflags.txt' in n for n in file_names)\nE   AssertionError",
-        "text_original_chars": 149,
         "time": 0.156
       },
       "name": "tests.test_time_and_output.test_json_with_multiple_flags",
@@ -5435,8 +5114,6 @@
       "branch": "746762709b06",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_harvest.py:550: in test_show_files_by_invert_regex\n    assert \"0 \u250c\u2500\u2500 test_dir2\" in output\nE   AssertionError",
-        "text_original_chars": 119,
         "time": 0.186
       },
       "name": "tests.test_harvest.test_show_files_by_invert_regex",
@@ -5542,8 +5219,6 @@
       "branch": "e7da309aed82",
       "extra": {
         "message": "root bypasses file permission restrictions",
-        "text": "/workspace/eval/tests/test_exact_output.py:88: root bypasses file permission restrictions",
-        "text_original_chars": 89,
         "time": 0.001
       },
       "name": "eval.tests.test_exact_output.test_permission_normal",
@@ -5553,8 +5228,6 @@
       "branch": "e7da309aed82",
       "extra": {
         "message": "root bypasses file permission restrictions",
-        "text": "/workspace/eval/tests/test_exact_output.py:98: root bypasses file permission restrictions",
-        "text_original_chars": 89,
         "time": 0.002
       },
       "name": "eval.tests.test_exact_output.test_permission_flag",
@@ -5596,8 +5269,6 @@
       "branch": "e7da309aed82",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_d0_works_on_multiple():\n        out = run(\"-d\", \"0\", TEST_DIR + \"/\", TEST_DIR2).stdout.decode()\n>       assert \"test_dir \" in out\nE       AssertionError\n\neval/tests/test_flags.py:47: AssertionError",
-        "text_original_chars": 206,
         "time": 0.187
       },
       "name": "eval.tests.test_flags.test_d0_works_on_multiple",
@@ -5719,8 +5390,6 @@
       "branch": "e7da309aed82",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_output_screen_reader():\n        out = run(\"--screen-reader\", \"-c\", TEST_DIR + \"/\").stdout.decode()\n>       assert \"test_dir   0\" in out\nE       AssertionError\n\neval/tests/test_flags.py:164: AssertionError",
-        "text_original_chars": 213,
         "time": 0.162
       },
       "name": "eval.tests.test_flags.test_output_screen_reader",
@@ -5738,8 +5407,6 @@
       "branch": "e7da309aed82",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_show_files_by_regex_match_nothing():\n        out = run(\"-c\", \"-e\", \"match_nothing$\", \"tests\").stdout.decode()\n>       assert \"tests\" in out\nE       AssertionError\n\neval/tests/test_flags.py:180: AssertionError",
-        "text_original_chars": 217,
         "time": 0.131
       },
       "name": "eval.tests.test_flags.test_show_files_by_regex_match_nothing",
@@ -5757,8 +5424,6 @@
       "branch": "e7da309aed82",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_show_files_by_invert_regex():\n        out = run(\"-c\", \"-f\", \"-v\", \"e\", TEST_DIR2).stdout.decode()\n>       assert \"0\" in out and \"test_dir2\" in out\nE       AssertionError\n\neval/tests/test_flags.py:192: AssertionError",
-        "text_original_chars": 224,
         "time": 0.186
       },
       "name": "eval.tests.test_flags.test_show_files_by_invert_regex",
@@ -5800,8 +5465,6 @@
       "branch": "e7da309aed82",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_handle_duplicate_names():\n        out = run(\n            str(TESTDATA / \"test_dir_matching\" / \"dave\" / \"dup_name\"),\n            str(TESTDATA / \"test_dir_matching\" / \"andy\" / \"dup_name\"),\n            \"ci\",\n        ).stdout.decode()\n        assert \"andy\" in out\n        assert \"dave\" in out\n        assert \"ci\" in out\n        assert \"dup_name\" in out\n>       assert \"test_dir_matching\" not in out\nE       AssertionError\n\neval/tests/test_flags.py:236: AssertionError",
-        "text_original_chars": 472,
         "time": 0.128
       },
       "name": "eval.tests.test_flags.test_handle_duplicate_names",
@@ -5827,8 +5490,6 @@
       "branch": "e7da309aed82",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_hard_sym_link_no_dup_multi_arg():\n        d1 = tempfile.mkdtemp()\n        d2 = tempfile.mkdtemp()\n        fpath = os.path.join(d1, \"notes.txt\")\n        with open(fpath, \"w\") as f:\n            f.write(\"I am a temp file\\n\")\n        link = os.path.join(d2, \"the_link\")\n        os.link(fpath, link)\n    \n        r = run_dust(\"-p\", \"-c\", \"-w\", \"999\", \"-b\", d2, d1)\n        out = r.stdout.decode()\n        has_file_only = fpath in out and link not in out\n        has_link_only = fpath not in out and link in out\n>       assert has_file_only or has_link_only\nE       AssertionError\n\neval/tests/test_symlinks.py:66: AssertionError",
-        "text_original_chars": 631,
         "time": 0.169
       },
       "name": "eval.tests.test_symlinks.test_hard_sym_link_no_dup_multi_arg",
@@ -6046,8 +5707,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestThreadsFlag object at 0x746133e31ba0>\n\n    def test_threads_invalid_value(self):\n        \"\"\"Test -T with non-integer value.\"\"\"\n        code, stdout, stderr = run_command([\"-T\", \"xyz\"])\n>       assert code == 2\nE       AssertionError\n\neval/tests/test_arg_parsing.py:120: AssertionError",
-        "text_original_chars": 313,
         "time": 0.173
       },
       "name": "eval.tests.test_arg_parsing.TestThreadsFlag.test_threads_invalid_value",
@@ -6105,8 +5764,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestOutputFormatFlag object at 0x7a13505c2170>\nformat_value = 'M'\n\n    @pytest.mark.parametrize(\"format_value\", [\n        \"si\", \"b\", \"k\", \"m\", \"g\", \"t\", \"kb\", \"mb\", \"gb\", \"tb\",\n        \"SI\", \"B\", \"K\", \"M\", \"G\", \"T\", \"KB\", \"MB\", \"GB\", \"TB\",  # Test case insensitivity\n    ])\n    def test_output_format_valid_values(self, format_value):\n        \"\"\"Test all valid output format values.\"\"\"\n        code, stdout, stderr = run_command([\"-o\", format_value, \"tests/test_dir\"])\n>       assert code == 0\nE       AssertionError\n\neval/tests/test_arg_parsing.py:219: AssertionError",
-        "text_original_chars": 593,
         "time": 0.153
       },
       "name": "eval.tests.test_arg_parsing.TestOutputFormatFlag.test_output_format_valid_values[M]",
@@ -6164,8 +5821,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestOutputFormatFlag object at 0x72686a4b5780>\nformat_value = 'B'\n\n    @pytest.mark.parametrize(\"format_value\", [\n        \"si\", \"b\", \"k\", \"m\", \"g\", \"t\", \"kb\", \"mb\", \"gb\", \"tb\",\n        \"SI\", \"B\", \"K\", \"M\", \"G\", \"T\", \"KB\", \"MB\", \"GB\", \"TB\",  # Test case insensitivity\n    ])\n    def test_output_format_valid_values(self, format_value):\n        \"\"\"Test all valid output format values.\"\"\"\n        code, stdout, stderr = run_command([\"-o\", format_value, \"tests/test_dir\"])\n>       assert code == 0\nE       AssertionError\n\neval/tests/test_arg_parsing.py:219: AssertionError",
-        "text_original_chars": 593,
         "time": 0.182
       },
       "name": "eval.tests.test_arg_parsing.TestOutputFormatFlag.test_output_format_valid_values[B]",
@@ -6239,8 +5894,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestOutputFormatFlag object at 0x738b359e1870>\nformat_value = 'SI'\n\n    @pytest.mark.parametrize(\"format_value\", [\n        \"si\", \"b\", \"k\", \"m\", \"g\", \"t\", \"kb\", \"mb\", \"gb\", \"tb\",\n        \"SI\", \"B\", \"K\", \"M\", \"G\", \"T\", \"KB\", \"MB\", \"GB\", \"TB\",  # Test case insensitivity\n    ])\n    def test_output_format_valid_values(self, format_value):\n        \"\"\"Test all valid output format values.\"\"\"\n        code, stdout, stderr = run_command([\"-o\", format_value, \"tests/test_dir\"])\n>       assert code == 0\nE       AssertionError\n\neval/tests/test_arg_parsing.py:219: AssertionError",
-        "text_original_chars": 594,
         "time": 0.158
       },
       "name": "eval.tests.test_arg_parsing.TestOutputFormatFlag.test_output_format_valid_values[SI]",
@@ -6258,8 +5911,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestOutputFormatFlag object at 0x776330604220>\nformat_value = 'T'\n\n    @pytest.mark.parametrize(\"format_value\", [\n        \"si\", \"b\", \"k\", \"m\", \"g\", \"t\", \"kb\", \"mb\", \"gb\", \"tb\",\n        \"SI\", \"B\", \"K\", \"M\", \"G\", \"T\", \"KB\", \"MB\", \"GB\", \"TB\",  # Test case insensitivity\n    ])\n    def test_output_format_valid_values(self, format_value):\n        \"\"\"Test all valid output format values.\"\"\"\n        code, stdout, stderr = run_command([\"-o\", format_value, \"tests/test_dir\"])\n>       assert code == 0\nE       AssertionError\n\neval/tests/test_arg_parsing.py:219: AssertionError",
-        "text_original_chars": 593,
         "time": 0.138
       },
       "name": "eval.tests.test_arg_parsing.TestOutputFormatFlag.test_output_format_valid_values[T]",
@@ -6277,8 +5928,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestOutputFormatFlag object at 0x7a624333c220>\nformat_value = 'G'\n\n    @pytest.mark.parametrize(\"format_value\", [\n        \"si\", \"b\", \"k\", \"m\", \"g\", \"t\", \"kb\", \"mb\", \"gb\", \"tb\",\n        \"SI\", \"B\", \"K\", \"M\", \"G\", \"T\", \"KB\", \"MB\", \"GB\", \"TB\",  # Test case insensitivity\n    ])\n    def test_output_format_valid_values(self, format_value):\n        \"\"\"Test all valid output format values.\"\"\"\n        code, stdout, stderr = run_command([\"-o\", format_value, \"tests/test_dir\"])\n>       assert code == 0\nE       AssertionError\n\neval/tests/test_arg_parsing.py:219: AssertionError",
-        "text_original_chars": 593,
         "time": 0.147
       },
       "name": "eval.tests.test_arg_parsing.TestOutputFormatFlag.test_output_format_valid_values[G]",
@@ -6296,8 +5945,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestOutputFormatFlag object at 0x793dcb7c66b0>\nformat_value = 'MB'\n\n    @pytest.mark.parametrize(\"format_value\", [\n        \"si\", \"b\", \"k\", \"m\", \"g\", \"t\", \"kb\", \"mb\", \"gb\", \"tb\",\n        \"SI\", \"B\", \"K\", \"M\", \"G\", \"T\", \"KB\", \"MB\", \"GB\", \"TB\",  # Test case insensitivity\n    ])\n    def test_output_format_valid_values(self, format_value):\n        \"\"\"Test all valid output format values.\"\"\"\n        code, stdout, stderr = run_command([\"-o\", format_value, \"tests/test_dir\"])\n>       assert code == 0\nE       AssertionError\n\neval/tests/test_arg_parsing.py:219: AssertionError",
-        "text_original_chars": 594,
         "time": 0.159
       },
       "name": "eval.tests.test_arg_parsing.TestOutputFormatFlag.test_output_format_valid_values[MB]",
@@ -6347,8 +5994,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestOutputFormatFlag object at 0x75d5bd22e740>\nformat_value = 'KB'\n\n    @pytest.mark.parametrize(\"format_value\", [\n        \"si\", \"b\", \"k\", \"m\", \"g\", \"t\", \"kb\", \"mb\", \"gb\", \"tb\",\n        \"SI\", \"B\", \"K\", \"M\", \"G\", \"T\", \"KB\", \"MB\", \"GB\", \"TB\",  # Test case insensitivity\n    ])\n    def test_output_format_valid_values(self, format_value):\n        \"\"\"Test all valid output format values.\"\"\"\n        code, stdout, stderr = run_command([\"-o\", format_value, \"tests/test_dir\"])\n>       assert code == 0\nE       AssertionError\n\neval/tests/test_arg_parsing.py:219: AssertionError",
-        "text_original_chars": 594,
         "time": 0.148
       },
       "name": "eval.tests.test_arg_parsing.TestOutputFormatFlag.test_output_format_valid_values[KB]",
@@ -6366,8 +6011,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestOutputFormatFlag object at 0x778248c2b970>\nformat_value = 'TB'\n\n    @pytest.mark.parametrize(\"format_value\", [\n        \"si\", \"b\", \"k\", \"m\", \"g\", \"t\", \"kb\", \"mb\", \"gb\", \"tb\",\n        \"SI\", \"B\", \"K\", \"M\", \"G\", \"T\", \"KB\", \"MB\", \"GB\", \"TB\",  # Test case insensitivity\n    ])\n    def test_output_format_valid_values(self, format_value):\n        \"\"\"Test all valid output format values.\"\"\"\n        code, stdout, stderr = run_command([\"-o\", format_value, \"tests/test_dir\"])\n>       assert code == 0\nE       AssertionError\n\neval/tests/test_arg_parsing.py:219: AssertionError",
-        "text_original_chars": 594,
         "time": 0.124
       },
       "name": "eval.tests.test_arg_parsing.TestOutputFormatFlag.test_output_format_valid_values[TB]",
@@ -6545,8 +6188,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestConflictingFlags object at 0x7d365016a6b0>\n\n    def test_filter_and_file_types_conflict(self):\n        \"\"\"Test that -e and -t cannot be used together.\"\"\"\n        code, stdout, stderr = run_command([\"-e\", \"pattern\", \"-t\", \"tests/test_dir\"])\n>       assert code == 2\nE       AssertionError\n\neval/tests/test_arg_parsing.py:400: AssertionError",
-        "text_original_chars": 368,
         "time": 0.151
       },
       "name": "eval.tests.test_arg_parsing.TestConflictingFlags.test_filter_and_file_types_conflict",
@@ -6564,8 +6205,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestConflictingFlags object at 0x762524efaef0>\n\n    def test_filter_and_invert_filter_conflict(self):\n        \"\"\"Test that -e and -v cannot be used together.\"\"\"\n        code, stdout, stderr = run_command([\"-e\", \"pattern\", \"-v\", \"pattern2\", \"tests/test_dir\"])\n>       assert code == 2\nE       AssertionError\n\neval/tests/test_arg_parsing.py:394: AssertionError",
-        "text_original_chars": 383,
         "time": 0.16
       },
       "name": "eval.tests.test_arg_parsing.TestConflictingFlags.test_filter_and_invert_filter_conflict",
@@ -6583,8 +6222,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestConflictingFlags object at 0x72114466b400>\n\n    def test_invert_filter_and_file_types_conflict(self):\n        \"\"\"Test that -v and -t cannot be used together.\"\"\"\n        code, stdout, stderr = run_command([\"-v\", \"pattern\", \"-t\", \"tests/test_dir\"])\n>       assert code == 2\nE       AssertionError\n\neval/tests/test_arg_parsing.py:406: AssertionError",
-        "text_original_chars": 375,
         "time": 0.156
       },
       "name": "eval.tests.test_arg_parsing.TestConflictingFlags.test_invert_filter_and_file_types_conflict",
@@ -6594,8 +6231,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestConflictingFlags object at 0x7a1dea1f7a30>\n\n    def test_file_types_and_only_dir_conflict(self):\n        \"\"\"Test that -t and -D cannot be used together.\"\"\"\n        code, stdout, stderr = run_command([\"-t\", \"-D\", \"tests/test_dir\"])\n>       assert code == 2\nE       AssertionError\n\neval/tests/test_arg_parsing.py:418: AssertionError",
-        "text_original_chars": 359,
         "time": 0.155
       },
       "name": "eval.tests.test_arg_parsing.TestConflictingFlags.test_file_types_and_only_dir_conflict",
@@ -6613,8 +6248,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestConflictingFlags object at 0x7d07aba663e0>\n\n    def test_files_from_and_files0_from_conflict(self):\n        \"\"\"Test that --files-from and --files0-from cannot be used together.\"\"\"\n        code, stdout, stderr = run_command([\"--files-from\", \"file1\", \"--files0-from\", \"file2\"])\n>       assert code == 2\nE       AssertionError\n\neval/tests/test_arg_parsing.py:424: AssertionError",
-        "text_original_chars": 404,
         "time": 0.174
       },
       "name": "eval.tests.test_arg_parsing.TestConflictingFlags.test_files_from_and_files0_from_conflict",
@@ -6688,8 +6321,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestStackSizeFlag object at 0x7c5584341120>\n\n    def test_stack_size_invalid_value(self):\n        \"\"\"Test -S with non-integer value.\"\"\"\n        code, stdout, stderr = run_command([\"-S\", \"notanumber\"])\n>       assert code == 2\nE       AssertionError\n\neval/tests/test_arg_parsing.py:516: AssertionError",
-        "text_original_chars": 325,
         "time": 0.161
       },
       "name": "eval.tests.test_arg_parsing.TestStackSizeFlag.test_stack_size_invalid_value",
@@ -6955,8 +6586,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestOutputFormatFlag object at 0x7a13505c2410>\nformat_value = 'GB'\n\n    @pytest.mark.parametrize(\"format_value\", [\n        \"si\", \"b\", \"k\", \"m\", \"g\", \"t\", \"kb\", \"mb\", \"gb\", \"tb\",\n        \"SI\", \"B\", \"K\", \"M\", \"G\", \"T\", \"KB\", \"MB\", \"GB\", \"TB\",  # Test case insensitivity\n    ])\n    def test_output_format_valid_values(self, format_value):\n        \"\"\"Test all valid output format values.\"\"\"\n        code, stdout, stderr = run_command([\"-o\", format_value, \"tests/test_dir\"])\n>       assert code == 0\nE       AssertionError\n\neval/tests/test_arg_parsing.py:219: AssertionError",
-        "text_original_chars": 594,
         "time": 0.158
       },
       "name": "eval.tests.test_arg_parsing.TestOutputFormatFlag.test_output_format_valid_values[GB]",
@@ -6974,8 +6603,6 @@
       "branch": "b96223da77bd",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_arg_parsing.TestOutputFormatFlag object at 0x72686a4b58a0>\nformat_value = 'K'\n\n    @pytest.mark.parametrize(\"format_value\", [\n        \"si\", \"b\", \"k\", \"m\", \"g\", \"t\", \"kb\", \"mb\", \"gb\", \"tb\",\n        \"SI\", \"B\", \"K\", \"M\", \"G\", \"T\", \"KB\", \"MB\", \"GB\", \"TB\",  # Test case insensitivity\n    ])\n    def test_output_format_valid_values(self, format_value):\n        \"\"\"Test all valid output format values.\"\"\"\n        code, stdout, stderr = run_command([\"-o\", format_value, \"tests/test_dir\"])\n>       assert code == 0\nE       AssertionError\n\neval/tests/test_arg_parsing.py:219: AssertionError",
-        "text_original_chars": 593,
         "time": 0.179
       },
       "name": "eval.tests.test_arg_parsing.TestOutputFormatFlag.test_output_format_valid_values[K]",
@@ -7153,8 +6780,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['-T']\nexpected_snippet = \"a value is required for '--threads <THREADS>'\"\n\n    @pytest.mark.parametrize(\n        \"args, expected_snippet\",\n        [\n            ([\"--depth\"], \"a value is required for '--depth <DEPTH>'\"),\n            ([\"-d\"], \"a value is required for '--depth <DEPTH>'\"),\n            ([\"--threads\"], \"a value is required for '--threads <THREADS>'\"),\n            ([\"-T\"], \"a value is required for '--threads <THREADS>'\"),\n            ([\"--config\"], \"a value is required for '--config <FILE>'\"),\n            ([\"-o\"], \"a value is required for '--output-format <FORMAT>'\"),\n            ([\"--output-format\"], \"a value is required for '--output-format <FORMAT>'\"),\n        ],\n    )\n    def test_missing_value_for_value_flags(args, expected_snippet):\n        rc, out, err = run(args)\n        assert out == \"\"\n>       assert_arg_error(rc, err, contains=[expected_snippet])\n\neval/tests/test_argparse_validation.py:60: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nrc = 2\nerr = \"error: a value is required for '-T <THREADS>' but none was supplied\\n\\nFor more information, try '--help'.\\n\"\n\n    def assert_arg_error(rc, err, *, contains=None):\n        assert rc == 2\n        assert \"For more information, try '--help'.\" in err\n        if contains:\n            for c in contains:\n>               assert c in err\nE               AssertionError\n\neval/tests/test_argparse_validation.py:28: AssertionError",
-        "text_original_chars": 1449,
         "time": 0.183
       },
       "name": "eval.tests.test_argparse_validation.test_missing_value_for_value_flags[args3-a value is required for '--threads <THREADS>']",
@@ -7164,8 +6789,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['--output-json', '--output-json']\n\n    @pytest.mark.parametrize(\n        \"args\",\n        [\n            [\"-p\", \"-p\"],\n            [\"--full-paths\", \"--full-paths\"],\n            [\"-j\", \"-j\"],\n            [\"--output-json\", \"--output-json\"],\n            [\"-o\", \"si\", \"-o\", \"kb\"],\n            [\"--output-format\", \"si\", \"--output-format\", \"kb\"],\n        ],\n    )\n    def test_non_repeatable_flags_rejected(args):\n        rc, out, err = run(args)\n>       assert out == \"\"\nE       AssertionError\n\neval/tests/test_argparse_validation.py:100: AssertionError",
-        "text_original_chars": 554,
         "time": 0.166
       },
       "name": "eval.tests.test_argparse_validation.test_non_repeatable_flags_rejected[args3]",
@@ -7175,8 +6798,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['-o']\nexpected_snippet = \"a value is required for '--output-format <FORMAT>'\"\n\n    @pytest.mark.parametrize(\n        \"args, expected_snippet\",\n        [\n            ([\"--depth\"], \"a value is required for '--depth <DEPTH>'\"),\n            ([\"-d\"], \"a value is required for '--depth <DEPTH>'\"),\n            ([\"--threads\"], \"a value is required for '--threads <THREADS>'\"),\n            ([\"-T\"], \"a value is required for '--threads <THREADS>'\"),\n            ([\"--config\"], \"a value is required for '--config <FILE>'\"),\n            ([\"-o\"], \"a value is required for '--output-format <FORMAT>'\"),\n            ([\"--output-format\"], \"a value is required for '--output-format <FORMAT>'\"),\n        ],\n    )\n    def test_missing_value_for_value_flags(args, expected_snippet):\n        rc, out, err = run(args)\n        assert out == \"\"\n>       assert_arg_error(rc, err, contains=[expected_snippet])\n\neval/tests/test_argparse_validation.py:60: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nrc = 2\nerr = \"error: a value is required for '-o <OUTPUT_FORMAT>' but none was supplied\\n\\nFor more information, try '--help'.\\n\"\n\n    def assert_arg_error(rc, err, *, contains=None):\n        assert rc == 2\n        assert \"For more information, try '--help'.\" in err\n        if contains:\n            for c in contains:\n>               assert c in err\nE               AssertionError\n\neval/tests/test_argparse_validation.py:28: AssertionError",
-        "text_original_chars": 1460,
         "time": 0.177
       },
       "name": "eval.tests.test_argparse_validation.test_missing_value_for_value_flags[args5-a value is required for '--output-format <FORMAT>']",
@@ -7186,8 +6807,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['--threads', 'nope']\nexpected = \"invalid value 'nope' for '--threads <THREADS>'\"\n\n    @pytest.mark.parametrize(\n        \"args, expected\",\n        [\n            ([\"--depth=abc\"], \"invalid value 'abc' for '--depth <DEPTH>'\"),\n            ([\"-d\", \"abc\"], \"invalid value 'abc' for '--depth <DEPTH>'\"),\n            ([\"--threads\", \"nope\"], \"invalid value 'nope' for '--threads <THREADS>'\"),\n            ([\"-T\", \"nope\"], \"invalid value 'nope' for '--threads <THREADS>'\"),\n            ([\"--terminal-width\", \"NaN\"], \"invalid value 'NaN' for '--terminal-width <WIDTH>'\"),\n            ([\"-w\", \"NaN\"], \"invalid value 'NaN' for '--terminal-width <WIDTH>'\"),\n        ],\n    )\n    def test_invalid_integer_values(args, expected):\n        rc, out, err = run(args)\n>       assert out == \"\"\nE       AssertionError\n\neval/tests/test_argparse_validation.py:76: AssertionError",
-        "text_original_chars": 862,
         "time": 0.208
       },
       "name": "eval.tests.test_argparse_validation.test_invalid_integer_values[args2-invalid value 'nope' for '--threads <THREADS>']",
@@ -7197,8 +6816,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_overflow_integer_errors():\n        huge = \"9\" * 200\n        rc, out, err = run([\"--depth\", huge])\n>       assert out == \"\"\nE       AssertionError\n\neval/tests/test_argparse_validation.py:83: AssertionError",
-        "text_original_chars": 213,
         "time": 0.21
       },
       "name": "eval.tests.test_argparse_validation.test_overflow_integer_errors",
@@ -7216,8 +6833,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['-d'], expected_snippet = \"a value is required for '--depth <DEPTH>'\"\n\n    @pytest.mark.parametrize(\n        \"args, expected_snippet\",\n        [\n            ([\"--depth\"], \"a value is required for '--depth <DEPTH>'\"),\n            ([\"-d\"], \"a value is required for '--depth <DEPTH>'\"),\n            ([\"--threads\"], \"a value is required for '--threads <THREADS>'\"),\n            ([\"-T\"], \"a value is required for '--threads <THREADS>'\"),\n            ([\"--config\"], \"a value is required for '--config <FILE>'\"),\n            ([\"-o\"], \"a value is required for '--output-format <FORMAT>'\"),\n            ([\"--output-format\"], \"a value is required for '--output-format <FORMAT>'\"),\n        ],\n    )\n    def test_missing_value_for_value_flags(args, expected_snippet):\n        rc, out, err = run(args)\n        assert out == \"\"\n>       assert_arg_error(rc, err, contains=[expected_snippet])\n\neval/tests/test_argparse_validation.py:60: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nrc = 2\nerr = \"error: a value is required for '-d <DEPTH>' but none was supplied\\n\\nFor more information, try '--help'.\\n\"\n\n    def assert_arg_error(rc, err, *, contains=None):\n        assert rc == 2\n        assert \"For more information, try '--help'.\" in err\n        if contains:\n            for c in contains:\n>               assert c in err\nE               AssertionError\n\neval/tests/test_argparse_validation.py:28: AssertionError",
-        "text_original_chars": 1444,
         "time": 0.199
       },
       "name": "eval.tests.test_argparse_validation.test_missing_value_for_value_flags[args1-a value is required for '--depth <DEPTH>']",
@@ -7227,8 +6842,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['--full-paths', '--full-paths']\n\n    @pytest.mark.parametrize(\n        \"args\",\n        [\n            [\"-p\", \"-p\"],\n            [\"--full-paths\", \"--full-paths\"],\n            [\"-j\", \"-j\"],\n            [\"--output-json\", \"--output-json\"],\n            [\"-o\", \"si\", \"-o\", \"kb\"],\n            [\"--output-format\", \"si\", \"--output-format\", \"kb\"],\n        ],\n    )\n    def test_non_repeatable_flags_rejected(args):\n        rc, out, err = run(args)\n>       assert out == \"\"\nE       AssertionError\n\neval/tests/test_argparse_validation.py:100: AssertionError",
-        "text_original_chars": 552,
         "time": 0.204
       },
       "name": "eval.tests.test_argparse_validation.test_non_repeatable_flags_rejected[args1]",
@@ -7310,8 +6923,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['--output-format']\nexpected_snippet = \"a value is required for '--output-format <FORMAT>'\"\n\n    @pytest.mark.parametrize(\n        \"args, expected_snippet\",\n        [\n            ([\"--depth\"], \"a value is required for '--depth <DEPTH>'\"),\n            ([\"-d\"], \"a value is required for '--depth <DEPTH>'\"),\n            ([\"--threads\"], \"a value is required for '--threads <THREADS>'\"),\n            ([\"-T\"], \"a value is required for '--threads <THREADS>'\"),\n            ([\"--config\"], \"a value is required for '--config <FILE>'\"),\n            ([\"-o\"], \"a value is required for '--output-format <FORMAT>'\"),\n            ([\"--output-format\"], \"a value is required for '--output-format <FORMAT>'\"),\n        ],\n    )\n    def test_missing_value_for_value_flags(args, expected_snippet):\n        rc, out, err = run(args)\n        assert out == \"\"\n>       assert_arg_error(rc, err, contains=[expected_snippet])\n\neval/tests/test_argparse_validation.py:60: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nrc = 2\nerr = \"error: a value is required for '--output-format <OUTPUT_FORMAT>' but none was supplied\\n\\nFor more information, try '--help'.\\n\"\n\n    def assert_arg_error(rc, err, *, contains=None):\n        assert rc == 2\n        assert \"For more information, try '--help'.\" in err\n        if contains:\n            for c in contains:\n>               assert c in err\nE               AssertionError\n\neval/tests/test_argparse_validation.py:28: AssertionError",
-        "text_original_chars": 1486,
         "time": 0.175
       },
       "name": "eval.tests.test_argparse_validation.test_missing_value_for_value_flags[args6-a value is required for '--output-format <FORMAT>']",
@@ -7321,8 +6932,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['--config']\nexpected_snippet = \"a value is required for '--config <FILE>'\"\n\n    @pytest.mark.parametrize(\n        \"args, expected_snippet\",\n        [\n            ([\"--depth\"], \"a value is required for '--depth <DEPTH>'\"),\n            ([\"-d\"], \"a value is required for '--depth <DEPTH>'\"),\n            ([\"--threads\"], \"a value is required for '--threads <THREADS>'\"),\n            ([\"-T\"], \"a value is required for '--threads <THREADS>'\"),\n            ([\"--config\"], \"a value is required for '--config <FILE>'\"),\n            ([\"-o\"], \"a value is required for '--output-format <FORMAT>'\"),\n            ([\"--output-format\"], \"a value is required for '--output-format <FORMAT>'\"),\n        ],\n    )\n    def test_missing_value_for_value_flags(args, expected_snippet):\n        rc, out, err = run(args)\n        assert out == \"\"\n>       assert_arg_error(rc, err, contains=[expected_snippet])\n\neval/tests/test_argparse_validation.py:60: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nrc = 2\nerr = \"error: a value is required for '--config <CONFIG>' but none was supplied\\n\\nFor more information, try '--help'.\\n\"\n\n    def assert_arg_error(rc, err, *, contains=None):\n        assert rc == 2\n        assert \"For more information, try '--help'.\" in err\n        if contains:\n            for c in contains:\n>               assert c in err\nE               AssertionError\n\neval/tests/test_argparse_validation.py:28: AssertionError",
-        "text_original_chars": 1456,
         "time": 0.17
       },
       "name": "eval.tests.test_argparse_validation.test_missing_value_for_value_flags[args4-a value is required for '--config <FILE>']",
@@ -7340,8 +6949,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['-j', '-j']\n\n    @pytest.mark.parametrize(\n        \"args\",\n        [\n            [\"-p\", \"-p\"],\n            [\"--full-paths\", \"--full-paths\"],\n            [\"-j\", \"-j\"],\n            [\"--output-json\", \"--output-json\"],\n            [\"-o\", \"si\", \"-o\", \"kb\"],\n            [\"--output-format\", \"si\", \"--output-format\", \"kb\"],\n        ],\n    )\n    def test_non_repeatable_flags_rejected(args):\n        rc, out, err = run(args)\n>       assert out == \"\"\nE       AssertionError\n\neval/tests/test_argparse_validation.py:100: AssertionError",
-        "text_original_chars": 532,
         "time": 0.168
       },
       "name": "eval.tests.test_argparse_validation.test_non_repeatable_flags_rejected[args2]",
@@ -7351,8 +6958,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['-p', '-p']\n\n    @pytest.mark.parametrize(\n        \"args\",\n        [\n            [\"-p\", \"-p\"],\n            [\"--full-paths\", \"--full-paths\"],\n            [\"-j\", \"-j\"],\n            [\"--output-json\", \"--output-json\"],\n            [\"-o\", \"si\", \"-o\", \"kb\"],\n            [\"--output-format\", \"si\", \"--output-format\", \"kb\"],\n        ],\n    )\n    def test_non_repeatable_flags_rejected(args):\n        rc, out, err = run(args)\n>       assert out == \"\"\nE       AssertionError\n\neval/tests/test_argparse_validation.py:100: AssertionError",
-        "text_original_chars": 532,
         "time": 0.148
       },
       "name": "eval.tests.test_argparse_validation.test_non_repeatable_flags_rejected[args0]",
@@ -7362,8 +6967,6 @@
       "branch": "d42ad55b3a4b",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['-T', 'nope']\nexpected = \"invalid value 'nope' for '--threads <THREADS>'\"\n\n    @pytest.mark.parametrize(\n        \"args, expected\",\n        [\n            ([\"--depth=abc\"], \"invalid value 'abc' for '--depth <DEPTH>'\"),\n            ([\"-d\", \"abc\"], \"invalid value 'abc' for '--depth <DEPTH>'\"),\n            ([\"--threads\", \"nope\"], \"invalid value 'nope' for '--threads <THREADS>'\"),\n            ([\"-T\", \"nope\"], \"invalid value 'nope' for '--threads <THREADS>'\"),\n            ([\"--terminal-width\", \"NaN\"], \"invalid value 'NaN' for '--terminal-width <WIDTH>'\"),\n            ([\"-w\", \"NaN\"], \"invalid value 'NaN' for '--terminal-width <WIDTH>'\"),\n        ],\n    )\n    def test_invalid_integer_values(args, expected):\n        rc, out, err = run(args)\n>       assert out == \"\"\nE       AssertionError\n\neval/tests/test_argparse_validation.py:76: AssertionError",
-        "text_original_chars": 855,
         "time": 0.178
       },
       "name": "eval.tests.test_argparse_validation.test_invalid_integer_values[args3-invalid value 'nope' for '--threads <THREADS>']",
@@ -8221,8 +7824,6 @@
       "branch": "cfa2013a52b2",
       "extra": {
         "message": "AssertionError",
-        "text": "sample_tree = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw8/test_progress_indicator_writes2')\n\n    def test_progress_indicator_writes_to_stderr(sample_tree: Path):\n        # dust uses stderr for its progress indicator by default (carriage returns, etc.)\n        r = run(\"-c\", \"-b\", \"-n\", \"50\", str(sample_tree))\n        assert r.returncode == 0\n>       assert r.stderr != b\"\"\nE       AssertionError\n\neval/tests/test_io_behavior.py:95: AssertionError",
-        "text_original_chars": 453,
         "time": 0.191
       },
       "name": "eval.tests.test_io_behavior.test_progress_indicator_writes_to_stderr",
@@ -8696,8 +8297,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_ignore_directory_excludes_named_dir depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_ignore_directory_excludes_named_dir depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 159,
         "time": 0.001
       },
       "name": "eval.tests.test_behavior_tree.test_ignore_directory_excludes_named_dir",
@@ -8707,8 +8306,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_skip_total_removes_total_row depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_skip_total_removes_total_row depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 152,
         "time": 0.0
       },
       "name": "eval.tests.test_behavior_tree.test_skip_total_removes_total_row",
@@ -8718,8 +8315,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_only_file_and_only_dir_filters depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_only_file_and_only_dir_filters depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 154,
         "time": 0.001
       },
       "name": "eval.tests.test_behavior_tree.test_only_file_and_only_dir_filters",
@@ -8729,8 +8324,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_output_format_kb_accepts depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_output_format_kb_accepts depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 148,
         "time": 0.001
       },
       "name": "eval.tests.test_behavior_tree.test_output_format_kb_accepts",
@@ -8740,8 +8333,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_full_paths_option_shows_full_child_paths depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_full_paths_option_shows_full_child_paths depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 164,
         "time": 0.001
       },
       "name": "eval.tests.test_behavior_tree.test_full_paths_option_shows_full_child_paths",
@@ -8751,8 +8342,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_screen_reader_adds_depth_column depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_screen_reader_adds_depth_column depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 155,
         "time": 0.0
       },
       "name": "eval.tests.test_behavior_tree.test_screen_reader_adds_depth_column",
@@ -8762,8 +8351,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_files_from_and_files0_from depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_files_from_and_files0_from depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 150,
         "time": 0.001
       },
       "name": "eval.tests.test_behavior_tree.test_files_from_and_files0_from",
@@ -8773,8 +8360,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_number_of_lines_limits_output depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_number_of_lines_limits_output depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 153,
         "time": 0.001
       },
       "name": "eval.tests.test_behavior_tree.test_number_of_lines_limits_output",
@@ -8784,8 +8369,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_no_percent_bars_removes_percent_sign depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_no_percent_bars_removes_percent_sign depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 160,
         "time": 0.001
       },
       "name": "eval.tests.test_behavior_tree.test_no_percent_bars_removes_percent_sign",
@@ -8795,8 +8378,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_depth_limits_recursion depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_depth_limits_recursion depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 146,
         "time": 0.001
       },
       "name": "eval.tests.test_behavior_tree.test_depth_limits_recursion",
@@ -8806,8 +8387,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_ignore_hidden_excludes_dotfiles depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_ignore_hidden_excludes_dotfiles depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 155,
         "time": 0.001
       },
       "name": "eval.tests.test_behavior_tree.test_ignore_hidden_excludes_dotfiles",
@@ -8817,8 +8396,6 @@
       "branch": "6e5f38f8bf73",
       "extra": {
         "message": "test_output_json_writes_valid_json depends on test_basic_run_includes_root_and_children",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_output_json_writes_valid_json depends on test_basic_run_includes_root_and_children",
-        "text_original_chars": 153,
         "time": 0.001
       },
       "name": "eval.tests.test_behavior_tree.test_output_json_writes_valid_json",
@@ -9100,8 +8677,6 @@
       "branch": "bfee6b583f6f",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_flags.TestDepthFlags object at 0x728c90a030a0>\n\n    def test_d0_works_on_multiple(self):\n        \"\"\"Test -d 0 with multiple directories\"\"\"\n        result = run_dust([\"-c\", \"-d\", \"0\", TEST_DATA_DIR, TEST_DATA_DIR2])\n        assert result.returncode == 0\n>       assert \"test_dir\" in result.stdout\nE       AssertionError\n\neval/tests/test_flags.py:38: AssertionError",
-        "text_original_chars": 376,
         "time": 0.166
       },
       "name": "eval.tests.test_flags.TestDepthFlags.test_d0_works_on_multiple",
@@ -9167,8 +8742,6 @@
       "branch": "bfee6b583f6f",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_flags.TestOutputFlags object at 0x7957eb4c3d90>\n\n    def test_screen_reader(self):\n        \"\"\"Test -R screen-reader flag\"\"\"\n        result = run_dust([\"-c\", \"-R\", TEST_DATA_DIR])\n        assert result.returncode == 0\n>       assert \"test_dir   0\" in result.stdout\nE       AssertionError\n\neval/tests/test_flags.py:158: AssertionError",
-        "text_original_chars": 345,
         "time": 0.174
       },
       "name": "eval.tests.test_flags.TestOutputFlags.test_screen_reader",

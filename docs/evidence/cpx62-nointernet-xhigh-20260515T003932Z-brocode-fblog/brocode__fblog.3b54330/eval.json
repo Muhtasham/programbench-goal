@@ -855,6 +855,7 @@
     }
   ],
   "public_redactions": {
+    "extra_text": "redacted",
     "log_output": "redacted",
     "long_extra_text": "truncated to 2000 chars"
   },
@@ -992,8 +993,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_custom_main_line_format():\n        \"\"\"Test custom main line format.\"\"\"\n        log = '{\"message\": \"test\", \"level\": \"info\"}'\n        result = run(\"--main-line-format\", \"{{fblog_level}}: {{fblog_message}}\", stdin=log)\n        assert result.returncode == 0\n>       assert b\"INFO:\" in result.stdout or b\"info:\" in result.stdout\nE       AssertionError\n\neval/tests/test_additional_coverage.py:137: AssertionError",
-        "text_original_chars": 415,
         "time": 0.118
       },
       "name": "eval.tests.test_additional_coverage.test_custom_main_line_format",
@@ -1019,8 +1018,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_filter_nested_object_field():\n        \"\"\"Test filter accessing nested object fields.\"\"\"\n        log = '{\"message\": \"test\", \"meta\": {\"user\": \"alice\", \"id\": 123}, \"level\": \"info\"}'\n        result = run(\"-f\", 'meta.user == \"alice\"', stdin=log)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_additional_coverage.py:95: AssertionError",
-        "text_original_chars": 409,
         "time": 0.11
       },
       "name": "eval.tests.test_additional_coverage.test_filter_nested_object_field",
@@ -1118,8 +1115,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_files = <conftest.TempFiles object at 0x7692af174cd0>\n\n    def test_level_map_from_config(temp_files):\n        \"\"\"Test level mapping from configuration file.\"\"\"\n        config = \"\"\"\n    [level_map]\n    10 = \"trace\"\n    20 = \"debug\"\n    30 = \"info\"\n    \"\"\"\n        config_file = temp_files.create(\"config.toml\", config)\n        log = '{\"message\": \"test\", \"level\": \"10\"}'\n        result = run(\"--config-file\", str(config_file), stdin=log)\n        assert result.returncode == 0\n>       assert b\"TRACE\" in result.stdout\nE       AssertionError\n\neval/tests/test_additional_coverage.py:177: AssertionError",
-        "text_original_chars": 603,
         "time": 0.101
       },
       "name": "eval.tests.test_additional_coverage.test_level_map_from_config",
@@ -1225,8 +1220,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_generate_completions_bash():\n        \"\"\"Test generating bash completions.\"\"\"\n        result = run(\"--generate-completions\", \"bash\")\n>       assert result.returncode == 0\nE       AssertionError\n\neval/tests/test_completions.py:7: AssertionError",
-        "text_original_chars": 251,
         "time": 0.084
       },
       "name": "eval.tests.test_completions.test_generate_completions_bash",
@@ -1244,8 +1237,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_generate_completions_zsh():\n        \"\"\"Test generating zsh completions.\"\"\"\n        result = run(\"--generate-completions\", \"zsh\")\n>       assert result.returncode == 0\nE       AssertionError\n\neval/tests/test_completions.py:14: AssertionError",
-        "text_original_chars": 249,
         "time": 0.067
       },
       "name": "eval.tests.test_completions.test_generate_completions_zsh",
@@ -1311,8 +1302,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_config_with_level_mapping():\n        \"\"\"Test config file with level mapping.\"\"\"\n        with TempFiles() as tf:\n            config_content = \"\"\"\n    message_keys = [\"message\"]\n    level_keys = [\"level\"]\n    \n    [level_map]\n    10 = \"trace\"\n    20 = \"debug\"\n    30 = \"info\"\n    \"\"\"\n            config_file = tf.create(\"level_config.toml\", config_content)\n            json_input = '{\"message\": \"test\", \"level\": 30}'\n            result = run(\"--config-file\", str(config_file), stdin=json_input)\n            assert result.returncode == 0\n            assert b\"test\" in result.stdout\n            # Level 30 should map to INFO\n>           assert b\"INFO\" in result.stdout or b\"info\" in result.stdout\nE           AssertionError\n\neval/tests/test_configuration.py:37: AssertionError",
-        "text_original_chars": 781,
         "time": 0.087
       },
       "name": "eval.tests.test_configuration.test_config_with_level_mapping",
@@ -1482,8 +1471,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_files = <conftest.TempFiles object at 0x7d9f759f6770>\n\n    def test_invalid_config_file_malformed(temp_files):\n        \"\"\"Test handling of malformed configuration file.\"\"\"\n        config_file = temp_files.create(\"bad_config.toml\", \"this is not valid toml {{{\")\n        result = run(\"--config-file\", str(config_file), stdin='{\"message\": \"test\"}')\n        # Should fail or report error\n>       assert result.returncode != 0 or b\"Could not\" in result.stderr or b\"parse\" in result.stderr.lower()\nE       AssertionError\n\neval/tests/test_error_handling.py:17: AssertionError",
-        "text_original_chars": 573,
         "time": 0.098
       },
       "name": "eval.tests.test_error_handling.test_invalid_config_file_malformed",
@@ -1493,8 +1480,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_conflicting_flags_additional_and_excluded():\n        \"\"\"Test that -a and -x flags conflict.\"\"\"\n        result = run(\"-a\", \"field1\", \"-x\", \"field2\", stdin='{\"message\": \"test\"}')\n        # Should fail due to conflict\n>       assert result.returncode != 0 or (b\"error\" in result.stderr.lower() or b\"conflict\" in result.stderr.lower())\nE       AssertionError\n\neval/tests/test_error_handling.py:108: AssertionError",
-        "text_original_chars": 418,
         "time": 0.088
       },
       "name": "eval.tests.test_error_handling.test_conflicting_flags_additional_and_excluded",
@@ -1632,8 +1617,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_short_message_key_detection():\n        \"\"\"Test 'short_message' key detection (default message key).\"\"\"\n        log_line = '{\"short_message\": \"test\", \"level\": \"info\"}\\n'\n        result = run(stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_error_paths.py:90: AssertionError",
-        "text_original_chars": 366,
         "time": 0.095
       },
       "name": "eval.tests.test_error_paths.test_short_message_key_detection",
@@ -1683,8 +1666,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_default_log_settings():\n        \"\"\"Test default log settings initialization (log_settings.rs line 35-38).\"\"\"\n        log_line = '{\"short_message\": \"test\", \"level\": \"info\"}\\n'\n        result = run(stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_error_paths.py:76: AssertionError",
-        "text_original_chars": 372,
         "time": 0.097
       },
       "name": "eval.tests.test_error_paths.test_default_log_settings",
@@ -1822,8 +1803,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_filter_numeric_comparison():\n        \"\"\"Test filter with numeric comparison.\"\"\"\n        input_logs = \"\"\"{\"message\": \"test\", \"status\": {\"code\": 200}}\n    {\"message\": \"test\", \"status\": {\"code\": 404}}\n    {\"message\": \"test\", \"status\": {\"code\": 500}}\"\"\"\n        result = run(\"-f\", 'status.code >= 400', stdin=input_logs)\n        assert result.returncode == 0\n        output_lines = [l for l in result.stdout.decode().strip().split('\\n') if l]\n        # Should match 404 and 500\n>       assert len(output_lines) == 2\nE       AssertionError\n\neval/tests/test_filtering.py:67: AssertionError",
-        "text_original_chars": 592,
         "time": 0.124
       },
       "name": "eval.tests.test_filtering.test_filter_numeric_comparison",
@@ -1857,8 +1836,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_filter_nested_field():\n        \"\"\"Test filter on nested field.\"\"\"\n        input_logs = \"\"\"{\"message\": \"test\", \"log\": {\"level\": \"info\"}}\n    {\"message\": \"test\", \"log\": {\"level\": \"error\"}}\"\"\"\n        result = run(\"-f\", 'log.level == \"error\"', stdin=input_logs)\n        assert result.returncode == 0\n        # Should only output one line\n        output_lines = [l for l in result.stdout.decode().strip().split('\\n') if l]\n>       assert len(output_lines) == 1\nE       AssertionError\n\neval/tests/test_filtering.py:77: AssertionError",
-        "text_original_chars": 537,
         "time": 0.11
       },
       "name": "eval.tests.test_filtering.test_filter_nested_field",
@@ -1900,8 +1877,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_files = <conftest.TempFiles object at 0x711182e80820>\n\n    def test_map_level_config_file(temp_files):\n        \"\"\"Test level mapping via config file.\"\"\"\n        config_content = \"\"\"\n    [level_map]\n    10 = \"trace\"\n    20 = \"debug\"\n    30 = \"info\"\n    40 = \"warn\"\n    50 = \"error\"\n    60 = \"fatal\"\n    \"\"\"\n        config_file = temp_files.create(\"config.toml\", config_content)\n        log_line = '{\"message\": \"test\", \"level\": \"30\"}\\n'\n        result = run(\"--config-file\", str(config_file), stdin=log_line)\n        assert result.returncode == 0\n        assert b\"test\" in result.stdout\n>       assert b\"info\" in result.stdout.lower() or b\"INFO\" in result.stdout\nE       AssertionError\n\neval/tests/test_level_mapping.py:91: AssertionError",
-        "text_original_chars": 741,
         "time": 0.076
       },
       "name": "eval.tests.test_level_mapping.test_map_level_config_file",
@@ -1919,8 +1894,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_short_message_key():\n        \"\"\"Test 'short_message' key detection.\"\"\"\n        result = run(stdin='{\"short_message\": \"using short_message\", \"level\": \"info\"}')\n        assert result.returncode == 0\n>       assert b\"using short_message\" in result.stdout\nE       AssertionError\n\neval/tests/test_message_detection.py:20: AssertionError",
-        "text_original_chars": 340,
         "time": 0.094
       },
       "name": "eval.tests.test_message_detection.test_short_message_key",
@@ -2042,8 +2015,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_custom_main_line_format():\n        \"\"\"Test --main-line-format for custom output.\"\"\"\n        json_input = '{\"message\": \"custom format test\", \"level\": \"info\"}'\n        result = run(\"--main-line-format\", \"{{fblog_level}}: {{fblog_message}}\", stdin=json_input)\n        assert result.returncode == 0\n>       assert b\"info\" in result.stdout or b\"INFO\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:68: AssertionError",
-        "text_original_chars": 451,
         "time": 0.122
       },
       "name": "eval.tests.test_output_formatting.test_custom_main_line_format",
@@ -2053,8 +2024,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_custom_additional_value_format():\n        \"\"\"Test --additional-value-format for custom additional value output.\"\"\"\n        json_input = '{\"message\": \"test\", \"level\": \"info\", \"user\": \"alice\"}'\n        result = run(\"-a\", \"user\", \"--additional-value-format\", \"{{key}}={{value}}\", stdin=json_input)\n        assert result.returncode == 0\n>       assert b\"user\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:76: AssertionError",
-        "text_original_chars": 461,
         "time": 0.087
       },
       "name": "eval.tests.test_output_formatting.test_custom_additional_value_format",
@@ -2064,8 +2033,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_custom_additional_value_format():\n        \"\"\"Test custom additional value format.\"\"\"\n        log = '{\"message\": \"test\", \"level\": \"info\", \"user\": \"alice\"}'\n        result = run(\"-a\", \"user\", \"--additional-value-format\", \"{{key}}={{value}}\", stdin=log)\n        assert result.returncode == 0\n        assert b\"test\" in result.stdout\n>       assert b\"user=\" in result.stdout or b\"user\" in result.stdout\nE       AssertionError\n\neval/tests/test_additional_coverage.py:146: AssertionError",
-        "text_original_chars": 489,
         "time": 0.098
       },
       "name": "eval.tests.test_additional_coverage.test_custom_additional_value_format",
@@ -2075,8 +2042,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_filter_nested_array_index():\n        \"\"\"Test filter accessing nested array by index.\"\"\"\n        log = '{\"message\": \"test\", \"items\": [\"a\", \"b\", \"c\"], \"level\": \"info\"}'\n        result = run(\"-f\", 'items[2] == \"b\"', stdin=log)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_additional_coverage.py:102: AssertionError",
-        "text_original_chars": 393,
         "time": 0.088
       },
       "name": "eval.tests.test_additional_coverage.test_filter_nested_array_index",
@@ -2086,8 +2051,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_generate_completions_fish():\n        \"\"\"Test generating fish completions.\"\"\"\n        result = run(\"--generate-completions\", \"fish\")\n>       assert result.returncode == 0\nE       AssertionError\n\neval/tests/test_completions.py:21: AssertionError",
-        "text_original_chars": 252,
         "time": 0.102
       },
       "name": "eval.tests.test_completions.test_generate_completions_fish",
@@ -2097,8 +2060,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_files = <conftest.TempFiles object at 0x7692aefe6320>\n\n    def test_always_print_fields_from_config(temp_files):\n        \"\"\"Test always_print_fields configuration.\"\"\"\n        config = \"\"\"\n    message_keys = [\"message\"]\n    always_print_fields = [\"request_id\"]\n    \"\"\"\n        config_file = temp_files.create(\"config.toml\", config)\n        log = '{\"message\": \"test\", \"level\": \"info\", \"request_id\": \"req-123\"}'\n        result = run(\"--config-file\", str(config_file), stdin=log)\n        assert result.returncode == 0\n        assert b\"test\" in result.stdout\n        # request_id should always be shown\n>       assert b\"request_id\" in result.stdout or b\"req-123\" in result.stdout\nE       AssertionError\n\neval/tests/test_additional_coverage.py:192: AssertionError",
-        "text_original_chars": 762,
         "time": 0.133
       },
       "name": "eval.tests.test_additional_coverage.test_always_print_fields_from_config",
@@ -2204,8 +2165,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_sample_nested_with_filter():\n        \"\"\"Test filtering sample_nested.json.log.\"\"\"\n        if Path(\"sample_nested.json.log\").exists():\n            result = run(\"-f\", \"status.a == 100\", \"sample_nested.json.log\")\n            assert result.returncode == 0\n            # Should only match one entry\n            output_lines = [l for l in result.stdout.decode().strip().split('\\n') if l]\n>           assert len(output_lines) == 1\nE           AssertionError\n\neval/tests/test_real_samples.py:28: AssertionError",
-        "text_original_chars": 511,
         "time": 0.097
       },
       "name": "eval.tests.test_real_samples.test_sample_nested_with_filter",
@@ -2287,8 +2246,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_loglevel_key_detection():\n        \"\"\"Test 'loglevel' key as level (default level key).\"\"\"\n        log_line = '{\"message\": \"test\", \"loglevel\": \"warn\"}\\n'\n        result = run(stdin=log_line)\n        assert result.returncode == 0\n        assert b\"test\" in result.stdout\n>       assert b\"warn\" in result.stdout.lower() or b\"WARN\" in result.stdout\nE       AssertionError\n\neval/tests/test_error_paths.py:106: AssertionError",
-        "text_original_chars": 427,
         "time": 0.101
       },
       "name": "eval.tests.test_error_paths.test_loglevel_key_detection",
@@ -2474,8 +2431,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_filter_array_access():\n        \"\"\"Test filter on array elements.\"\"\"\n        input_logs = \"\"\"{\"message\": \"test\", \"tags\": [\"a\", \"b\", \"c\"]}\n    {\"message\": \"test\", \"tags\": [\"x\", \"y\", \"z\"]}\"\"\"\n        result = run(\"-f\", 'tags[1] == \"a\"', stdin=input_logs)\n        assert result.returncode == 0\n        # Should match first entry (Lua arrays are 1-indexed)\n        output_lines = [l for l in result.stdout.decode().strip().split('\\n') if l]\n>       assert len(output_lines) == 1\nE       AssertionError\n\neval/tests/test_filtering.py:87: AssertionError",
-        "text_original_chars": 554,
         "time": 0.152
       },
       "name": "eval.tests.test_filtering.test_filter_array_access",
@@ -2557,8 +2512,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_red_helper():\n        \"\"\"Test red color helper.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{red message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:27: AssertionError",
-        "text_original_chars": 354,
         "time": 0.117
       },
       "name": "eval.tests.test_template_helpers.test_red_helper",
@@ -2568,8 +2521,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_yellow_helper():\n        \"\"\"Test yellow color helper.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{yellow message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:18: AssertionError",
-        "text_original_chars": 363,
         "time": 0.117
       },
       "name": "eval.tests.test_template_helpers.test_yellow_helper",
@@ -2579,8 +2530,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_green_helper():\n        \"\"\"Test green color helper.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{green message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:51: AssertionError",
-        "text_original_chars": 360,
         "time": 0.11
       },
       "name": "eval.tests.test_template_helpers.test_green_helper",
@@ -2590,8 +2539,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_bold_helper():\n        \"\"\"Test bold helper in main line format.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{bold message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:9: AssertionError",
-        "text_original_chars": 370,
         "time": 0.129
       },
       "name": "eval.tests.test_template_helpers.test_bold_helper",
@@ -2601,8 +2548,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_blue_helper():\n        \"\"\"Test blue color helper.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{blue message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:35: AssertionError",
-        "text_original_chars": 357,
         "time": 0.091
       },
       "name": "eval.tests.test_template_helpers.test_blue_helper",
@@ -2612,8 +2557,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_purple_helper():\n        \"\"\"Test purple/magenta color helper.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{purple message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:43: AssertionError",
-        "text_original_chars": 371,
         "time": 0.118
       },
       "name": "eval.tests.test_template_helpers.test_purple_helper",
@@ -2623,8 +2566,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_cyan_helper():\n        \"\"\"Test cyan color helper.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{cyan message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:59: AssertionError",
-        "text_original_chars": 357,
         "time": 0.12
       },
       "name": "eval.tests.test_template_helpers.test_cyan_helper",
@@ -2650,8 +2591,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_level_style_err():\n        \"\"\"Test level_style helper with err level.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"err\"}\\n'\n        result = run(\"--main-line-format\", \"{{level_style level}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"err\" in result.stdout.lower() or b\"ERR\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:118: AssertionError",
-        "text_original_chars": 416,
         "time": 0.131
       },
       "name": "eval.tests.test_template_helpers.test_level_style_err",
@@ -2661,8 +2600,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_level_style_fatal():\n        \"\"\"Test level_style helper with fatal level.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"fatal\"}\\n'\n        result = run(\"--main-line-format\", \"{{level_style level}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"fatal\" in result.stdout.lower() or b\"FATAL\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:125: AssertionError",
-        "text_original_chars": 426,
         "time": 0.126
       },
       "name": "eval.tests.test_template_helpers.test_level_style_fatal",
@@ -2688,8 +2625,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_min_size_helper():\n        \"\"\"Test min_size helper.\"\"\"\n        log_line = '{\"message\": \"short\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{min_size 20 message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"short\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:158: AssertionError",
-        "text_original_chars": 369,
         "time": 0.129
       },
       "name": "eval.tests.test_template_helpers.test_min_size_helper",
@@ -2707,8 +2642,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_fixed_size_truncation():\n        \"\"\"Test fixed_size helper truncates long strings.\"\"\"\n        log_line = '{\"message\": \"this is a very long message\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{fixed_size 10 message}}\", stdin=log_line)\n        assert result.returncode == 0\n        # Should be truncated to 10 chars\n        decoded = result.stdout.decode(errors='ignore')\n>       assert \"this is a \" in decoded or \"this\" in decoded\nE       AssertionError\n\neval/tests/test_template_helpers.py:151: AssertionError",
-        "text_original_chars": 541,
         "time": 0.127
       },
       "name": "eval.tests.test_template_helpers.test_fixed_size_truncation",
@@ -2734,8 +2667,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_additional_value_format_with_helpers():\n        \"\"\"Test additional value format with helpers.\"\"\"\n        log_line = '{\"message\": \"test\", \"extra\": \"value\", \"level\": \"info\"}\\n'\n        result = run(\"-a\", \"extra\", \"--additional-value-format\", \"{{bold key}}: {{value}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"extra\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:190: AssertionError",
-        "text_original_chars": 450,
         "time": 0.077
       },
       "name": "eval.tests.test_template_helpers.test_additional_value_format_with_helpers",
@@ -2745,8 +2676,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_helper_with_nested_field():\n        \"\"\"Test helper with nested field.\"\"\"\n        log_line = '{\"nested\": {\"value\": \"test\"}, \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{bold nested.value}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:183: AssertionError",
-        "text_original_chars": 393,
         "time": 0.11
       },
       "name": "eval.tests.test_template_helpers.test_helper_with_nested_field",
@@ -2764,8 +2693,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_at_timestamp_key():\n        \"\"\"Test '@timestamp' key (Elasticsearch style).\"\"\"\n        log_line = '{\"message\": \"test\", \"@timestamp\": \"2023-01-01T12:00:00Z\", \"level\": \"info\"}\\n'\n        result = run(stdin=log_line)\n        assert result.returncode == 0\n        assert b\"test\" in result.stdout\n>       assert b\"2023\" in result.stdout or b\"12:00\" in result.stdout\nE       AssertionError\n\neval/tests/test_time_handling.py:27: AssertionError",
-        "text_original_chars": 445,
         "time": 0.111
       },
       "name": "eval.tests.test_time_handling.test_at_timestamp_key",
@@ -2775,8 +2702,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_array_with_number_values():\n        \"\"\"Test filtering arrays with number values.\"\"\"\n        log_line = '{\"message\": \"test\", \"numbers\": [1, 2, 3], \"level\": \"info\"}\\n'\n        result = run(\"-f\", \"numbers[1] == 1\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_string_escaping.py:54: AssertionError",
-        "text_original_chars": 392,
         "time": 0.131
       },
       "name": "eval.tests.test_string_escaping.test_array_with_number_values",
@@ -2794,8 +2719,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_level_style_debug():\n        \"\"\"Test level_style helper with debug level.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"debug\"}\\n'\n        result = run(\"--main-line-format\", \"{{level_style level}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"debug\" in result.stdout.lower() or b\"DEBUG\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:90: AssertionError",
-        "text_original_chars": 425,
         "time": 0.126
       },
       "name": "eval.tests.test_template_helpers.test_level_style_debug",
@@ -2813,8 +2736,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_level_style_warn():\n        \"\"\"Test level_style helper with warn level.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"warn\"}\\n'\n        result = run(\"--main-line-format\", \"{{level_style level}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"warn\" in result.stdout.lower() or b\"WARN\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:97: AssertionError",
-        "text_original_chars": 420,
         "time": 0.12
       },
       "name": "eval.tests.test_template_helpers.test_level_style_warn",
@@ -2824,8 +2745,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_level_style_trace():\n        \"\"\"Test level_style helper with trace level.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"trace\"}\\n'\n        result = run(\"--main-line-format\", \"{{level_style level}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"trace\" in result.stdout.lower() or b\"TRACE\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:83: AssertionError",
-        "text_original_chars": 425,
         "time": 0.13
       },
       "name": "eval.tests.test_template_helpers.test_level_style_trace",
@@ -2835,8 +2754,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_color_rgb_helper():\n        \"\"\"Test RGB color helper.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{color_rgb 255 0 0 message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:67: AssertionError",
-        "text_original_chars": 374,
         "time": 0.107
       },
       "name": "eval.tests.test_template_helpers.test_color_rgb_helper",
@@ -2846,8 +2763,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_uppercase_helper():\n        \"\"\"Test uppercase helper.\"\"\"\n        log_line = '{\"message\": \"test lowercase\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{uppercase message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"TEST LOWERCASE\" in result.stdout or b\"TEST\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:76: AssertionError",
-        "text_original_chars": 414,
         "time": 0.1
       },
       "name": "eval.tests.test_template_helpers.test_uppercase_helper",
@@ -2865,8 +2780,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_level_style_warning():\n        \"\"\"Test level_style helper with warning level.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"warning\"}\\n'\n        result = run(\"--main-line-format\", \"{{level_style level}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"warn\" in result.stdout.lower() or b\"WARNING\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:104: AssertionError",
-        "text_original_chars": 433,
         "time": 0.095
       },
       "name": "eval.tests.test_template_helpers.test_level_style_warning",
@@ -2876,8 +2789,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_level_style_error():\n        \"\"\"Test level_style helper with error level.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"error\"}\\n'\n        result = run(\"--main-line-format\", \"{{level_style level}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"error\" in result.stdout.lower() or b\"ERROR\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:111: AssertionError",
-        "text_original_chars": 426,
         "time": 0.113
       },
       "name": "eval.tests.test_template_helpers.test_level_style_error",
@@ -2895,8 +2806,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_fixed_size_helper():\n        \"\"\"Test fixed_size helper.\"\"\"\n        log_line = '{\"message\": \"short\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{fixed_size 20 message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"short\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:139: AssertionError",
-        "text_original_chars": 375,
         "time": 0.101
       },
       "name": "eval.tests.test_template_helpers.test_fixed_size_helper",
@@ -2906,8 +2815,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_level_style_unknown():\n        \"\"\"Test level_style helper with unknown level.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"unknown\"}\\n'\n        result = run(\"--main-line-format\", \"{{level_style level}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"unknown\" in result.stdout.lower() or b\"UNKNOWN\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:132: AssertionError",
-        "text_original_chars": 436,
         "time": 0.129
       },
       "name": "eval.tests.test_template_helpers.test_level_style_unknown",
@@ -2917,8 +2824,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_combined_helpers():\n        \"\"\"Test multiple helpers combined.\"\"\"\n        log_line = '{\"message\": \"test\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{bold (uppercase (cyan message))}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"TEST\" in result.stdout or b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:176: AssertionError",
-        "text_original_chars": 418,
         "time": 0.095
       },
       "name": "eval.tests.test_template_helpers.test_combined_helpers",
@@ -2928,8 +2833,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_min_size_no_truncation():\n        \"\"\"Test min_size helper doesn't truncate.\"\"\"\n        log_line = '{\"message\": \"this is a very long message\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{min_size 10 message}}\", stdin=log_line)\n        assert result.returncode == 0\n        # Should NOT be truncated\n>       assert b\"this is a very long message\" in result.stdout\nE       AssertionError\n\neval/tests/test_template_helpers.py:169: AssertionError",
-        "text_original_chars": 471,
         "time": 0.128
       },
       "name": "eval.tests.test_template_helpers.test_min_size_no_truncation",
@@ -3011,8 +2914,6 @@
       "branch": "d14b27faa8de",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_timestamp_in_main_format():\n        \"\"\"Test timestamp display in custom format.\"\"\"\n        log_line = '{\"message\": \"test\", \"timestamp\": \"2023-01-01T12:00:00Z\", \"level\": \"info\"}\\n'\n        result = run(\"--main-line-format\", \"{{fblog_timestamp}}: {{fblog_message}}\", stdin=log_line)\n        assert result.returncode == 0\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_time_handling.py:94: AssertionError",
-        "text_original_chars": 443,
         "time": 0.135
       },
       "name": "eval.tests.test_time_handling.test_timestamp_in_main_format",
@@ -3142,8 +3043,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_configuration.TestConfiguration object at 0x788f4057a470>\ntemp_files = <conftest.temp_files.<locals>.TempFiles object at 0x788f40579f90>\n\n        def test_config_with_custom_format(self, temp_files):\n            \"\"\"Test config file with custom format.\"\"\"\n            config = temp_files.create(\"format.toml\", \"\"\"\n    message_keys = [\"message\"]\n    main_line_format = \"CUSTOM: {{fblog_message}}\"\n    \"\"\")\n            result = run(\"--config-file\", str(config),\n                         stdin='{\"message\": \"test\"}\\n')\n            assert result.returncode == 0\n>           assert b\"CUSTOM:\" in result.stdout\nE           AssertionError\n\neval/tests/test_configuration.py:43: AssertionError",
-        "text_original_chars": 696,
         "time": 0.114
       },
       "name": "eval.tests.test_configuration.TestConfiguration.test_config_with_custom_format",
@@ -3169,8 +3068,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_completions.TestCompletions object at 0x7b234f87d720>\n\n    def test_generate_bash_completions(self):\n        \"\"\"Test generating bash completions.\"\"\"\n        result = run(\"--generate-completions\", \"bash\")\n>       assert result.returncode == 0\nE       AssertionError\n\neval/tests/test_completions.py:12: AssertionError",
-        "text_original_chars": 328,
         "time": 0.118
       },
       "name": "eval.tests.test_completions.TestCompletions.test_generate_bash_completions",
@@ -3196,8 +3093,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_completions.TestCompletions object at 0x72dac6ca32b0>\n\n    def test_generate_fish_completions(self):\n        \"\"\"Test generating fish completions.\"\"\"\n        result = run(\"--generate-completions\", \"fish\")\n>       assert result.returncode == 0\nE       AssertionError\n\neval/tests/test_completions.py:27: AssertionError",
-        "text_original_chars": 328,
         "time": 0.123
       },
       "name": "eval.tests.test_completions.TestCompletions.test_generate_fish_completions",
@@ -3255,8 +3150,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_configuration.TestConfiguration object at 0x7c18206299c0>\ntemp_files = <conftest.temp_files.<locals>.TempFiles object at 0x7c182043ae00>\n\n        def test_config_with_level_map(self, temp_files):\n            \"\"\"Test config file with level mapping.\"\"\"\n            config = temp_files.create(\"config.toml\", \"\"\"\n    message_keys = [\"message\"]\n    [level_map]\n    10 = \"trace\"\n    20 = \"debug\"\n    30 = \"info\"\n    \"\"\")\n            result = run(\"--config-file\", str(config),\n                         stdin='{\"message\": \"test\", \"level\": \"10\"}\\n')\n            assert result.returncode == 0\n>           assert b\"TRACE\" in result.stdout or b\"trace\" in result.stdout.lower()\nE           AssertionError\n\neval/tests/test_configuration.py:32: AssertionError",
-        "text_original_chars": 757,
         "time": 0.09
       },
       "name": "eval.tests.test_configuration.TestConfiguration.test_config_with_level_map",
@@ -3450,8 +3343,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_error_handling.TestErrorHandling object at 0x795001bcc730>\n\n    def test_conflicting_flags_additional_and_excluded(self):\n        \"\"\"Test that -a and -x flags conflict.\"\"\"\n        result = run(\"-a\", \"field1\", \"-x\", \"field2\",\n                     stdin='{\"message\": \"test\"}\\n')\n        # Should fail due to conflicting arguments\n>       assert result.returncode != 0\nE       AssertionError\n\neval/tests/test_error_handling.py:14: AssertionError",
-        "text_original_chars": 455,
         "time": 0.077
       },
       "name": "eval.tests.test_error_handling.TestErrorHandling.test_conflicting_flags_additional_and_excluded",
@@ -3621,8 +3512,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_filtering.TestFiltering object at 0x7fe059c64c70>\n\n    def test_filter_nested_field(self):\n        \"\"\"Test filtering on nested field.\"\"\"\n        result = run(\"-f\", 'status.code == 200',\n                     stdin='{\"message\": \"ok\", \"status\": {\"code\": 200}}\\n'\n                           '{\"message\": \"error\", \"status\": {\"code\": 500}}\\n')\n        assert result.returncode == 0\n>       assert b\"ok\" in result.stdout\nE       AssertionError\n\neval/tests/test_filtering.py:82: AssertionError",
-        "text_original_chars": 498,
         "time": 0.095
       },
       "name": "eval.tests.test_filtering.TestFiltering.test_filter_nested_field",
@@ -3632,8 +3521,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_filtering.TestFiltering object at 0x7c5bb2e4d780>\n\n    def test_filter_array_access(self):\n        \"\"\"Test filtering with array element access.\"\"\"\n        result = run(\"-f\", 'items[1] == \"first\"',\n                     stdin='{\"message\": \"has first\", \"items\": [\"first\", \"second\"]}\\n'\n                           '{\"message\": \"no first\", \"items\": [\"other\", \"things\"]}\\n')\n        assert result.returncode == 0\n        # Lua arrays are 1-indexed\n>       assert b\"has first\" in result.stdout\nE       AssertionError\n\neval/tests/test_filtering.py:93: AssertionError",
-        "text_original_chars": 571,
         "time": 0.095
       },
       "name": "eval.tests.test_filtering.TestFiltering.test_filter_array_access",
@@ -3691,8 +3578,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_json_parsing.TestJSONParsing object at 0x7507d6d63c10>\n\n    def test_parse_at_timestamp_field(self):\n        \"\"\"Test parsing '@timestamp' field.\"\"\"\n        result = run(stdin='{\"message\": \"test\", \"@timestamp\": \"2023-05-01T10:30:00Z\"}\\n')\n        assert result.returncode == 0\n>       assert b\"2023-05-01\" in result.stdout\nE       AssertionError\n\neval/tests/test_json_parsing.py:44: AssertionError",
-        "text_original_chars": 409,
         "time": 0.074
       },
       "name": "eval.tests.test_json_parsing.TestJSONParsing.test_parse_at_timestamp_field",
@@ -3702,8 +3587,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_json_parsing.TestJSONParsing object at 0x703084fb60b0>\n\n    def test_parse_short_message_field(self):\n        \"\"\"Test parsing 'short_message' field.\"\"\"\n        result = run(stdin='{\"short_message\": \"short msg\", \"level\": \"info\"}\\n')\n        assert result.returncode == 0\n>       assert b\"short msg\" in result.stdout\nE       AssertionError\n\neval/tests/test_json_parsing.py:25: AssertionError",
-        "text_original_chars": 402,
         "time": 0.097
       },
       "name": "eval.tests.test_json_parsing.TestJSONParsing.test_parse_short_message_field",
@@ -3713,8 +3596,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_json_parsing.TestJSONParsing object at 0x7fcc8be47c40>\n\n    def test_parse_loglevel_field(self):\n        \"\"\"Test parsing 'loglevel' field.\"\"\"\n        result = run(stdin='{\"message\": \"test\", \"loglevel\": \"info\"}\\n')\n        assert result.returncode == 0\n>       assert b\"INFO\" in result.stdout\nE       AssertionError\n\neval/tests/test_json_parsing.py:69: AssertionError",
-        "text_original_chars": 379,
         "time": 0.068
       },
       "name": "eval.tests.test_json_parsing.TestJSONParsing.test_parse_loglevel_field",
@@ -3820,8 +3701,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_output_formatting.TestOutputFormatting object at 0x70cb144537c0>\n\n    def test_main_line_format_with_timestamp(self):\n        \"\"\"Test custom format including timestamp.\"\"\"\n        result = run(\"--main-line-format\", \"[{{fblog_timestamp}}] {{fblog_message}}\",\n                     stdin='{\"message\": \"test\", \"time\": \"2023-01-01T00:00:00Z\"}\\n')\n        assert result.returncode == 0\n>       assert b\"2023-01-01\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:22: AssertionError",
-        "text_original_chars": 518,
         "time": 0.087
       },
       "name": "eval.tests.test_output_formatting.TestOutputFormatting.test_main_line_format_with_timestamp",
@@ -3831,8 +3710,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_output_formatting.TestOutputFormatting object at 0x75c587279690>\n\n    def test_main_line_format_custom(self):\n        \"\"\"Test --main-line-format with custom template.\"\"\"\n        result = run(\"--main-line-format\", \"{{fblog_level}}: {{fblog_message}}\",\n                     stdin='{\"message\": \"test\", \"level\": \"info\"}\\n')\n        assert result.returncode == 0\n>       assert b\"info:\" in result.stdout or b\"INFO:\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:14: AssertionError",
-        "text_original_chars": 520,
         "time": 0.098
       },
       "name": "eval.tests.test_output_formatting.TestOutputFormatting.test_main_line_format_custom",
@@ -3842,8 +3719,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_output_formatting.TestOutputFormatting object at 0x758c126ae200>\n\n    def test_main_line_format_with_prefix(self):\n        \"\"\"Test custom format with prefix variable.\"\"\"\n        result = run(\"-p\", \"--main-line-format\", \"{{fblog_prefix}} {{fblog_message}}\",\n                     stdin='myprefix | {\"message\": \"test\", \"level\": \"info\"}\\n')\n        assert result.returncode == 0\n>       assert b\"myprefix\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:30: AssertionError",
-        "text_original_chars": 511,
         "time": 0.096
       },
       "name": "eval.tests.test_output_formatting.TestOutputFormatting.test_main_line_format_with_prefix",
@@ -3853,8 +3728,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_output_formatting.TestOutputFormatting object at 0x746b76297280>\n\n    def test_format_with_helpers_bold(self):\n        \"\"\"Test format with bold helper.\"\"\"\n        result = run(\"--main-line-format\", \"{{bold fblog_message}}\",\n                     stdin='{\"message\": \"bold text\", \"level\": \"info\"}\\n')\n        assert result.returncode == 0\n>       assert b\"bold text\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:54: AssertionError",
-        "text_original_chars": 473,
         "time": 0.094
       },
       "name": "eval.tests.test_output_formatting.TestOutputFormatting.test_format_with_helpers_bold",
@@ -3864,8 +3737,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_output_formatting.TestOutputFormatting object at 0x758175c87d00>\n\n    def test_additional_value_format_custom(self):\n        \"\"\"Test --additional-value-format with custom template.\"\"\"\n        result = run(\"-a\", \"custom_field\",\n                     \"--additional-value-format\", \"{{key}}={{value}}\",\n                     stdin='{\"message\": \"test\", \"custom_field\": \"myvalue\"}\\n')\n        assert result.returncode == 0\n>       assert b\"custom_field\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:39: AssertionError",
-        "text_original_chars": 555,
         "time": 0.078
       },
       "name": "eval.tests.test_output_formatting.TestOutputFormatting.test_additional_value_format_custom",
@@ -3875,8 +3746,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_output_formatting.TestOutputFormatting object at 0x75dfa3198e80>\n\n    def test_format_with_nested_field_access(self):\n        \"\"\"Test format accessing nested fields.\"\"\"\n        result = run(\"--main-line-format\", \"{{nested.value}}\",\n                     stdin='{\"message\": \"test\", \"nested\": {\"value\": \"deep\"}}\\n')\n        assert result.returncode == 0\n>       assert b\"deep\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:47: AssertionError",
-        "text_original_chars": 483,
         "time": 0.081
       },
       "name": "eval.tests.test_output_formatting.TestOutputFormatting.test_format_with_nested_field_access",
@@ -3894,8 +3763,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_completions.TestCompletions object at 0x7b234f87df00>\n\n    def test_generate_zsh_completions(self):\n        \"\"\"Test generating zsh completions.\"\"\"\n        result = run(\"--generate-completions\", \"zsh\")\n>       assert result.returncode == 0\nE       AssertionError\n\neval/tests/test_completions.py:20: AssertionError",
-        "text_original_chars": 325,
         "time": 0.125
       },
       "name": "eval.tests.test_completions.TestCompletions.test_generate_zsh_completions",
@@ -3921,8 +3788,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_completions.TestCompletions object at 0x72dac6ca23e0>\n\n    def test_completions_output_to_stdout(self):\n        \"\"\"Test that completions are written to stdout.\"\"\"\n        result = run(\"--generate-completions\", \"bash\")\n>       assert result.returncode == 0\nE       AssertionError\n\neval/tests/test_completions.py:35: AssertionError",
-        "text_original_chars": 342,
         "time": 0.145
       },
       "name": "eval.tests.test_completions.TestCompletions.test_completions_output_to_stdout",
@@ -4068,8 +3933,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_real_samples.TestRealSamples object at 0x79500196a200>\n\n    def test_sample_nested_filter_by_status(self):\n        \"\"\"Test filtering nested sample by status field.\"\"\"\n        result = run(\"-f\", \"status.a == 100\", \"sample_nested.json.log\")\n        assert result.returncode == 0\n        # Should show only entries with status.a == 100\n>       assert b\"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_real_samples.py:54: AssertionError",
-        "text_original_chars": 460,
         "time": 0.141
       },
       "name": "eval.tests.test_real_samples.TestRealSamples.test_sample_nested_filter_by_status",
@@ -4103,8 +3966,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_real_samples.TestRealSamples object at 0x788f4032a9b0>\n\n    def test_sample_elastic_log(self):\n        \"\"\"Test sample_elastic.log.\"\"\"\n        result = run(\"sample_elastic.log\")\n        assert result.returncode == 0\n        assert b\"Hello, world!\" in result.stdout\n>       assert b\"INFO\" in result.stdout or b\"WARN\" in result.stdout\nE       AssertionError\n\neval/tests/test_real_samples.py:77: AssertionError",
-        "text_original_chars": 419,
         "time": 0.136
       },
       "name": "eval.tests.test_real_samples.TestRealSamples.test_sample_elastic_log",
@@ -4226,8 +4087,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_output_formatting.TestOutputFormatting object at 0x70cb141cc3a0>\n\n    def test_format_with_fixed_size(self):\n        \"\"\"Test format with fixed_size helper.\"\"\"\n        result = run(\"--main-line-format\", \"{{fixed_size 10 fblog_level}}\",\n                     stdin='{\"message\": \"test\", \"level\": \"info\"}\\n')\n        assert result.returncode == 0\n        # Output should be formatted with fixed width\n>       assert b\"INFO\" in result.stdout or b\"info\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:76: AssertionError",
-        "text_original_chars": 556,
         "time": 0.081
       },
       "name": "eval.tests.test_output_formatting.TestOutputFormatting.test_format_with_fixed_size",
@@ -4269,8 +4128,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_output_formatting.TestOutputFormatting object at 0x746b76010640>\n\n    def test_format_with_min_size(self):\n        \"\"\"Test format with min_size helper.\"\"\"\n        result = run(\"--main-line-format\", \"{{min_size 20 fblog_message}}\",\n                     stdin='{\"message\": \"short\", \"level\": \"info\"}\\n')\n        assert result.returncode == 0\n>       assert b\"short\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:83: AssertionError",
-        "text_original_chars": 472,
         "time": 0.107
       },
       "name": "eval.tests.test_output_formatting.TestOutputFormatting.test_format_with_min_size",
@@ -4280,8 +4137,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_output_formatting.TestOutputFormatting object at 0x75c58727b6d0>\n\n    def test_format_with_helpers_uppercase(self):\n        \"\"\"Test format with uppercase helper.\"\"\"\n        result = run(\"--main-line-format\", \"{{uppercase fblog_level}}\",\n                     stdin='{\"message\": \"test\", \"level\": \"info\"}\\n')\n        assert result.returncode == 0\n>       assert b\"INFO\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:61: AssertionError",
-        "text_original_chars": 476,
         "time": 0.113
       },
       "name": "eval.tests.test_output_formatting.TestOutputFormatting.test_format_with_helpers_uppercase",
@@ -4291,8 +4146,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_output_formatting.TestOutputFormatting object at 0x75dfa2f14940>\n\n    def test_format_level_style_helper(self):\n        \"\"\"Test level_style helper for colored levels.\"\"\"\n        result = run(\"--main-line-format\", \"{{level_style fblog_level}}\",\n                     stdin='{\"message\": \"test\", \"level\": \"error\"}\\n')\n        assert result.returncode == 0\n        # Should apply color based on level\n>       assert b\"ERROR\" in result.stdout or b\"error\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:91: AssertionError",
-        "text_original_chars": 558,
         "time": 0.102
       },
       "name": "eval.tests.test_output_formatting.TestOutputFormatting.test_format_level_style_helper",
@@ -4302,8 +4155,6 @@
       "branch": "cbaf2db7a9ec",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_output_formatting.TestOutputFormatting object at 0x758c124280a0>\n\n    def test_format_with_color_helpers(self):\n        \"\"\"Test format with color helpers.\"\"\"\n        result = run(\"--main-line-format\", \"{{red fblog_message}}\",\n                     stdin='{\"message\": \"error text\", \"level\": \"error\"}\\n')\n        assert result.returncode == 0\n>       assert b\"error text\" in result.stdout\nE       AssertionError\n\neval/tests/test_output_formatting.py:68: AssertionError",
-        "text_original_chars": 478,
         "time": 0.07
       },
       "name": "eval.tests.test_output_formatting.TestOutputFormatting.test_format_with_color_helpers",
@@ -4457,8 +4308,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:25: in test_config_invalid_toml_syntax_error\n    assert \"unclosed array\" in stderr\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.138
       },
       "name": "tests.test_config.test_config_invalid_toml_syntax_error",
@@ -4468,8 +4317,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:372: in test_cli_main_line_format_overrides_config\n    assert result.stdout.decode() == (RESOURCES_CLI / \"cli_format_override.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 186,
         "time": 0.138
       },
       "name": "tests.test_config.test_cli_main_line_format_overrides_config",
@@ -4495,8 +4342,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:120: in test_config_duplicate_keys_error\n    assert result.returncode == 101\nE   AssertionError",
-        "text_original_chars": 116,
         "time": 0.133
       },
       "name": "tests.test_config.test_config_duplicate_keys_error",
@@ -4546,8 +4391,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:186: in test_shell_completion_bash_structure\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.145
       },
       "name": "tests.test_edge_cases.test_shell_completion_bash_structure",
@@ -4581,8 +4424,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:271: in test_cli_overrides_config_level_map\n    assert result.stdout.decode() == (RESOURCES_CLI / \"cli_overrides_config.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 180,
         "time": 0.122
       },
       "name": "tests.test_config.test_cli_overrides_config_level_map",
@@ -4624,8 +4465,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:820: in test_template_render_type_mismatch_error\n    assert output == (RESOURCES / \"template_render_error.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 170,
         "time": 0.087
       },
       "name": "tests.test_edge_cases.test_template_render_type_mismatch_error",
@@ -4643,8 +4482,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:734: in test_filter_with_string_operations\n    assert \"TEST MESSAGE\" in output\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.099
       },
       "name": "tests.test_edge_cases.test_filter_with_string_operations",
@@ -4670,8 +4507,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:111: in test_invalid_config_file_error_message\n    assert \"Could not parse config file\" in combined\nE   AssertionError",
-        "text_original_chars": 143,
         "time": 0.094
       },
       "name": "tests.test_edge_cases.test_invalid_config_file_error_message",
@@ -4689,8 +4524,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:665: in test_main_line_format_custom\n    assert output == (RESOURCES / \"main_line_format_custom.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 160,
         "time": 0.08
       },
       "name": "tests.test_edge_cases.test_main_line_format_custom",
@@ -4756,8 +4589,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:281: in test_filter_with_null_value_comparison\n    assert output == (RESOURCES / \"filter_null_value.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 164,
         "time": 0.079
       },
       "name": "tests.test_edge_cases.test_filter_with_null_value_comparison",
@@ -4847,8 +4678,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:625: in test_filter_with_nested_array_access\n    assert \"test\" in output\nE   AssertionError",
-        "text_original_chars": 116,
         "time": 0.107
       },
       "name": "tests.test_edge_cases.test_filter_with_nested_array_access",
@@ -4930,8 +4759,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:1001: in test_invalid_regex_in_filter_graceful_error\n    assert \"Failed to apply filter expression\" in stderr\nE   AssertionError",
-        "text_original_chars": 153,
         "time": 0.097
       },
       "name": "tests.test_edge_cases.test_invalid_regex_in_filter_graceful_error",
@@ -4949,8 +4776,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_fields.py:109: in test_nested_field_display_with_dump_all\n    assert output == golden\nE   AssertionError",
-        "text_original_chars": 115,
         "time": 0.102
       },
       "name": "tests.test_fields.test_nested_field_display_with_dump_all",
@@ -4968,8 +4793,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_fields.py:512: in test_unicode_and_special_characters_in_fields\n    assert output == golden\nE   AssertionError",
-        "text_original_chars": 121,
         "time": 0.098
       },
       "name": "tests.test_fields.test_unicode_and_special_characters_in_fields",
@@ -5019,8 +4842,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:158: in test_filter_nested_array_in_object\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.1
       },
       "name": "tests.test_filtering.test_filter_nested_array_in_object",
@@ -5030,8 +4851,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:94: in test_filter_pattern_matching\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 124,
         "time": 0.093
       },
       "name": "tests.test_filtering.test_filter_pattern_matching",
@@ -5041,8 +4860,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:396: in test_cli_additional_value_format_overrides_config\n    assert output_lines[:4] == golden_lines\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.133
       },
       "name": "tests.test_config.test_cli_additional_value_format_overrides_config",
@@ -5052,8 +4869,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:139: in test_config_custom_formats\n    assert result.stdout.decode() == (RESOURCES / \"custom_formats_output.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 168,
         "time": 0.135
       },
       "name": "tests.test_config.test_config_custom_formats",
@@ -5071,8 +4886,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:196: in test_shell_completion_zsh_structure\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 121,
         "time": 0.124
       },
       "name": "tests.test_edge_cases.test_shell_completion_zsh_structure",
@@ -5082,8 +4895,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:293: in test_multiple_map_level_same_key_last_wins\n    assert output_lines[2] == (RESOURCES_CLI / \"multiple_map_precedence.golden\").read_text().strip()\nE   AssertionError",
-        "text_original_chars": 191,
         "time": 0.109
       },
       "name": "tests.test_config.test_multiple_map_level_same_key_last_wins",
@@ -5093,8 +4904,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:840: in test_additional_value_template_render_error\n    assert output == (RESOURCES / \"additional_value_render_error.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 181,
         "time": 0.125
       },
       "name": "tests.test_edge_cases.test_additional_value_template_render_error",
@@ -5112,8 +4921,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:677: in test_additional_value_format_custom\n    assert output == (RESOURCES / \"additional_value_format_custom.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 174,
         "time": 0.118
       },
       "name": "tests.test_edge_cases.test_additional_value_format_custom",
@@ -5123,8 +4930,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:58: in test_config_valid_custom_keys_and_level_mapping\n    assert result.stdout.decode() == (RESOURCES / \"valid_custom_output.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 186,
         "time": 0.132
       },
       "name": "tests.test_config.test_config_valid_custom_keys_and_level_mapping",
@@ -5166,8 +4971,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:770: in test_excluded_values_mutually_exclusive_with_additional\n    assert result.returncode != 0\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.099
       },
       "name": "tests.test_edge_cases.test_excluded_values_mutually_exclusive_with_additional",
@@ -5177,8 +4980,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError: Unexpected exit code: 1",
-        "text": "tests/test_edge_cases.py:172: in test_sigpipe_handling_early_termination\n    assert proc.returncode in [0, 13, 14, 141], f\"Unexpected exit code: {proc.returncode}\"\nE   AssertionError: Unexpected exit code: 1",
-        "text_original_chars": 207,
         "time": 0.114
       },
       "name": "tests.test_edge_cases.test_sigpipe_handling_early_termination",
@@ -5220,8 +5021,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:1078: in test_filter_runtime_error_no_crash\n    assert \"test\" in output\nE   AssertionError",
-        "text_original_chars": 115,
         "time": 0.09
       },
       "name": "tests.test_edge_cases.test_filter_runtime_error_no_crash",
@@ -5255,8 +5054,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_fields.py:131: in test_nested_field_selection_with_prefix\n    assert output == golden\nE   AssertionError",
-        "text_original_chars": 115,
         "time": 0.088
       },
       "name": "tests.test_fields.test_nested_field_selection_with_prefix",
@@ -5266,8 +5063,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:1014: in test_filter_unclosed_string_syntax_error\n    assert \"unfinished string\" in stderr\nE   AssertionError",
-        "text_original_chars": 134,
         "time": 0.11
       },
       "name": "tests.test_edge_cases.test_filter_unclosed_string_syntax_error",
@@ -5365,8 +5160,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:382: in test_filter_null_values_converted_to_unsupported\n    assert output == expected\nE   AssertionError",
-        "text_original_chars": 129,
         "time": 0.098
       },
       "name": "tests.test_filtering.test_filter_null_values_converted_to_unsupported",
@@ -5376,8 +5169,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:122: in test_field_sanitization_dots_to_underscores\n    assert output == expected\nE   AssertionError",
-        "text_original_chars": 124,
         "time": 0.075
       },
       "name": "tests.test_filtering.test_field_sanitization_dots_to_underscores",
@@ -5467,8 +5258,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_integration.py:162: in test_config_file_with_filter_and_additional_values\n    assert output == golden\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.122
       },
       "name": "tests.test_integration.test_config_file_with_filter_and_additional_values",
@@ -5486,8 +5275,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_integration.py:368: in test_nested_array_length_filtering\n    assert output == golden\nE   AssertionError",
-        "text_original_chars": 115,
         "time": 0.111
       },
       "name": "tests.test_integration.test_nested_array_length_filtering",
@@ -5529,8 +5316,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:156: in test_config_complex_level_map_multiple_keys\n    assert result.stdout.decode() == (RESOURCES / \"complex_level_map_output.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 188,
         "time": 0.116
       },
       "name": "tests.test_config.test_config_complex_level_map_multiple_keys",
@@ -5572,8 +5357,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:206: in test_shell_completion_fish_structure\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.12
       },
       "name": "tests.test_edge_cases.test_shell_completion_fish_structure",
@@ -5615,8 +5398,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:105: in test_config_invalid_type_for_array_field\n    assert \"invalid type\" in stderr\nE   AssertionError",
-        "text_original_chars": 124,
         "time": 0.119
       },
       "name": "tests.test_config.test_config_invalid_type_for_array_field",
@@ -5658,8 +5439,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:481: in test_short_level_names_padded_to_five_chars\n    assert first_line == (RESOURCES_CLI / \"short_level_output.golden\").read_text().strip()\nE   AssertionError",
-        "text_original_chars": 182,
         "time": 0.079
       },
       "name": "tests.test_config.test_short_level_names_padded_to_five_chars",
@@ -5669,8 +5448,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:215: in test_filter_multiple_sanitized_fields\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 134,
         "time": 0.106
       },
       "name": "tests.test_filtering.test_filter_multiple_sanitized_fields",
@@ -5704,8 +5481,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_integration.py:846: in test_config_file_with_runtime_flag_overrides\n    assert output == golden\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 0.071
       },
       "name": "tests.test_integration.test_config_file_with_runtime_flag_overrides",
@@ -5723,8 +5498,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:300: in test_filter_deeply_nested_object_access\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 136,
         "time": 0.069
       },
       "name": "tests.test_filtering.test_filter_deeply_nested_object_access",
@@ -5806,8 +5579,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:1027: in test_toml_config_wrong_type_error\n    assert \"invalid type\" in stderr\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.09
       },
       "name": "tests.test_edge_cases.test_toml_config_wrong_type_error",
@@ -5817,8 +5588,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_parsing.py:259: in test_elastic_log_format_compatibility\n    assert output == expected\nE   AssertionError",
-        "text_original_chars": 116,
         "time": 0.113
       },
       "name": "tests.test_parsing.test_elastic_log_format_compatibility",
@@ -5900,8 +5669,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:136: in test_filter_nested_object_access\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 129,
         "time": 0.098
       },
       "name": "tests.test_filtering.test_filter_nested_object_access",
@@ -5935,8 +5702,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:395: in test_filter_null_values_match_unsupported_string\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.077
       },
       "name": "tests.test_filtering.test_filter_null_values_match_unsupported_string",
@@ -5962,8 +5727,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_parsing.py:462: in test_nested_array_flattening\n    assert output == expected\nE   AssertionError",
-        "text_original_chars": 107,
         "time": 0.089
       },
       "name": "tests.test_parsing.test_nested_array_flattening",
@@ -6053,8 +5816,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_integration.py:189: in test_custom_template_formats_with_substitution\n    assert output == golden\nE   AssertionError",
-        "text_original_chars": 127,
         "time": 0.126
       },
       "name": "tests.test_integration.test_custom_template_formats_with_substitution",
@@ -6128,8 +5889,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_prefix.py:191: in test_prefix_in_custom_format\n    assert output == \"myprefix |::test\"\nE   AssertionError",
-        "text_original_chars": 116,
         "time": 0.113
       },
       "name": "tests.test_prefix.test_prefix_in_custom_format",
@@ -6235,8 +5994,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:16: in test_sample_json_with_prefix_parsing\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 0.099
       },
       "name": "tests.test_sample_files.test_sample_json_with_prefix_parsing",
@@ -6286,8 +6043,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:102: in test_sample_elastic_format_basic\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.111
       },
       "name": "tests.test_sample_files.test_sample_elastic_format_basic",
@@ -6297,8 +6052,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:178: in test_config_all_fields_comprehensive\n    assert \"secret\" not in output\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.1
       },
       "name": "tests.test_config.test_config_all_fields_comprehensive",
@@ -6356,8 +6109,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_parsing.py:38: in test_alternative_level_and_time_field_names\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.099
       },
       "name": "tests.test_parsing.test_alternative_level_and_time_field_names",
@@ -6367,8 +6118,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:244: in test_filter_syntax_error_produces_stderr\n    assert result.stderr.decode() == expected\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.083
       },
       "name": "tests.test_filtering.test_filter_syntax_error_produces_stderr",
@@ -6386,8 +6135,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:311: in test_filter_deeply_nested_numeric_comparison\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.094
       },
       "name": "tests.test_filtering.test_filter_deeply_nested_numeric_comparison",
@@ -6413,8 +6160,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:150: in test_sample_json_excluded_values\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.082
       },
       "name": "tests.test_sample_files.test_sample_json_excluded_values",
@@ -6440,8 +6185,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:190: in test_sample_elastic_dump_all\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 0.077
       },
       "name": "tests.test_sample_files.test_sample_elastic_dump_all",
@@ -6451,8 +6194,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:210: in test_sample_nested_filter_nested_field_access\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.11
       },
       "name": "tests.test_sample_files.test_sample_nested_filter_nested_field_access",
@@ -6486,8 +6227,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_parsing.py:292: in test_deeply_nested_json_with_dump_all\n    assert \"status > d[1][1][1]\" in output\nE   AssertionError",
-        "text_original_chars": 129,
         "time": 0.068
       },
       "name": "tests.test_parsing.test_deeply_nested_json_with_dump_all",
@@ -6513,8 +6252,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:147: in test_filter_array_element_access\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 129,
         "time": 0.099
       },
       "name": "tests.test_filtering.test_filter_array_element_access",
@@ -6564,8 +6301,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:301: in test_sample_context_filter_nested_context_field\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 147,
         "time": 0.103
       },
       "name": "tests.test_sample_files.test_sample_context_filter_nested_context_field",
@@ -6583,8 +6318,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:450: in test_filter_lua_pattern_with_digit_class\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.094
       },
       "name": "tests.test_filtering.test_filter_lua_pattern_with_digit_class",
@@ -6738,8 +6471,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_stress.py:101: in test_10k_element_array_complete_indexing\n    assert first_50 == (RESOURCES / \"10k_element_array_output_head.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 176,
         "time": 0.175
       },
       "name": "tests.test_stress.test_10k_element_array_complete_indexing",
@@ -6757,8 +6488,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_stress.py:182: in test_very_long_main_line_format_complete_substitution\n    assert output == (RESOURCES / \"long_format_output.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 176,
         "time": 0.093
       },
       "name": "tests.test_stress.test_very_long_main_line_format_complete_substitution",
@@ -6784,8 +6513,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:26: in test_sample_nested_dump_all\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 126,
         "time": 0.114
       },
       "name": "tests.test_sample_files.test_sample_nested_dump_all",
@@ -6843,8 +6570,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:116: in test_sample_elastic_additional_error_fields\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 143,
         "time": 0.096
       },
       "name": "tests.test_sample_files.test_sample_elastic_additional_error_fields",
@@ -6854,8 +6579,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_stress.py:345: in test_repeated_map_level_same_key_last_wins\n    assert output == (RESOURCES / \"repeated_map_level_output.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 172,
         "time": 0.081
       },
       "name": "tests.test_stress.test_repeated_map_level_same_key_last_wins",
@@ -6865,8 +6588,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:200: in test_config_always_print_fields_without_dump_all\n    assert \"request_id: req-456\" in output\nE   AssertionError",
-        "text_original_chars": 139,
         "time": 0.12
       },
       "name": "tests.test_config.test_config_always_print_fields_without_dump_all",
@@ -6916,8 +6637,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_filtering.py:267: in test_filter_string_with_quotes_escaped_in_lua\n    assert output == expected\nE   AssertionError",
-        "text_original_chars": 126,
         "time": 0.115
       },
       "name": "tests.test_filtering.test_filter_string_with_quotes_escaped_in_lua",
@@ -6943,8 +6662,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_stress.py:373: in test_very_large_number_scientific_notation\n    assert output == (RESOURCES / \"large_number_output.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 166,
         "time": 0.093
       },
       "name": "tests.test_stress.test_very_large_number_scientific_notation",
@@ -6970,8 +6687,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:200: in test_sample_numbered_filter_numeric_comparison\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.144
       },
       "name": "tests.test_sample_files.test_sample_numbered_filter_numeric_comparison",
@@ -6981,8 +6696,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:220: in test_sample_array_additional_value_array_field\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.075
       },
       "name": "tests.test_sample_files.test_sample_array_additional_value_array_field",
@@ -7080,8 +6793,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:274: in test_sample_json_prefix_dump_all_combined\n    assert output == expected\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 0.116
       },
       "name": "tests.test_sample_files.test_sample_json_prefix_dump_all_combined",
@@ -7147,8 +6858,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_substitution.py:325: in test_placeholder_format_flag_implicitly_enables_substitution\n    assert \"Value is substituted\" in output\nE   AssertionError",
-        "text_original_chars": 158,
         "time": 0.128
       },
       "name": "tests.test_substitution.test_placeholder_format_flag_implicitly_enables_substitution",
@@ -7158,8 +6867,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_substitution.py:311: in test_context_key_flag_implicitly_enables_substitution\n    assert \"Value is from_custom_key\" in output\nE   AssertionError",
-        "text_original_chars": 155,
         "time": 0.12
       },
       "name": "tests.test_substitution.test_context_key_flag_implicitly_enables_substitution",
@@ -7185,8 +6892,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_integration.py:31: in test_substitution_filter_additional_value_combined\n    assert output == golden\nE   AssertionError",
-        "text_original_chars": 130,
         "time": 0.135
       },
       "name": "tests.test_integration.test_substitution_filter_additional_value_combined",
@@ -7196,8 +6901,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_substitution.py:399: in test_combine_context_key_and_placeholder_format\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 147,
         "time": 0.069
       },
       "name": "tests.test_substitution.test_combine_context_key_and_placeholder_format",
@@ -7247,8 +6950,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_substitution.py:500: in test_primitive_context_not_object_or_array\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 142,
         "time": 0.123
       },
       "name": "tests.test_substitution.test_primitive_context_not_object_or_array",
@@ -7258,8 +6959,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_stress.py:198: in test_config_file_100_level_mappings\n    assert output == (RESOURCES / \"100_level_mappings_output.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 165,
         "time": 0.125
       },
       "name": "tests.test_stress.test_config_file_100_level_mappings",
@@ -7277,8 +6976,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:19: in test_custom_main_line_format_simple\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_simple.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 181,
         "time": 0.073
       },
       "name": "tests.test_templates.test_custom_main_line_format_simple",
@@ -7288,8 +6985,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:36: in test_sample_nested_additional_value_status\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.09
       },
       "name": "tests.test_sample_files.test_sample_nested_additional_value_status",
@@ -7299,8 +6994,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:126: in test_sample_json_array_dump_all\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.101
       },
       "name": "tests.test_sample_files.test_sample_json_array_dump_all",
@@ -7318,8 +7011,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:62: in test_custom_main_line_format_blue_timestamp\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_blue_timestamp.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 197,
         "time": 0.104
       },
       "name": "tests.test_templates.test_custom_main_line_format_blue_timestamp",
@@ -7329,8 +7020,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:219: in test_config_dump_all_exclude_removes_sensitive_fields\n    assert \"secret\" not in output\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 0.103
       },
       "name": "tests.test_config.test_config_dump_all_exclude_removes_sensitive_fields",
@@ -7364,8 +7053,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:106: in test_custom_main_line_format_color_rgb\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_color_rgb.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 188,
         "time": 0.105
       },
       "name": "tests.test_templates.test_custom_main_line_format_color_rgb",
@@ -7375,8 +7062,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:121: in test_custom_main_line_format_level_style\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_level_style.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 192,
         "time": 0.119
       },
       "name": "tests.test_templates.test_custom_main_line_format_level_style",
@@ -7394,8 +7079,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:136: in test_custom_main_line_format_fixed_size\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_fixed_size.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 190,
         "time": 0.135
       },
       "name": "tests.test_templates.test_custom_main_line_format_fixed_size",
@@ -7405,8 +7088,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:181: in test_custom_main_line_format_conditional_rendering\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_conditional.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 202,
         "time": 0.09
       },
       "name": "tests.test_templates.test_custom_main_line_format_conditional_rendering",
@@ -7424,8 +7105,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:223: in test_additional_value_format_custom_colored\n    assert result.stdout.decode() == (RESOURCES / \"additional_value_custom_colored.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 198,
         "time": 0.072
       },
       "name": "tests.test_templates.test_additional_value_format_custom_colored",
@@ -7459,8 +7138,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:254: in test_complex_template_multiple_helpers_and_conditionals\n    assert result.stdout.decode() == (RESOURCES / \"complex_template.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 195,
         "time": 0.103
       },
       "name": "tests.test_templates.test_complex_template_multiple_helpers_and_conditionals",
@@ -7470,8 +7147,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:301: in test_unclosed_if_block_error\n    assert \"panicked at src/template.rs:96:65:\" in normalized\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.122
       },
       "name": "tests.test_templates.test_unclosed_if_block_error",
@@ -7481,8 +7156,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:275: in test_invalid_template_syntax_error\n    assert \"panicked at src/template.rs:96:65:\" in normalized\nE   AssertionError",
-        "text_original_chars": 147,
         "time": 0.116
       },
       "name": "tests.test_templates.test_invalid_template_syntax_error",
@@ -7500,8 +7173,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:366: in test_template_with_prefix_variable\n    assert result.stdout.decode() == (RESOURCES / \"prefix_template.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 173,
         "time": 0.095
       },
       "name": "tests.test_templates.test_template_with_prefix_variable",
@@ -7519,8 +7190,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:397: in test_empty_and_missing_fields\n    assert result.stdout.decode() == (RESOURCES / \"edge_cases_output.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 170,
         "time": 0.086
       },
       "name": "tests.test_templates.test_empty_and_missing_fields",
@@ -7538,8 +7207,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:34: in test_custom_main_line_format_red_helper\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_red.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 182,
         "time": 0.134
       },
       "name": "tests.test_templates.test_custom_main_line_format_red_helper",
@@ -7549,8 +7216,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:427: in test_color_rgb_black_zero_values\n    assert result.stdout.decode() == (RESOURCES / \"color_rgb_black.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 171,
         "time": 0.114
       },
       "name": "tests.test_templates.test_color_rgb_black_zero_values",
@@ -7560,8 +7225,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:48: in test_custom_main_line_format_bold_yellow\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_bold_yellow.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 191,
         "time": 0.125
       },
       "name": "tests.test_templates.test_custom_main_line_format_bold_yellow",
@@ -7571,8 +7234,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_sample_files.py:136: in test_sample_invalid_string_utf8_error_handling\n    assert result.stdout.decode() == expected\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.088
       },
       "name": "tests.test_sample_files.test_sample_invalid_string_utf8_error_handling",
@@ -7582,8 +7243,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:77: in test_custom_main_line_format_purple_cyan\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_purple_cyan.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 191,
         "time": 0.085
       },
       "name": "tests.test_templates.test_custom_main_line_format_purple_cyan",
@@ -7593,8 +7252,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:91: in test_custom_main_line_format_green\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_green.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 179,
         "time": 0.096
       },
       "name": "tests.test_templates.test_custom_main_line_format_green",
@@ -7604,8 +7261,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:166: in test_custom_main_line_format_custom_json_field\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_custom_field.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 199,
         "time": 0.072
       },
       "name": "tests.test_templates.test_custom_main_line_format_custom_json_field",
@@ -7615,8 +7270,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:151: in test_custom_main_line_format_min_size\n    assert result.stdout.decode() == (RESOURCES / \"custom_main_line_min_size.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 186,
         "time": 0.076
       },
       "name": "tests.test_templates.test_custom_main_line_format_min_size",
@@ -7634,8 +7287,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:208: in test_additional_value_format_custom_simple\n    assert result.stdout.decode() == (RESOURCES / \"additional_value_custom_simple.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 196,
         "time": 0.074
       },
       "name": "tests.test_templates.test_additional_value_format_custom_simple",
@@ -7669,8 +7320,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:238: in test_nested_field_access_in_template\n    assert result.stdout.decode() == (RESOURCES / \"nested_field_access.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 179,
         "time": 0.123
       },
       "name": "tests.test_templates.test_nested_field_access_in_template",
@@ -7688,8 +7337,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_time.py:202: in test_elasticsearch_timestamp_format\n    assert lines == expected\nE   AssertionError",
-        "text_original_chars": 110,
         "time": 0.108
       },
       "name": "tests.test_time.test_elasticsearch_timestamp_format",
@@ -7699,8 +7346,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:322: in test_readme_example_red_short_message\n    assert result.stdout.decode() == (RESOURCES / \"readme_example.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 175,
         "time": 0.147
       },
       "name": "tests.test_templates.test_readme_example_red_short_message",
@@ -7710,8 +7355,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:336: in test_fixed_size_truncation\n    assert result.stdout.decode() == (RESOURCES / \"fixed_size_truncate.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 169,
         "time": 0.139
       },
       "name": "tests.test_templates.test_fixed_size_truncation",
@@ -7721,8 +7364,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:382: in test_level_style_all_log_levels\n    assert result.stdout.decode() == (RESOURCES / \"all_levels_style.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 171,
         "time": 0.126
       },
       "name": "tests.test_templates.test_level_style_all_log_levels",
@@ -7732,8 +7373,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:351: in test_min_size_no_truncation\n    assert result.stdout.decode() == (RESOURCES / \"min_size_no_truncate.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 171,
         "time": 0.15
       },
       "name": "tests.test_templates.test_min_size_no_truncation",
@@ -7743,8 +7382,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:412: in test_deeply_nested_helpers_four_levels\n    assert result.stdout.decode() == (RESOURCES / \"deeply_nested_helpers.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 183,
         "time": 0.099
       },
       "name": "tests.test_templates.test_deeply_nested_helpers_four_levels",
@@ -7762,8 +7399,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:442: in test_color_rgb_white_max_values\n    assert result.stdout.decode() == (RESOURCES / \"color_rgb_white.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 170,
         "time": 0.148
       },
       "name": "tests.test_templates.test_color_rgb_white_max_values",
@@ -7773,8 +7408,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:457: in test_additional_value_with_specific_field\n    assert result.stdout.decode() == (RESOURCES / \"additional_with_flag.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 185,
         "time": 0.142
       },
       "name": "tests.test_templates.test_additional_value_with_specific_field",
@@ -7816,8 +7449,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_time.py:20: in test_unix_timestamp_seconds_conversion\n    assert result.stdout.decode() == (RESOURCES / \"unix_timestamps.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 171,
         "time": 0.075
       },
       "name": "tests.test_time.test_unix_timestamp_seconds_conversion",
@@ -7827,8 +7458,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_time.py:416: in test_special_characters_in_timestamps\n    assert result.stdout.decode() == (RESOURCES / \"special_char_timestamp.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 178,
         "time": 0.107
       },
       "name": "tests.test_time.test_special_characters_in_timestamps",
@@ -7854,8 +7483,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_time.py:486: in test_custom_format_with_timestamp_variable\n    assert output == (RESOURCES / \"custom_format.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 158,
         "time": 0.113
       },
       "name": "tests.test_time.test_custom_format_with_timestamp_variable",
@@ -7881,8 +7508,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_time.py:83: in test_timestamp_field_detection_order\n    assert result.stdout.decode() == (RESOURCES / \"different_time_keys.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 173,
         "time": 0.136
       },
       "name": "tests.test_time.test_timestamp_field_detection_order",
@@ -7972,8 +7597,6 @@
       "branch": "017fa5001b4a",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_time.py:431: in test_extreme_numeric_timestamps\n    assert output == (RESOURCES / \"extreme_timestamps.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 152,
         "time": 0.152
       },
       "name": "tests.test_time.test_extreme_numeric_timestamps",
@@ -8495,8 +8118,6 @@
       "branch": "ce1d39773f1c",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_argument_parsing.TestFlagConflicts object at 0x7c236dedeb00>\n\n    def test_additional_value_conflicts_with_excluded_value(self):\n        \"\"\"Test that --additional-value and --excluded-value are mutually exclusive.\"\"\"\n        stdout, stderr, returncode = run_executable(\n            ['--additional-value', 'field1', '--excluded-value', 'field2']\n        )\n>       assert returncode == 2\nE       AssertionError\n\neval/tests/test_argument_parsing.py:391: AssertionError",
-        "text_original_chars": 478,
         "time": 0.124
       },
       "name": "eval.tests.test_argument_parsing.TestFlagConflicts.test_additional_value_conflicts_with_excluded_value",
@@ -8506,8 +8127,6 @@
       "branch": "ce1d39773f1c",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_argument_parsing.TestFlagConflicts object at 0x7212c37b5de0>\n\n    def test_additional_value_short_conflicts_with_excluded_value_short(self):\n        \"\"\"Test that -a and -x are mutually exclusive.\"\"\"\n        stdout, stderr, returncode = run_executable(\n            ['-a', 'field1', '-x', 'field2']\n        )\n>       assert returncode == 2\nE       AssertionError\n\neval/tests/test_argument_parsing.py:401: AssertionError",
-        "text_original_chars": 430,
         "time": 0.116
       },
       "name": "eval.tests.test_argument_parsing.TestFlagConflicts.test_additional_value_short_conflicts_with_excluded_value_short",
@@ -8717,8 +8336,6 @@
       "branch": "ce1d39773f1c",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_multiple_occurrences.TestMultipleOccurrencesOfSameFlag object at 0x7bfc0fb41510>\n\n    def test_filter_flag_multiple_times_error(self):\n        \"\"\"Test that --filter cannot be specified multiple times.\"\"\"\n        stdout, stderr, returncode = run_executable(\n            ['--filter', 'false', '--filter', 'true'],\n            stdin_text='{\"message\": \"test\"}'\n        )\n        # Should produce error about multiple usage\n>       assert returncode == 2\nE       AssertionError\n\neval/tests/test_multiple_occurrences.py:43: AssertionError",
-        "text_original_chars": 545,
         "time": 0.131
       },
       "name": "eval.tests.test_multiple_occurrences.TestMultipleOccurrencesOfSameFlag.test_filter_flag_multiple_times_error",
@@ -8744,8 +8361,6 @@
       "branch": "ce1d39773f1c",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_multiple_occurrences.TestMultipleOccurrencesOfSameFlag object at 0x77a40c09a410>\n\n    def test_config_file_multiple_times_error(self):\n        \"\"\"Test --config-file cannot be used multiple times.\"\"\"\n        stdout, stderr, returncode = run_executable(\n            ['--config-file', 'default_config.toml', '--config-file', 'default_config.toml'],\n            stdin_text='{\"message\": \"test\"}'\n        )\n>       assert returncode == 2\nE       AssertionError\n\neval/tests/test_multiple_occurrences.py:52: AssertionError",
-        "text_original_chars": 527,
         "time": 0.106
       },
       "name": "eval.tests.test_multiple_occurrences.TestMultipleOccurrencesOfSameFlag.test_config_file_multiple_times_error",
@@ -8755,8 +8370,6 @@
       "branch": "ce1d39773f1c",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_multiple_occurrences.TestMultipleOccurrencesOfSameFlag object at 0x7f01936439d0>\n\n    def test_main_line_format_multiple_times_error(self):\n        \"\"\"Test --main-line-format cannot be used multiple times.\"\"\"\n        stdout, stderr, returncode = run_executable(\n            ['--main-line-format', 'fmt1', '--main-line-format', 'fmt2'],\n            stdin_text='{\"message\": \"test\"}'\n        )\n>       assert returncode == 2\nE       AssertionError\n\neval/tests/test_multiple_occurrences.py:70: AssertionError",
-        "text_original_chars": 517,
         "time": 0.115
       },
       "name": "eval.tests.test_multiple_occurrences.TestMultipleOccurrencesOfSameFlag.test_main_line_format_multiple_times_error",
@@ -8766,8 +8379,6 @@
       "branch": "ce1d39773f1c",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_multiple_occurrences.TestMultipleOccurrencesOfSameFlag object at 0x7074fc97c670>\n\n    def test_boolean_flag_multiple_times_error(self):\n        \"\"\"Test boolean flag cannot be specified multiple times.\"\"\"\n        stdout, stderr, returncode = run_executable(\n            ['-d', '-d', '-d'],\n            stdin_text='{\"message\": \"test\"}'\n        )\n>       assert returncode == 2\nE       AssertionError\n\neval/tests/test_multiple_occurrences.py:61: AssertionError",
-        "text_original_chars": 470,
         "time": 0.124
       },
       "name": "eval.tests.test_multiple_occurrences.TestMultipleOccurrencesOfSameFlag.test_boolean_flag_multiple_times_error",
@@ -8961,8 +8572,6 @@
       "branch": "c5116ade8a34",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_conflict_is_symmetric_excluded_value_then_additional_value():\n        cp = run_executable([\"--excluded-value\", \"b\", \"--additional-value\", \"a\"])\n>       assert_clap_error(cp, \"cannot be used with\")\n\neval/tests/test_argparse_validation.py:80: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\ncp = CompletedProcess(args=['/workspace/executable', '--excluded-value', 'b', '--additional-value', 'a'], returncode=0, stdout=b'', stderr=b'')\ncontains = 'cannot be used with'\n\n    def assert_clap_error(cp: subprocess.CompletedProcess, contains: str | None = None):\n        # clap errors are printed to stderr and begin with 'error:'\n>       assert cp.stderr.decode(\"utf-8\", \"replace\").lstrip().startswith(\"error:\"), cp.stderr.decode(\n            \"utf-8\", \"replace\"\n        )\nE       AssertionError\n\neval/tests/test_argparse_validation.py:33: AssertionError",
-        "text_original_chars": 891,
         "time": 0.11
       },
       "name": "eval.tests.test_argparse_validation.test_conflict_is_symmetric_excluded_value_then_additional_value",
@@ -9052,8 +8661,6 @@
       "branch": "c5116ade8a34",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_additional_value_and_excluded_value_conflict():\n        cp = run_executable([\"--additional-value\", \"a\", \"--excluded-value\", \"b\"])\n>       assert_clap_error(cp, \"cannot be used with\")\n\neval/tests/test_argparse_validation.py:75: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\ncp = CompletedProcess(args=['/workspace/executable', '--additional-value', 'a', '--excluded-value', 'b'], returncode=0, stdout=b'', stderr=b'')\ncontains = 'cannot be used with'\n\n    def assert_clap_error(cp: subprocess.CompletedProcess, contains: str | None = None):\n        # clap errors are printed to stderr and begin with 'error:'\n>       assert cp.stderr.decode(\"utf-8\", \"replace\").lstrip().startswith(\"error:\"), cp.stderr.decode(\n            \"utf-8\", \"replace\"\n        )\nE       AssertionError\n\neval/tests/test_argparse_validation.py:33: AssertionError",
-        "text_original_chars": 877,
         "time": 0.103
       },
       "name": "eval.tests.test_argparse_validation.test_additional_value_and_excluded_value_conflict",
@@ -9119,8 +8726,6 @@
       "branch": "335611dbee6b",
       "extra": {
         "message": "AssertionError",
-        "text": "@pytest.mark.timeout(5)\n    def test_xdg_config_home_is_used_for_default_config_path():\n        with TempHome() as th:\n            cfg_path = Path(th.env[\"XDG_CONFIG_HOME\"]) / \"fblog.toml\"\n            cfg_path.parent.mkdir(parents=True, exist_ok=True)\n            cfg_path.write_text('main_line_format = \"CFG|{{fblog_message}}\"\\n')\n    \n            p = run_fblog(env=th.env)\n            assert p.returncode == 0\n>           assert p.stdout.decode(\"utf-8\") == \"CFG|hi\\n\"\nE           AssertionError\n\neval/tests/test_config_env.py:76: AssertionError",
-        "text_original_chars": 546,
         "time": 0.128
       },
       "name": "eval.tests.test_config_env.test_xdg_config_home_is_used_for_default_config_path",
@@ -9130,8 +8735,6 @@
       "branch": "335611dbee6b",
       "extra": {
         "message": "AssertionError",
-        "text": "@pytest.mark.timeout(5)\n    def test_cli_main_line_format_overrides_config_file_value():\n        with TempHome() as th:\n            cfg_path = Path(th.env[\"XDG_CONFIG_HOME\"]) / \"fblog.toml\"\n            cfg_path.parent.mkdir(parents=True, exist_ok=True)\n            cfg_path.write_text('main_line_format = \"CFG|{{fblog_message}}\"\\n')\n    \n            p = run_fblog(\"--main-line-format\", \"CLI|{{fblog_message}}\", env=th.env)\n            assert p.returncode == 0\n>           assert p.stdout.decode(\"utf-8\") == \"CLI|hi\\n\"\nE           AssertionError\n\neval/tests/test_config_env.py:144: AssertionError",
-        "text_original_chars": 595,
         "time": 0.1
       },
       "name": "eval.tests.test_config_env.test_cli_main_line_format_overrides_config_file_value",
@@ -9141,8 +8744,6 @@
       "branch": "335611dbee6b",
       "extra": {
         "message": "AssertionError",
-        "text": "@pytest.mark.timeout(5)\n    def test_malformed_config_via_cli_flag_is_handled_and_reports_could_not_load():\n        # Config::load_from_file returns None on parse error -> expect() in main prints this message\n        with tempfile.TemporaryDirectory() as d:\n            cfg = Path(d) / \"bad.toml\"\n            cfg.write_text(\"this is not toml!!!\")\n    \n            p = run_fblog(\"--config-file\", str(cfg))\n>           assert p.returncode != 0\nE           AssertionError\n\neval/tests/test_config_env.py:117: AssertionError",
-        "text_original_chars": 519,
         "time": 0.127
       },
       "name": "eval.tests.test_config_env.test_malformed_config_via_cli_flag_is_handled_and_reports_could_not_load",
@@ -9152,8 +8753,6 @@
       "branch": "335611dbee6b",
       "extra": {
         "message": "AssertionError",
-        "text": "@pytest.mark.timeout(5)\n    def test_malformed_config_in_default_location_crashes_with_error_message():\n        # Config::load() panics on parse error\n        with TempHome() as th:\n            cfg_path = Path(th.env[\"XDG_CONFIG_HOME\"]) / \"fblog.toml\"\n            cfg_path.parent.mkdir(parents=True, exist_ok=True)\n            cfg_path.write_text(\"this is not toml!!!\")\n    \n            p = run_fblog(env=th.env)\n>           assert p.returncode != 0\nE           AssertionError\n\neval/tests/test_config_env.py:105: AssertionError",
-        "text_original_chars": 527,
         "time": 0.127
       },
       "name": "eval.tests.test_config_env.test_malformed_config_in_default_location_crashes_with_error_message",
@@ -9163,8 +8762,6 @@
       "branch": "335611dbee6b",
       "extra": {
         "message": "AssertionError",
-        "text": "@pytest.mark.timeout(5)\n    def test_cli_config_file_flag_overrides_default_config_location():\n        with TempHome() as th:\n            # Put a config in the default location, but override it via --config-file\n            cfg_default = Path(th.env[\"XDG_CONFIG_HOME\"]) / \"fblog.toml\"\n            cfg_default.parent.mkdir(parents=True, exist_ok=True)\n            cfg_default.write_text('main_line_format = \"DEFAULT|{{fblog_message}}\"\\n')\n    \n            cfg_override = th.create_config(\n                \"override.toml\", 'main_line_format = \"OVERRIDE|{{fblog_message}}\"\\n'\n            )\n    \n            p = run_fblog(\"--config-file\", str(cfg_override), env=th.env)\n            assert p.returncode == 0\n>           assert p.stdout.decode(\"utf-8\") == \"OVERRIDE|hi\\n\"\nE           AssertionError\n\neval/tests/test_config_env.py:93: AssertionError",
-        "text_original_chars": 842,
         "time": 0.151
       },
       "name": "eval.tests.test_config_env.test_cli_config_file_flag_overrides_default_config_location",
@@ -9590,8 +9187,6 @@
       "branch": "84ae5ed1ef50",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_subcommand_dispatch.TestGenerateCompletions object at 0x7e18f1df3880>\n\n    def test_generate_completions_with_valid_shell(self):\n        \"\"\"Verify --generate-completions works with valid shell names.\"\"\"\n        shells = [\"bash\", \"zsh\", \"fish\"]\n    \n        for shell in shells:\n            result = run(\"--generate-completions\", shell)\n>           assert result.returncode == 0\nE           AssertionError\n\neval/tests/test_subcommand_dispatch.py:242: AssertionError",
-        "text_original_chars": 477,
         "time": 0.14
       },
       "name": "eval.tests.test_subcommand_dispatch.TestGenerateCompletions.test_generate_completions_with_valid_shell",
@@ -9601,8 +9196,6 @@
       "branch": "84ae5ed1ef50",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_subcommand_dispatch.TestGenerateCompletions object at 0x7d2ae72075b0>\n\n    def test_generate_completions_requires_argument(self):\n        \"\"\"Verify --generate-completions requires a shell argument.\"\"\"\n        result = run(\"--generate-completions\")\n    \n        assert result.returncode != 0\n        error_text = result.stderr.decode()\n>       assert \"value is required\" in error_text or \"requires\" in error_text\nE       AssertionError\n\neval/tests/test_subcommand_dispatch.py:231: AssertionError",
-        "text_original_chars": 507,
         "time": 0.136
       },
       "name": "eval.tests.test_subcommand_dispatch.TestGenerateCompletions.test_generate_completions_requires_argument",
@@ -9668,8 +9261,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw14/test_ext_substitution_common_p2')\n\n    def test_ext_substitution_common_placeholder_formats__bracket(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/substitution.rs::tests::common_placeholder_formats\n    \n        Upward trace: main -> LogSettings (-s -F '[key]') -> Substitution::apply\n        Downward trace: substituted message printed via fblog_message.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"Tapping fingers as a way to [key]\",\"time\":\"2017-07-06T15:21:16\",\"context\":{\"key\":\"speak\"},\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\"-s\", \"-F\", \"[key]\", \"--main-line-format\", \"{{fblog_message}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"Tapping fingers as a way to speak\"\nE       AssertionError\n\neval/tests/test_externalized.py:324: AssertionError",
-        "text_original_chars": 945,
         "time": 0.126
       },
       "name": "eval.tests.test_externalized.test_ext_substitution_common_placeholder_formats__bracket",
@@ -9687,8 +9278,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw6/test_ext_filter_logical_operat2')\n\n    def test_ext_filter_logical_operators(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/filter.rs::tests::filter_logical_operators\n    \n        Upward trace: main -> ... -> filter::show_log_entry (via -f)\n        Downward trace: returned boolean controls printing.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"m\",\"time\":\"2017-07-06T15:21:16\",\"process\":\"rust\",\"fu\":\"bower\",\"level\":\"info\"}\\n',\n        )\n        r_and = run_exe(\"-f\", 'process == \"rust\" and fu == \"bower\"', \"--main-line-format\", \"{{process}}\", inp)\n        assert r_and.returncode == 0\n>       assert norm_output(r_and.stdout).strip() == \"rust\"\nE       AssertionError\n\neval/tests/test_externalized.py:177: AssertionError",
-        "text_original_chars": 862,
         "time": 0.125
       },
       "name": "eval.tests.test_externalized.test_ext_filter_logical_operators",
@@ -9698,8 +9287,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw10/test_ext_filter_no_implicit_re2')\n\n    def test_ext_filter_no_implicit_return(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/filter.rs::tests::no_implicit_return\n    \n        Upward trace:\n          main -> ... -> filter::show_log_entry (via -f)\n            with --no-implicit-filter-return-statement => implicit_return=false\n    \n        Downward trace: Lua chunk can use explicit return; printing depends on result.\n        \"\"\"\n        inp = write_tmp_file(tmp_path, \"in.jsonl\", '{\"message\":\"m\",\"time\":\"2017-07-06T15:21:16\",\"process\":\"rust\",\"level\":\"info\"}\\n')\n        r = run_exe(\n            \"-f\",\n            \"if 3 > 2 then return true else return false end\",\n            \"--no-implicit-filter-return-statement\",\n            \"--main-line-format\",\n            \"{{process}}\",\n            inp,\n        )\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"rust\"\nE       AssertionError\n\neval/tests/test_externalized.py:249: AssertionError",
-        "text_original_chars": 1044,
         "time": 0.143
       },
       "name": "eval.tests.test_externalized.test_ext_filter_no_implicit_return",
@@ -9709,8 +9296,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw8/test_ext_filter_regex2')\n\n    def test_ext_filter_regex(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/filter.rs::tests::filter_regex\n    \n        Upward trace: main -> ... -> filter::show_log_entry (via -f)\n        Downward trace: boolean controls printing.\n        \"\"\"\n        inp = write_tmp_file(tmp_path, \"in.jsonl\", '{\"message\":\"m\",\"time\":\"2017-07-06T15:21:16\",\"fu\":\"bower\",\"level\":\"info\"}\\n')\n        r = run_exe(\"-f\", 'string.find(fu, \"bow.*\") ~= nil', \"--main-line-format\", \"{{fu}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"bower\"\nE       AssertionError\n\neval/tests/test_externalized.py:207: AssertionError",
-        "text_original_chars": 736,
         "time": 0.132
       },
       "name": "eval.tests.test_externalized.test_ext_filter_regex",
@@ -9720,8 +9305,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw15/test_ext_substitution_placehol2')\n\n    def test_ext_substitution_placeholder_not_in_context(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/substitution.rs::tests::placeholder_not_in_context\n    \n        Upward trace: main -> LogSettings (-s) -> Substitution::apply\n        Downward trace: unknown key is left as placeholder text in the final message.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"substituted: {subst}, ignored: {ignored}\",\"time\":\"2017-07-06T15:21:16\",\"context\":{\"subst\":\"no brackets!\"},\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\"-s\", \"--main-line-format\", \"{{fblog_message}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"substituted: no brackets!, ignored: {ignored}\"\nE       AssertionError\n\neval/tests/test_externalized.py:341: AssertionError",
-        "text_original_chars": 953,
         "time": 0.127
       },
       "name": "eval.tests.test_externalized.test_ext_substitution_placeholder_not_in_context",
@@ -9731,8 +9314,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw1/test_ext_config_read_empty_lev2')\n\n    def test_ext_config_read_empty_level_map(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/config.rs::tests::read_empty_level_map\n    \n        Upward trace:\n          main() -> Config::load_from_file (via --config-file)\n    \n        Downward trace:\n          level_map is applied in log::print_log_line (level -> mapped level -> fblog_level)\n          and affects the rendered output.\n    \n        External: config with empty [level_map] does not crash and leaves level unchanged.\n        \"\"\"\n        cfg = write_tmp_file(tmp_path, \"empty_level_map.toml\", \"[level_map]\\n\")\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"x\",\"time\":\"2017-07-06T15:21:16\",\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\"--config-file\", cfg, \"--main-line-format\", \"{{fblog_level}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"info\"\nE       AssertionError\n\neval/tests/test_externalized.py:85: AssertionError",
-        "text_original_chars": 1096,
         "time": 0.121
       },
       "name": "eval.tests.test_externalized.test_ext_config_read_empty_level_map",
@@ -9742,8 +9323,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw5/test_ext_filter_process2')\n\n    def test_ext_filter_process(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/filter.rs::tests::filter_process\n    \n        Upward trace: main -> ... -> filter::show_log_entry (via -f)\n        Downward trace: filter result determines whether the record is printed.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            \"\\n\".join(\n                [\n                    '{\"message\":\"m\",\"time\":\"2017-07-06T15:21:16\",\"process\":\"rust\",\"level\":\"info\"}',\n                    '{\"message\":\"m\",\"time\":\"2017-07-06T15:21:16\",\"process\":\"meep\",\"level\":\"info\"}',\n                    \"\",\n                ]\n            ),\n        )\n        r = run_exe(\"-f\", 'process == \"rust\"', \"--main-line-format\", \"{{process}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip().splitlines() == [\"rust\"]\nE       AssertionError\n\neval/tests/test_externalized.py:160: AssertionError",
-        "text_original_chars": 1031,
         "time": 0.131
       },
       "name": "eval.tests.test_externalized.test_ext_filter_process",
@@ -9753,8 +9332,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw13/test_ext_substitution_common_p2')\n\n    def test_ext_substitution_common_placeholder_formats__brace(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/substitution.rs::tests::common_placeholder_formats\n    \n        This internal test checks multiple formats; we externalize one per test for traceability.\n    \n        Upward trace:\n          main -> LogSettings (via -s and -F/--placeholder-format) -> substitution::Substitution::apply\n    \n        Downward trace:\n          apply() mutates fblog_message, which is printed via --main-line-format '{{fblog_message}}'.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"Tapping fingers as a way to {key}\",\"time\":\"2017-07-06T15:21:16\",\"context\":{\"key\":\"speak\"},\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\"-s\", \"--main-line-format\", \"{{fblog_message}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"Tapping fingers as a way to speak\"\nE       AssertionError\n\neval/tests/test_externalized.py:307: AssertionError",
-        "text_original_chars": 1136,
         "time": 0.13
       },
       "name": "eval.tests.test_externalized.test_ext_substitution_common_placeholder_formats__brace",
@@ -9764,8 +9341,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw2/test_ext_config_read_level_map2')\n\n    def test_ext_config_read_level_map(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/config.rs::tests::read_level_map\n    \n        Upward trace:\n          main() -> Config::load_from_file (via --config-file)\n    \n        Downward trace:\n          level_map remaps the raw log value before rendering.\n    \n        External: map-level equivalent via config file changes fblog_level.\n        \"\"\"\n        cfg = write_tmp_file(tmp_path, \"level_map.toml\", \"[level_map]\\n30 = 'info'\\n\")\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"x\",\"time\":\"2017-07-06T15:21:16\",\"level\":\"30\"}\\n',\n        )\n        r = run_exe(\"--config-file\", cfg, \"--main-line-format\", \"{{fblog_level}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"info\"\nE       AssertionError\n\neval/tests/test_externalized.py:108: AssertionError",
-        "text_original_chars": 1002,
         "time": 0.112
       },
       "name": "eval.tests.test_externalized.test_ext_config_read_level_map",
@@ -9775,8 +9350,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw11/test_ext_filter_nested2')\n\n    def test_ext_filter_nested(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/filter.rs::tests::neted\n    \n        Upward trace: main -> ... -> filter::show_log_entry (via -f)\n        Downward trace:\n          JSON keys are sanitized for Lua identifiers (\"log.level\" -> \"log_level\");\n          filter uses nested.log_level to match.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"something happened\",\"time\":\"2017-07-06T15:21:16\",\"nested\":{\"log.level\":\"debug\"},\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\"-f\", 'nested.log_level == \"debug\"', \"--main-line-format\", \"{{message}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"something happened\"\nE       AssertionError\n\neval/tests/test_externalized.py:268: AssertionError",
-        "text_original_chars": 934,
         "time": 0.138
       },
       "name": "eval.tests.test_externalized.test_ext_filter_nested",
@@ -9786,8 +9359,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw3/test_ext_filter_allow_all2')\n\n    def test_ext_filter_allow_all(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/filter.rs::tests::allow_all\n    \n        Upward trace:\n          main() -> process::process_lines -> filter::show_log_entry (via -f/--filter)\n    \n        Downward trace:\n          show_log_entry returns true -> log entry is printed by log::print_log_line.\n        \"\"\"\n        inp = write_tmp_file(tmp_path, \"in.jsonl\", '{\"message\":\"m\",\"time\":\"2017-07-06T15:21:16\",\"level\":\"info\"}\\n')\n        r = run_exe(\"-f\", \"true\", \"--main-line-format\", \"{{message}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"m\"\nE       AssertionError\n\neval/tests/test_externalized.py:124: AssertionError",
-        "text_original_chars": 806,
         "time": 0.133
       },
       "name": "eval.tests.test_externalized.test_ext_filter_allow_all",
@@ -9797,8 +9368,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw7/test_ext_filter_contains2')\n\n    def test_ext_filter_contains(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/filter.rs::tests::filter_contains\n    \n        Upward trace: main -> ... -> filter::show_log_entry (via -f)\n        Downward trace: show_log_entry uses Lua string.find; match prints.\n        \"\"\"\n        inp = write_tmp_file(tmp_path, \"in.jsonl\", '{\"message\":\"something happened\",\"time\":\"2017-07-06T15:21:16\",\"level\":\"info\"}\\n')\n        r = run_exe(\"-f\", 'string.find(message, \"something\") ~= nil', \"--main-line-format\", \"{{message}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"something happened\"\nE       AssertionError\n\neval/tests/test_externalized.py:194: AssertionError",
-        "text_original_chars": 800,
         "time": 0.125
       },
       "name": "eval.tests.test_externalized.test_ext_filter_contains",
@@ -9808,8 +9377,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw12/test_ext_filter_nested_with_ar2')\n\n    def test_ext_filter_nested_with_array(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/filter.rs::tests::nested_with_array\n    \n        Upward trace: main -> ... -> filter::show_log_entry (via -f)\n        Downward trace: Lua table created from JSON can be indexed: array[2] == \"b\".\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"something happened\",\"time\":\"2017-07-06T15:21:16\",\"nested_with_array\":{\"array\":[\"a\",\"b\",\"c\"]},\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\"-f\", 'nested_with_array.array[2] == \"b\"', \"--main-line-format\", \"{{message}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"something happened\"\nE       AssertionError\n\neval/tests/test_externalized.py:285: AssertionError",
-        "text_original_chars": 912,
         "time": 0.123
       },
       "name": "eval.tests.test_externalized.test_ext_filter_nested_with_array",
@@ -9819,8 +9386,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw4/test_ext_log_write_log_entry2')\n\n    def test_ext_log_write_log_entry(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/log.rs::tests::write_log_entry\n    \n        Upward trace: main -> process -> log::print_log_line\n        Downward trace: formatted output is written to stdout.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"something happened\",\"time\":\"2017-07-06T15:21:16\",\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\"--main-line-format\", \"{{fblog_timestamp}}  {{fblog_level}}: {{fblog_message}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout) == \"2017-07-06T15:21:16  info: something happened\\n\"\nE       AssertionError\n\neval/tests/test_externalized.py:412: AssertionError",
-        "text_original_chars": 847,
         "time": 0.094
       },
       "name": "eval.tests.test_externalized.test_ext_log_write_log_entry",
@@ -9830,8 +9395,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw9/test_ext_log_write_log_entry_d2')\n\n    def test_ext_log_write_log_entry_dump_all(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/log.rs::tests::write_log_entry_dump_all\n    \n        Upward trace: main -> LogSettings.dump_all (via -d/--dump-all)\n        Downward trace: all flattened key/value pairs printed.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"something happened\",\"time\":\"2017-07-06T15:21:16\",\"process\":\"rust\",\"fu\":\"bower\",\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\n            \"-d\",\n            \"--main-line-format\",\n            \"{{fblog_timestamp}}  {{fblog_level}}: {{fblog_message}}\",\n            \"--additional-value-format\",\n            \"{{key}}: {{value}}\",\n            inp,\n        )\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).splitlines() == [\n            \"2017-07-06T15:21:16  info: something happened\",\n            \"fu: bower\",\n            \"level: info\",\n            \"message: something happened\",\n            \"process: rust\",\n            \"time: 2017-07-06T15:21:16\",\n        ]\nE       AssertionError\n\neval/tests/test_externalized.py:545: AssertionError",
-        "text_original_chars": 1248,
         "time": 0.092
       },
       "name": "eval.tests.test_externalized.test_ext_log_write_log_entry_dump_all",
@@ -9841,8 +9404,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw0/test_ext_substitution_array_co2')\n\n    def test_ext_substitution_array_context(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/substitution.rs::tests::array_context\n    \n        Upward trace: main -> LogSettings (-s) -> Substitution::apply\n          context is provided under the 'context' key.\n        Downward trace: array values replace {0},{1},{2}; missing key leaves placeholder.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"text: {0}, number: {1}, bool: {2}, ignored: {3}\",\"time\":\"2017-07-06T15:21:16\",\"context\":[\"better than sleeping\",9,true],\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\"-s\", \"--main-line-format\", \"{{fblog_message}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"text: better than sleeping, number: 9, bool: true, ignored: {3}\"\nE       AssertionError\n\neval/tests/test_externalized.py:359: AssertionError",
-        "text_original_chars": 1017,
         "time": 0.087
       },
       "name": "eval.tests.test_externalized.test_ext_substitution_array_context",
@@ -9852,8 +9413,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw2/test_ext_time_try_convert_secs2')\n\n    def test_ext_time_try_convert_secs(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/time.rs::tests::test_try_convert (seconds branch)\n        \"\"\"\n        inp = write_tmp_file(tmp_path, \"in.jsonl\", '{\"message\":\"m\",\"time\":\"1716292213\",\"level\":\"info\"}\\n')\n        r = run_exe(\"--main-line-format\", \"{{fblog_timestamp}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"2024-05-21T11:50:13.000Z\"\nE       AssertionError\n\neval/tests/test_externalized.py:385: AssertionError",
-        "text_original_chars": 617,
         "time": 0.114
       },
       "name": "eval.tests.test_externalized.test_ext_time_try_convert_secs",
@@ -9863,8 +9422,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw5/test_ext_log_write_log_entry_w2')\n\n    def test_ext_log_write_log_entry_with_mapped_level(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/log.rs::tests::write_log_entry_with_mapped_level\n    \n        Upward trace:\n          main -> args parsing -> LogSettings.level_map (via --map-level from=to)\n          -> log::print_log_line\n        Downward trace: mapped value becomes fblog_level.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"something happened\",\"time\":\"2017-07-06T15:21:16\",\"level\":\"30\"}\\n',\n        )\n        r = run_exe(\n            \"--map-level\",\n            \"30=info\",\n            \"--main-line-format\",\n            \"{{fblog_timestamp}}  {{fblog_level}}: {{fblog_message}}\",\n            inp,\n        )\n        assert r.returncode == 0\n>       assert norm_output(r.stdout) == \"2017-07-06T15:21:16  info: something happened\\n\"\nE       AssertionError\n\neval/tests/test_externalized.py:437: AssertionError",
-        "text_original_chars": 1051,
         "time": 0.144
       },
       "name": "eval.tests.test_externalized.test_ext_log_write_log_entry_with_mapped_level",
@@ -9874,8 +9431,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw8/test_ext_log_write_log_entry_w2')\n\n    def test_ext_log_write_log_entry_with_nested(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/log.rs::tests::write_log_entry_with_nested\n    \n        Upward trace: main -> -a fu -> log::flatten_json\n        Downward trace: flattened nested key printed as 'fu > test'.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"something happened\",\"time\":\"2017-07-06T15:21:16\",\"process\":\"rust\",\"fu\":{\"test\":\"hello\"},\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\n            \"-a\",\n            \"process\",\n            \"-a\",\n            \"fu\",\n            \"--main-line-format\",\n            \"{{fblog_timestamp}}  {{fblog_level}}: {{fblog_message}}\",\n            \"--additional-value-format\",\n            \"{{key}}: {{value}}\",\n            inp,\n        )\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).splitlines() == [\n            \"2017-07-06T15:21:16  info: something happened\",\n            \"process: rust\",\n            \"fu > test: hello\",\n        ]\nE       AssertionError\n\neval/tests/test_externalized.py:517: AssertionError",
-        "text_original_chars": 1210,
         "time": 0.148
       },
       "name": "eval.tests.test_externalized.test_ext_log_write_log_entry_with_nested",
@@ -9885,8 +9440,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw6/test_ext_log_write_log_entry_w2')\n\n    def test_ext_log_write_log_entry_with_prefix(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/log.rs::tests::write_log_entry_with_prefix\n    \n        Upward trace: main -> process (via -p/--with-prefix)\n        Downward trace: prefix becomes fblog_prefix and can be rendered.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.log\",\n            'abc {\"message\":\"something happened\",\"time\":\"2017-07-06T15:21:16\",\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\n            \"-p\",\n            \"--main-line-format\",\n            \"{{fblog_timestamp}}  {{fblog_level}}: {{fblog_prefix}} {{fblog_message}}\",\n            inp,\n        )\n        assert r.returncode == 0\n>       assert norm_output(r.stdout) == \"2017-07-06T15:21:16  info: abc something happened\\n\"\nE       AssertionError\n\neval/tests/test_externalized.py:459: AssertionError",
-        "text_original_chars": 971,
         "time": 0.131
       },
       "name": "eval.tests.test_externalized.test_ext_log_write_log_entry_with_prefix",
@@ -9896,8 +9449,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw3/test_ext_time_try_convert_non_2')\n\n    def test_ext_time_try_convert_non_numeric_passthrough(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/time.rs::tests::test_try_convert (non-numeric passthrough)\n        \"\"\"\n        inp = write_tmp_file(tmp_path, \"in.jsonl\", '{\"message\":\"m\",\"time\":\"bla\",\"level\":\"info\"}\\n')\n        r = run_exe(\"--main-line-format\", \"{{fblog_timestamp}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"bla\"\nE       AssertionError\n\neval/tests/test_externalized.py:395: AssertionError",
-        "text_original_chars": 617,
         "time": 0.135
       },
       "name": "eval.tests.test_externalized.test_ext_time_try_convert_non_numeric_passthrough",
@@ -9907,8 +9458,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw10/test_ext_log_write_log_entry_w2')\n\n    def test_ext_log_write_log_entry_with_exotic_fields(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/log.rs::tests::write_log_entry_with_exotic_fields\n    \n        Upward trace:\n          main -> LogSettings.add_message_keys/add_time_keys/add_level_keys via\n            -m/--message-key, -t/--time-key, -l/--level-key.\n    \n        Downward trace: first matching keys become fblog_message/fblog_timestamp/fblog_level.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"something happened\",\"time\":\"2017-07-06T15:21:16\",\"process\":\"rust\",\"moep\":\"moep\",\"hugo\":\"HUGO\",\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\n            \"-m\",\n            \"process\",\n            \"-t\",\n            \"moep\",\n            \"-l\",\n            \"hugo\",\n            \"--main-line-format\",\n            \"{{fblog_timestamp}}  {{fblog_level}}: {{fblog_message}}\",\n            inp,\n        )\n        assert r.returncode == 0\n>       assert norm_output(r.stdout) == \"moep  HUGO: rust\\n\"\nE       AssertionError\n\neval/tests/test_externalized.py:582: AssertionError",
-        "text_original_chars": 1206,
         "time": 0.142
       },
       "name": "eval.tests.test_externalized.test_ext_log_write_log_entry_with_exotic_fields",
@@ -9918,8 +9467,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw1/test_ext_time_try_convert_mill2')\n\n    def test_ext_time_try_convert_millis(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/time.rs::tests::test_try_convert (millis branch)\n    \n        Upward trace:\n          main -> log::print_log_line -> time::try_convert_timestamp_to_readable\n            (time value is obtained from --time-key/default keys)\n        Downward trace:\n          converted timestamp becomes fblog_timestamp and is rendered by main line format.\n        \"\"\"\n        inp = write_tmp_file(tmp_path, \"in.jsonl\", '{\"message\":\"m\",\"time\":\"1716292213381\",\"level\":\"info\"}\\n')\n        r = run_exe(\"--main-line-format\", \"{{fblog_timestamp}}\", inp)\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).strip() == \"2024-05-21T11:50:13.381Z\"\nE       AssertionError\n\neval/tests/test_externalized.py:375: AssertionError",
-        "text_original_chars": 910,
         "time": 0.117
       },
       "name": "eval.tests.test_externalized.test_ext_time_try_convert_millis",
@@ -9929,8 +9476,6 @@
       "branch": "1622d7dfbc0c",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw7/test_ext_log_write_log_entry_w2')\n\n    def test_ext_log_write_log_entry_with_additional_field(tmp_path: Path):\n        \"\"\"\n        Externalized from: src/log.rs::tests::write_log_entry_with_additional_field\n    \n        Upward trace: main -> LogSettings.additional_values (via -a/--additional-value)\n        Downward trace: additional fields printed as extra lines.\n        \"\"\"\n        inp = write_tmp_file(\n            tmp_path,\n            \"in.jsonl\",\n            '{\"message\":\"something happened\",\"time\":\"2017-07-06T15:21:16\",\"process\":\"rust\",\"fu\":\"bower\",\"level\":\"info\"}\\n',\n        )\n        r = run_exe(\n            \"-a\",\n            \"process\",\n            \"-a\",\n            \"fu\",\n            \"--main-line-format\",\n            \"{{fblog_timestamp}}  {{fblog_level}}: {{fblog_message}}\",\n            \"--additional-value-format\",\n            \"{{key}}: {{value}}\",\n            inp,\n        )\n        assert r.returncode == 0\n>       assert norm_output(r.stdout).splitlines() == [\n            \"2017-07-06T15:21:16  info: something happened\",\n            \"process: rust\",\n            \"fu: bower\",\n        ]\nE       AssertionError\n\neval/tests/test_externalized.py:486: AssertionError",
-        "text_original_chars": 1242,
         "time": 0.114
       },
       "name": "eval.tests.test_externalized.test_ext_log_write_log_entry_with_additional_field",
@@ -10012,8 +9557,6 @@
       "branch": "e764acf68f28",
       "extra": {
         "message": "AssertionError",
-        "text": "run_fblog = <function run_fblog.<locals>._run at 0x723f023ff0a0>\n\n    def test_nested_fields_filtering(run_fblog):\n        input_data = '{\"level\":\"info\",\"msg\":\"test\",\"status\":{\"a\":100},\"time\":\"2023\"}\\n'\n        input_data += '{\"level\":\"info\",\"msg\":\"discard\",\"status\":{\"a\":200},\"time\":\"2023\"}\\n'\n        # Nested fields are converted to lua records: status.a\n        returncode, stdout, stderr = run_fblog([\"-f\", \"status.a == 100\", \"-\"], input_data=input_data)\n        stripped = strip_ansi(stdout)\n>       assert \"test\" in stripped\nE       AssertionError\n\neval/tests/test_advanced.py:59: AssertionError",
-        "text_original_chars": 602,
         "time": 0.138
       },
       "name": "eval.tests.test_advanced.test_nested_fields_filtering",
@@ -10039,8 +9582,6 @@
       "branch": "e764acf68f28",
       "extra": {
         "message": "AssertionError",
-        "text": "run_fblog = <function run_fblog.<locals>._run at 0x7d6c0c16b010>\n\n    def test_array_fields_filtering(run_fblog):\n        input_data = '{\"level\":\"info\",\"msg\":\"test\",\"status\":{\"d\":[\"a\",\"b\"]},\"time\":\"2023\"}\\n'\n        input_data += '{\"level\":\"info\",\"msg\":\"discard\",\"status\":{\"d\":[\"c\",\"d\"]},\"time\":\"2023\"}\\n'\n        # Array fields are converted to lua tables (index starts with 1)\n        returncode, stdout, stderr = run_fblog([\"-f\", 'status.d[1] == \"a\"', \"-\"], input_data=input_data)\n        stripped = strip_ansi(stdout)\n>       assert \"test\" in stripped\nE       AssertionError\n\neval/tests/test_advanced.py:68: AssertionError",
-        "text_original_chars": 626,
         "time": 0.149
       },
       "name": "eval.tests.test_advanced.test_array_fields_filtering",
@@ -10074,8 +9615,6 @@
       "branch": "e764acf68f28",
       "extra": {
         "message": "AssertionError",
-        "text": "run_fblog = <function run_fblog.<locals>._run at 0x749a6de92a70>\ntmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw11/test_config_file_level_map2')\n\n    def test_config_file_level_map(run_fblog, tmp_path):\n        config_file = tmp_path / \"custom_config.toml\"\n        config_file.write_text(\"\"\"\n    [level_map]\n    \"10\" = \"trace\"\n    \"20\" = \"debug\"\n    \"\"\")\n        input_data = '{\"level\":\"10\",\"msg\":\"trace message\",\"time\":\"2023\"}\\n'\n        returncode, stdout, stderr = run_fblog([\"--config-file\", str(config_file), \"-\"], input_data=input_data)\n        assert returncode == 0\n>       assert \"TRACE\" in strip_ansi(stdout)\nE       AssertionError\n\neval/tests/test_config.py:29: AssertionError",
-        "text_original_chars": 699,
         "time": 0.126
       },
       "name": "eval.tests.test_config.test_config_file_level_map",
@@ -10101,8 +9640,6 @@
       "branch": "e764acf68f28",
       "extra": {
         "message": "AssertionError",
-        "text": "run_fblog = <function run_fblog.<locals>._run at 0x7a1b9b937130>\n\n    def test_main_line_format(run_fblog):\n        input_data = '{\"level\":\"info\",\"msg\":\"test\",\"time\":\"2023-10-27T10:00:00Z\"}\\n'\n        returncode, stdout, stderr = run_fblog([\"--main-line-format\", \"{{fblog_level}} -> {{fblog_message}}\", \"-\"], input_data=input_data)\n>       assert \"info -> test\" in strip_ansi(stdout)\nE       AssertionError\n\neval/tests/test_advanced.py:46: AssertionError",
-        "text_original_chars": 454,
         "time": 0.152
       },
       "name": "eval.tests.test_advanced.test_main_line_format",
@@ -10120,8 +9657,6 @@
       "branch": "e764acf68f28",
       "extra": {
         "message": "AssertionError",
-        "text": "run_fblog = <function run_fblog.<locals>._run at 0x7ff50a936b00>\ntmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw10/test_config_file_loading2')\n\n    def test_config_file_loading(run_fblog, tmp_path):\n        config_file = tmp_path / \"custom_config.toml\"\n        config_file.write_text(\"\"\"\n    message_keys = [\"custom_msg\"]\n    time_keys = [\"custom_time\"]\n    level_keys = [\"custom_level\"]\n    main_line_format = \"{{fblog_level}} | {{fblog_message}}\"\n    \"\"\")\n    \n        input_data = '{\"custom_level\":\"info\",\"custom_msg\":\"test\",\"custom_time\":\"2023-10-27\"}\\n'\n        returncode, stdout, stderr = run_fblog([\"--config-file\", str(config_file), \"-\"], input_data=input_data)\n        assert returncode == 0\n>       assert \"info | test\" in strip_ansi(stdout)\nE       AssertionError\n\neval/tests/test_config.py:17: AssertionError",
-        "text_original_chars": 833,
         "time": 0.148
       },
       "name": "eval.tests.test_config.test_config_file_loading",
@@ -10163,8 +9698,6 @@
       "branch": "4e219826c927",
       "extra": {
         "message": "test_stdin_matches_file_for_sample_json_log depends on test_sample_json_log_default_snapshot",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_stdin_matches_file_for_sample_json_log depends on test_sample_json_log_default_snapshot",
-        "text_original_chars": 158,
         "time": 0.0
       },
       "name": "eval.tests.test_fblog_behavior.test_stdin_matches_file_for_sample_json_log",
@@ -10174,8 +9707,6 @@
       "branch": "4e219826c927",
       "extra": {
         "message": "test_filter_level_not_info_snapshot depends on test_sample_json_log_default_snapshot",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_filter_level_not_info_snapshot depends on test_sample_json_log_default_snapshot",
-        "text_original_chars": 150,
         "time": 0.001
       },
       "name": "eval.tests.test_fblog_behavior.test_filter_level_not_info_snapshot",
@@ -10185,8 +9716,6 @@
       "branch": "4e219826c927",
       "extra": {
         "message": "test_no_implicit_filter_return_statement_snapshot depends on test_sample_json_log_default_snapshot",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_no_implicit_filter_return_statement_snapshot depends on test_sample_json_log_default_snapshot",
-        "text_original_chars": 164,
         "time": 0.001
       },
       "name": "eval.tests.test_fblog_behavior.test_no_implicit_filter_return_statement_snapshot",
@@ -10196,8 +9725,6 @@
       "branch": "4e219826c927",
       "extra": {
         "message": "test_additional_values_snapshot depends on test_sample_json_log_default_snapshot",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_additional_values_snapshot depends on test_sample_json_log_default_snapshot",
-        "text_original_chars": 146,
         "time": 0.001
       },
       "name": "eval.tests.test_fblog_behavior.test_additional_values_snapshot",
@@ -10207,8 +9734,6 @@
       "branch": "4e219826c927",
       "extra": {
         "message": "test_dump_all_snapshot depends on test_sample_json_log_default_snapshot",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_dump_all_snapshot depends on test_sample_json_log_default_snapshot",
-        "text_original_chars": 137,
         "time": 0.001
       },
       "name": "eval.tests.test_fblog_behavior.test_dump_all_snapshot",
@@ -10218,8 +9743,6 @@
       "branch": "4e219826c927",
       "extra": {
         "message": "test_with_prefix_snapshot depends on test_sample_json_log_default_snapshot",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_with_prefix_snapshot depends on test_sample_json_log_default_snapshot",
-        "text_original_chars": 140,
         "time": 0.001
       },
       "name": "eval.tests.test_fblog_behavior.test_with_prefix_snapshot",
@@ -10261,8 +9784,6 @@
       "branch": "4e219826c927",
       "extra": {
         "message": "AssertionError",
-        "text": "samples_dir = PosixPath('/workspace')\n\n    @pytest.mark.dependency()\n    def test_sample_json_log_default_snapshot(samples_dir):\n        rc, out, err = run_fblog([\"sample.json.log\"], env={\"NO_COLOR\": \"1\"})\n        assert rc == 0\n        assert err == b\"\"\n        snap = (Path(__file__).parent / \"snapshots\" / \"sample_json_log_default.txt\").read_bytes()\n>       assert out == snap\nE       AssertionError\n\neval/tests/test_fblog_behavior.py:55: AssertionError",
-        "text_original_chars": 456,
         "time": 0.132
       },
       "name": "eval.tests.test_fblog_behavior.test_sample_json_log_default_snapshot",
@@ -10272,8 +9793,6 @@
       "branch": "4e219826c927",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw8/test_placeholder_substitution_2')\n\n    @pytest.mark.dependency()\n    def test_placeholder_substitution_tempfile(tmp_path):\n        log = '{\"message\": \"Found #{count} new items.\", \"extra_data\": {\"count\": 556}, \"level\": \"info\"}\\n'\n        p = tmp_path / \"example.log\"\n        p.write_text(log, encoding=\"utf-8\")\n    \n        rc, out, err = run_fblog([\"-c\", \"extra_data\", \"-F\", \"#{key}\", str(p)], env={\"NO_COLOR\": \"1\"})\n        assert rc == 0\n        assert err == b\"\"\n        # exact output snapshot\n        snap = (Path(__file__).parent / \"snapshots\" / \"placeholder_substitution.txt\").read_bytes()\n>       assert out == snap\nE       AssertionError\n\neval/tests/test_fblog_behavior.py:118: AssertionError",
-        "text_original_chars": 762,
         "time": 0.154
       },
       "name": "eval.tests.test_fblog_behavior.test_placeholder_substitution_tempfile",
@@ -10515,8 +10034,6 @@
       "branch": "ce4b32d3837e",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <tests.test_fblog.TestFiltering object at 0x73f621b97640>\n\n    def test_filter_nested_fields(self):\n        \"\"\"Test filtering nested fields.\"\"\"\n        sample_file = os.path.join(SAMPLE_DIR, \"sample_nested.json.log\")\n        result = run_fblog([\"-d\", \"-f\", \"status.a == 100\"], input_data=open(sample_file).read())\n        assert result.returncode == 0\n>       assert \"a\" in result.stdout\nE       AssertionError\n\neval/tests/test_fblog.py:164: AssertionError",
-        "text_original_chars": 463,
         "time": 0.129
       },
       "name": "eval.tests.test_fblog.TestFiltering.test_filter_nested_fields",
@@ -10534,8 +10051,6 @@
       "branch": "ce4b32d3837e",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <tests.test_fblog.TestOutputFormatting object at 0x7094ad152470>\n\n    def test_main_line_format(self):\n        \"\"\"Test --main-line-format option.\"\"\"\n        input_data = '{\"level\":\"info\",\"msg\":\"test\"}'\n        result = run_fblog([\"--main-line-format\", \"{{fblog_message}}\"], input_data=input_data)\n        assert result.returncode == 0\n>       assert \"test\" in result.stdout\nE       AssertionError\n\neval/tests/test_fblog.py:249: AssertionError",
-        "text_original_chars": 449,
         "time": 0.128
       },
       "name": "eval.tests.test_fblog.TestOutputFormatting.test_main_line_format",

@@ -795,6 +795,7 @@
     }
   ],
   "public_redactions": {
+    "extra_text": "redacted",
     "log_output": "redacted",
     "long_extra_text": "truncated to 2000 chars"
   },
@@ -883,8 +884,6 @@
       "branch": "ef68f5cfbae5",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_autocomplete_mimes():\n        \"\"\"autocomplete -m should list mime types.\"\"\"\n        with TempFiles() as tf:\n            config_home = tf.path() / \"config\"\n            data_home = tf.path() / \"data\"\n            config_home.mkdir()\n            data_home.mkdir()\n    \n            env = {\n                \"XDG_CONFIG_HOME\": str(config_home),\n                \"XDG_DATA_HOME\": str(data_home),\n            }\n    \n            # Run autocomplete for mimes\n            result = run(\"autocomplete\", \"-m\", env=env)\n>           assert result.returncode == 0\nE           AssertionError\n\neval/tests/test_autocomplete.py:87: AssertionError",
-        "text_original_chars": 632,
         "time": 0.121
       },
       "name": "eval.tests.test_autocomplete.test_autocomplete_mimes",
@@ -910,8 +909,6 @@
       "branch": "ef68f5cfbae5",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_autocomplete_desktop_files_flag():\n        \"\"\"Test autocomplete -d flag for desktop files.\"\"\"\n        with TempFiles() as tf:\n            config_home = tf.path() / \"config\"\n            data_home = tf.path() / \"data\"\n            config_home.mkdir()\n            data_home.mkdir()\n    \n            env = {\n                \"XDG_CONFIG_HOME\": str(config_home),\n                \"XDG_DATA_HOME\": str(data_home),\n            }\n    \n            # Create a desktop file\n            apps_dir = data_home / \"applications\"\n            apps_dir.mkdir(parents=True)\n            desktop_file = apps_dir / \"myapp.desktop\"\n            desktop_file.write_text(\"\"\"[Desktop Entry]\n    Type=Application\n    Name=My App\n    Exec=echo test\n    \"\"\")\n    \n            result = run(\"autocomplete\", \"-d\", env=env)\n            # Should list desktop files\n>           assert b\"myapp.desktop\" in result.stdout or result.returncode == 0\nE           AssertionError\n\neval/tests/test_comprehensive_coverage.py:65: AssertionError",
-        "text_original_chars": 1002,
         "time": 0.133
       },
       "name": "eval.tests.test_comprehensive_coverage.test_autocomplete_desktop_files_flag",
@@ -1105,8 +1102,6 @@
       "branch": "ef68f5cfbae5",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_autocomplete_desktop_files():\n        \"\"\"autocomplete -d should list desktop files.\"\"\"\n        with TempFiles() as tf:\n            config_home = tf.path() / \"config\"\n            data_home = tf.path() / \"data\"\n            config_home.mkdir()\n            data_home.mkdir()\n    \n            env = {\n                \"XDG_CONFIG_HOME\": str(config_home),\n                \"XDG_DATA_HOME\": str(data_home),\n            }\n    \n            # Create dummy desktop files\n            apps_dir = data_home / \"applications\"\n            apps_dir.mkdir(parents=True)\n    \n            for i in range(1, 3):\n                desktop_file = apps_dir / f\"test{i}.desktop\"\n                desktop_file.write_text(f\"\"\"[Desktop Entry]\n    Type=Application\n    Name=Test App {i}\n    Exec=echo test{i}\n    MimeType=text/plain;\n    \"\"\")\n    \n            # Run autocomplete for desktop files\n            result = run(\"autocomplete\", \"-d\", env=env)\n>           assert result.returncode == 0\nE           AssertionError\n\neval/tests/test_autocomplete.py:66: AssertionError",
-        "text_original_chars": 1047,
         "time": 0.109
       },
       "name": "eval.tests.test_autocomplete.test_autocomplete_desktop_files",
@@ -1244,8 +1239,6 @@
       "branch": "ef68f5cfbae5",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_open_with_handler_that_spawns_process():\n        \"\"\"Test opening with handler that spawns a background process.\"\"\"\n        with TempFiles() as tf:\n            config_home = tf.path() / \"config\"\n            data_home = tf.path() / \"data\"\n            config_home.mkdir()\n            data_home.mkdir()\n    \n            env = {\n                \"XDG_CONFIG_HOME\": str(config_home),\n                \"XDG_DATA_HOME\": str(data_home),\n            }\n    \n            # Create desktop file\n            apps_dir = data_home / \"applications\"\n            apps_dir.mkdir(parents=True)\n    \n            # Use /bin/true which always succeeds\n            desktop_file = apps_dir / \"test.desktop\"\n            desktop_file.write_text(\"\"\"[Desktop Entry]\n    Type=Application\n    Name=Test\n    Exec=/bin/true %f\n    MimeType=text/plain;\n    \"\"\")\n    \n            # Set handler\n            run(\"set\", \"text/plain\", \"test.desktop\", env=env)\n    \n            # Create and open file\n            test_file = tf.create(\"test.txt\", \"content\")\n            result = run(\"open\", str(test_file), env=env)\n    \n            # Should succeed since /bin/true always succeeds\n>           assert result.returncode == 0\nE           AssertionError\n\neval/tests/test_final_coverage_push.py:166: AssertionError",
-        "text_original_chars": 1275,
         "time": 0.222
       },
       "name": "eval.tests.test_final_coverage_push.test_open_with_handler_that_spawns_process",
@@ -1279,8 +1272,6 @@
       "branch": "ef68f5cfbae5",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_launch_with_no_terminal_available():\n        \"\"\"Test launching Terminal=true app when no terminal is available.\"\"\"\n        with TempFiles() as tf:\n            config_home = tf.path() / \"config\"\n            data_home = tf.path() / \"data\"\n            config_home.mkdir()\n            data_home.mkdir()\n    \n            env = {\n                \"XDG_CONFIG_HOME\": str(config_home),\n                \"XDG_DATA_HOME\": str(data_home),\n            }\n    \n            # Create terminal app but no terminal emulator\n            apps_dir = data_home / \"applications\"\n            apps_dir.mkdir(parents=True)\n    \n            app_file = apps_dir / \"termapp.desktop\"\n            app_file.write_text(\"\"\"[Desktop Entry]\n    Type=Application\n    Name=Terminal App\n    Exec=echo hello\n    Terminal=true\n    MimeType=application/x-noterm;\n    \"\"\")\n    \n            # Set handler\n            run(\"set\", \"application/x-noterm\", \"termapp.desktop\", env=env)\n    \n            # Try to launch - should fail with no terminal error\n            result = run(\"launch\", \"application/x-noterm\", env=env)\n>           assert result.returncode != 0\nE           AssertionError\n\neval/tests/test_final_coverage_push.py:202: AssertionError",
-        "text_original_chars": 1209,
         "time": 0.243
       },
       "name": "eval.tests.test_final_coverage_push.test_launch_with_no_terminal_available",
@@ -1530,8 +1521,6 @@
       "branch": "ef68f5cfbae5",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_autocomplete_empty_output():\n        \"\"\"Test autocomplete with no desktop files.\"\"\"\n        with TempFiles() as tf:\n            config_home = tf.path() / \"config\"\n            data_home = tf.path() / \"data\"\n            config_home.mkdir()\n            data_home.mkdir()\n    \n            env = {\n                \"XDG_CONFIG_HOME\": str(config_home),\n                \"XDG_DATA_HOME\": str(data_home),\n            }\n    \n            # Autocomplete with empty applications dir\n            result = run(\"autocomplete\", \"-d\", env=env)\n>           assert result.returncode == 0\nE           AssertionError\n\neval/tests/test_more_edge_cases.py:282: AssertionError",
-        "text_original_chars": 658,
         "time": 0.118
       },
       "name": "eval.tests.test_more_edge_cases.test_autocomplete_empty_output",
@@ -1685,8 +1674,6 @@
       "branch": "ef68f5cfbae5",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_open_multiple_files():\n        \"\"\"open should handle multiple files at once.\"\"\"\n        with TempFiles() as tf:\n            config_home = tf.path() / \"config\"\n            data_home = tf.path() / \"data\"\n            config_home.mkdir()\n            data_home.mkdir()\n    \n            env = {\n                \"XDG_CONFIG_HOME\": str(config_home),\n                \"XDG_DATA_HOME\": str(data_home),\n            }\n    \n            # Create a dummy desktop file\n            apps_dir = data_home / \"applications\"\n            apps_dir.mkdir(parents=True)\n    \n            output_marker = tf.path() / \"opened.txt\"\n            script = tf.path() / \"handler.sh\"\n            script.write_text(f\"#!/bin/bash\\necho $@ >> {output_marker}\\n\")\n            script.chmod(0o755)\n    \n            desktop_file = apps_dir / \"test.desktop\"\n            desktop_file.write_text(f\"\"\"[Desktop Entry]\n    Type=Application\n    Name=Test App\n    Exec={script} %f\n    MimeType=text/plain;\n    \"\"\")\n    \n            # Set handler\n            run(\"set\", \"text/plain\", \"test.desktop\", env=env)\n    \n            # Create test files\n            test_file1 = tf.create(\"test1.txt\", \"test content 1\")\n            test_file2 = tf.create(\"test2.txt\", \"test content 2\")\n    \n            # Open multiple files\n            result = run(\"open\", str(test_file1), str(test_file2), env=env)\n>           assert result.returncode == 0\nE           AssertionError\n\neval/tests/test_open_launch.py:140: AssertionError",
-        "text_original_chars": 1469,
         "time": 0.228
       },
       "name": "eval.tests.test_open_launch.test_open_multiple_files",
@@ -1696,8 +1683,6 @@
       "branch": "ef68f5cfbae5",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_set_by_extension():\n        \"\"\"Set handler by extension.\"\"\"\n        with TempFiles() as tf:\n            config_home = tf.path() / \"config\"\n            data_home = tf.path() / \"data\"\n            config_home.mkdir()\n            data_home.mkdir()\n    \n            env = {\n                \"XDG_CONFIG_HOME\": str(config_home),\n                \"XDG_DATA_HOME\": str(data_home),\n            }\n    \n            # Create a dummy desktop file\n            apps_dir = data_home / \"applications\"\n            apps_dir.mkdir(parents=True)\n            desktop_file = apps_dir / \"test.desktop\"\n            desktop_file.write_text(\"\"\"[Desktop Entry]\n    Type=Application\n    Name=Test App\n    Exec=echo test\n    MimeType=text/plain;\n    \"\"\")\n    \n            # Set handler by extension\n            result = run(\"set\", \".txt\", \"test.desktop\", env=env)\n>           assert result.returncode == 0\nE           AssertionError\n\neval/tests/test_set_get_unset.py:100: AssertionError",
-        "text_original_chars": 963,
         "time": 0.11
       },
       "name": "eval.tests.test_set_get_unset.test_set_by_extension",
@@ -1763,8 +1748,6 @@
       "branch": "ef68f5cfbae5",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_open_text_file():\n        \"\"\"open should open a text file with its handler.\"\"\"\n        with TempFiles() as tf:\n            config_home = tf.path() / \"config\"\n            data_home = tf.path() / \"data\"\n            config_home.mkdir()\n            data_home.mkdir()\n    \n            env = {\n                \"XDG_CONFIG_HOME\": str(config_home),\n                \"XDG_DATA_HOME\": str(data_home),\n            }\n    \n            # Create a dummy desktop file with /bin/true which always succeeds\n            apps_dir = data_home / \"applications\"\n            apps_dir.mkdir(parents=True)\n    \n            desktop_file = apps_dir / \"test.desktop\"\n            desktop_file.write_text(\"\"\"[Desktop Entry]\n    Type=Application\n    Name=Test App\n    Exec=/bin/true %f\n    MimeType=text/plain;\n    \"\"\")\n    \n            # Set handler\n            result = run(\"set\", \"text/plain\", \"test.desktop\", env=env)\n            assert result.returncode == 0\n    \n            # Create test file\n            test_file = tf.create(\"test.txt\", \"test content\")\n    \n            # Open the file\n            result = run(\"open\", str(test_file), env=env)\n>           assert result.returncode == 0\nE           AssertionError\n\neval/tests/test_open_launch.py:73: AssertionError",
-        "text_original_chars": 1248,
         "time": 0.175
       },
       "name": "eval.tests.test_open_launch.test_open_text_file",
@@ -1910,8 +1893,6 @@
       "branch": "ef68f5cfbae5",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_autocomplete_mimes_flag():\n        \"\"\"Test autocomplete -m flag for mime types.\"\"\"\n        result = run(\"autocomplete\", \"-m\")\n        # Should list mime types or complete without error\n>       assert result.returncode == 0 or len(result.stdout) > 0\nE       AssertionError\n\neval/tests/test_comprehensive_coverage.py:74: AssertionError",
-        "text_original_chars": 342,
         "time": 0.165
       },
       "name": "eval.tests.test_comprehensive_coverage.test_autocomplete_mimes_flag",
@@ -2049,8 +2030,6 @@
       "branch": "3023c86fbab3",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_home = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw4/test_autocomplete_desktop_file2/home')\ndesktop_file = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw4/test_autocomplete_desktop_file2/home/.local/share/applications/test-app.desktop')\n\n    def test_autocomplete_desktop_files(temp_home, desktop_file):\n        \"\"\"Test autocomplete for desktop files.\"\"\"\n        result = run(\"autocomplete\", \"-d\")\n        # May succeed or fail, just verify it doesn't crash\n>       assert result.returncode in [0, 1]\nE       AssertionError\n\neval/tests/test_autocomplete.py:8: AssertionError",
-        "text_original_chars": 585,
         "time": 0.152
       },
       "name": "eval.tests.test_autocomplete.test_autocomplete_desktop_files",
@@ -2580,8 +2559,6 @@
       "branch": "3023c86fbab3",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_home = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw7/test_set_creates_config2/home')\ndesktop_file = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw7/test_set_creates_config2/home/.local/share/applications/test-app.desktop')\n\n    def test_set_creates_config(temp_home, desktop_file):\n        \"\"\"Test that set creates config directory if it doesn't exist.\"\"\"\n        config_dir = temp_home / \".config\" / \"handlr\"\n        config_dir.rmdir()  # Remove it\n    \n        result = run(\"set\", \"text/plain\", \"test-app.desktop\")\n        assert result.returncode == 0\n        assert b\"error\" not in result.stderr.lower()\n    \n        # Config directory should be created\n>       assert config_dir.exists()\nE       AssertionError\n\neval/tests/test_set.py:27: AssertionError",
-        "text_original_chars": 769,
         "time": 0.155
       },
       "name": "eval.tests.test_set.test_set_creates_config",
@@ -2759,8 +2736,6 @@
       "branch": "3023c86fbab3",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_home = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw4/test_autocomplete_mimes2/home')\n\n    def test_autocomplete_mimes(temp_home):\n        \"\"\"Test autocomplete for mime types.\"\"\"\n        result = run(\"autocomplete\", \"-m\")\n        # May succeed or fail, just verify it doesn't crash\n>       assert result.returncode in [0, 1]\nE       AssertionError\n\neval/tests/test_autocomplete.py:17: AssertionError",
-        "text_original_chars": 407,
         "time": 0.124
       },
       "name": "eval.tests.test_autocomplete.test_autocomplete_mimes",
@@ -2786,8 +2761,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:183: in test_autocomplete_both_flags_desktop_takes_precedence\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.139
       },
       "name": "tests.test_autocomplete.test_autocomplete_both_flags_desktop_takes_precedence",
@@ -2797,8 +2770,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:54: in test_autocomplete_mimes_includes_common_extensions\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.169
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_includes_common_extensions",
@@ -2808,8 +2779,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: sections should be in correct order",
-        "text": "tests/test_add.py:730: in test_add_config_file_format_sections_order\n    assert added_idx < default_idx, \"sections should be in correct order\"\nE   AssertionError: sections should be in correct order",
-        "text_original_chars": 198,
         "time": 0.18
       },
       "name": "tests.test_add.test_add_config_file_format_sections_order",
@@ -2819,8 +2788,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: handlr.toml not created on first run",
-        "text": "tests/test_config.py:222: in test_config_handlr_toml_created_on_first_run\n    assert handlr_toml.exists(), \"handlr.toml not created on first run\"\nE   AssertionError: handlr.toml not created on first run",
-        "text_original_chars": 202,
         "time": 0.177
       },
       "name": "tests.test_config.test_config_handlr_toml_created_on_first_run",
@@ -2830,8 +2797,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:435: in test_autocomplete_mimes_includes_text_types\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.175
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_includes_text_types",
@@ -2841,8 +2806,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:368: in test_autocomplete_mimes_flag_alone_works\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 0.157
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_flag_alone_works",
@@ -2852,8 +2815,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:130: in test_autocomplete_mimes_has_scheme_handlers\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.163
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_has_scheme_handlers",
@@ -2863,8 +2824,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:530: in test_autocomplete_help_flag_works\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 121,
         "time": 0.167
       },
       "name": "tests.test_autocomplete.test_autocomplete_help_flag_works",
@@ -2882,8 +2841,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_add.py:36: in test_add_single_handler\n    assert actual_content == expected_content\nE   AssertionError",
-        "text_original_chars": 113,
         "time": 0.152
       },
       "name": "tests.test_add.test_add_single_handler",
@@ -2901,8 +2858,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:271: in test_autocomplete_mimes_count_is_consistent\n    assert result1.returncode == 0\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.224
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_count_is_consistent",
@@ -2912,8 +2867,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_add.py:232: in test_add_same_handler_twice\n    assert actual_content == expected_content\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.237
       },
       "name": "tests.test_add.test_add_same_handler_twice",
@@ -2923,8 +2876,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_add.py:132: in test_add_three_handlers_ordering\n    assert actual_content == expected_content\nE   AssertionError",
-        "text_original_chars": 123,
         "time": 0.312
       },
       "name": "tests.test_add.test_add_three_handlers_ordering",
@@ -2974,8 +2925,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "ValueError: substring not found",
-        "text": "tests/test_add.py:527: in test_add_order_affects_list_output\n    assert mp4_line[0].index(\"vlc.desktop\") < mp4_line[0].index(\"mpv.desktop\")\nE   ValueError: substring not found",
-        "text_original_chars": 175,
         "time": 0.252
       },
       "name": "tests.test_add.test_add_order_affects_list_output",
@@ -3001,8 +2950,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_add.py:668: in test_add_four_handlers_maintains_order\n    assert plain_line[0] == \"text/plain=vim.desktop;nano.desktop;firefox.desktop;mpv.desktop;\"\nE   AssertionError",
-        "text_original_chars": 178,
         "time": 0.39
       },
       "name": "tests.test_add.test_add_four_handlers_maintains_order",
@@ -3020,8 +2967,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:181: in test_config_filters_invalid_mime_types\n    assert result.stdout == (RESOURCES / \"list_filtered_invalid.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 171,
         "time": 0.1
       },
       "name": "tests.test_config.test_config_filters_invalid_mime_types",
@@ -3071,8 +3016,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:556: in test_config_semicolon_terminated_handlers_required\n    assert content == (RESOURCES / \"mimeapps_single_handler.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 179,
         "time": 0.114
       },
       "name": "tests.test_config.test_config_semicolon_terminated_handlers_required",
@@ -3082,8 +3025,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:194: in test_autocomplete_mimes_output_matches_golden_exactly\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.098
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_output_matches_golden_exactly",
@@ -3093,8 +3034,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:542: in test_autocomplete_version_flag_works\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 124,
         "time": 0.116
       },
       "name": "tests.test_autocomplete.test_autocomplete_version_flag_works",
@@ -3104,8 +3043,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:377: in test_autocomplete_flag_order_d_then_m\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 0.13
       },
       "name": "tests.test_autocomplete.test_autocomplete_flag_order_d_then_m",
@@ -3115,8 +3052,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:72: in test_autocomplete_mimes_includes_mime_types_from_mime_db\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 143,
         "time": 0.129
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_includes_mime_types_from_mime_db",
@@ -3126,8 +3061,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:145: in test_autocomplete_mimes_has_inode_directory\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.14
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_has_inode_directory",
@@ -3137,8 +3070,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:452: in test_autocomplete_mimes_includes_application_types\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 138,
         "time": 0.125
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_includes_application_types",
@@ -3148,8 +3079,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:245: in test_add_handler_appends_not_replaces\n    assert content == (RESOURCES / \"mimeapps_add_handler.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 163,
         "time": 0.189
       },
       "name": "tests.test_config.test_add_handler_appends_not_replaces",
@@ -3159,8 +3088,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_add.py:57: in test_add_multiple_handlers_preserves_order\n    assert actual_content == expected_content\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.208
       },
       "name": "tests.test_add.test_add_multiple_handlers_preserves_order",
@@ -3178,8 +3105,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:285: in test_autocomplete_desktop_files_has_filename_and_name\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.115
       },
       "name": "tests.test_autocomplete.test_autocomplete_desktop_files_has_filename_and_name",
@@ -3197,8 +3122,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:15: in test_autocomplete_mimes_full_output\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.102
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_full_output",
@@ -3264,8 +3187,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_add.py:319: in test_add_vs_set_semantic_difference\n    assert \"text/plain=vim.desktop;nano.desktop;\" in content1\nE   AssertionError",
-        "text_original_chars": 142,
         "time": 0.185
       },
       "name": "tests.test_add.test_add_vs_set_semantic_difference",
@@ -3283,8 +3204,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw14/test_config_enable_selector_fa2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:43: in test_config_enable_selector_false_by_default\n    config_contents = config_path.read_text()\n/usr/lib/python3.10/pathlib.py:1134: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw14/test_config_enable_selector_fa2/config/handlr/handlr.toml'",
-        "text_original_chars": 523,
         "time": 0.109
       },
       "name": "tests.test_config_advanced.test_config_enable_selector_false_by_default",
@@ -3326,8 +3245,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_add.py:711: in test_add_mixed_wildcard_and_specific\n    assert result_wildcard.stdout.strip() == \"mpv.desktop\"\nE   AssertionError",
-        "text_original_chars": 140,
         "time": 0.465
       },
       "name": "tests.test_add.test_add_mixed_wildcard_and_specific",
@@ -3353,8 +3270,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:376: in test_set_replaces_existing_handler\n    assert content == (RESOURCES / \"mimeapps_set_replace.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 160,
         "time": 0.438
       },
       "name": "tests.test_config.test_set_replaces_existing_handler",
@@ -3460,8 +3375,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw3/test_selector_returns_chosen_h2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:205: in test_selector_returns_chosen_handler\n    config_path.write_text(\"\"\"enable_selector = true\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw3/test_selector_returns_chosen_h2/config/handlr/handlr.toml'",
-        "text_original_chars": 540,
         "time": 0.237
       },
       "name": "tests.test_config_advanced.test_selector_returns_chosen_handler",
@@ -3551,8 +3464,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:209: in test_autocomplete_mimes_no_empty_lines\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 126,
         "time": 0.099
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_no_empty_lines",
@@ -3578,8 +3489,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:91: in test_autocomplete_mimes_output_format_one_per_line\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.1
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_output_format_one_per_line",
@@ -3589,8 +3498,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:470: in test_autocomplete_mimes_has_all_four_custom_types\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.118
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_has_all_four_custom_types",
@@ -3600,8 +3507,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: mimeapps.list not created on first run",
-        "text": "tests/test_config.py:39: in test_config_file_created_on_first_run\n    assert mimeapps.exists(), \"mimeapps.list not created on first run\"\nE   AssertionError: mimeapps.list not created on first run",
-        "text_original_chars": 195,
         "time": 0.147
       },
       "name": "tests.test_config.test_config_file_created_on_first_run",
@@ -3611,8 +3516,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:386: in test_autocomplete_mimes_includes_video_types\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.097
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_includes_video_types",
@@ -3622,8 +3525,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:304: in test_autocomplete_mimes_extensions_section_comes_first\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 142,
         "time": 0.118
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_extensions_section_comes_first",
@@ -3633,8 +3534,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:167: in test_autocomplete_mimes_stderr_is_empty\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 127,
         "time": 0.11
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_stderr_is_empty",
@@ -3644,8 +3543,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:24: in test_autocomplete_mimes_has_custom_mime_types\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.124
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_has_custom_mime_types",
@@ -3663,8 +3560,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:265: in test_wildcard_mime_types_storage\n    assert content == (RESOURCES / \"mimeapps_wildcard.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 155,
         "time": 0.113
       },
       "name": "tests.test_config.test_wildcard_mime_types_storage",
@@ -3690,8 +3585,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_add.py:92: in test_add_wildcard_mime_type\n    assert actual_content == expected_content\nE   AssertionError",
-        "text_original_chars": 117,
         "time": 0.118
       },
       "name": "tests.test_add.test_add_wildcard_mime_type",
@@ -3709,8 +3602,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw14/test_config_selector_default_r2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:59: in test_config_selector_default_rofi_command\n    config_contents = config_path.read_text()\n/usr/lib/python3.10/pathlib.py:1134: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw14/test_config_selector_default_r2/config/handlr/handlr.toml'",
-        "text_original_chars": 520,
         "time": 0.111
       },
       "name": "tests.test_config_advanced.test_config_selector_default_rofi_command",
@@ -3720,8 +3611,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw2/test_config_enables_selector_f2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:597: in test_config_enables_selector_flag_variations\n    config_path.write_text(\"\"\"enable_selector = true\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw2/test_config_enables_selector_f2/config/handlr/handlr.toml'",
-        "text_original_chars": 548,
         "time": 0.237
       },
       "name": "tests.test_config_advanced.test_config_enables_selector_flag_variations",
@@ -3755,8 +3644,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors.py:77: in test_invalid_mime_with_at_sign\n    assert result.stderr == expected\nE   AssertionError",
-        "text_original_chars": 114,
         "time": 0.114
       },
       "name": "tests.test_errors.test_invalid_mime_with_at_sign",
@@ -3774,8 +3661,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:416: in test_config_multiple_mime_types_same_handler\n    assert content == (RESOURCES / \"mimeapps_same_handler_multi_mime.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 182,
         "time": 0.395
       },
       "name": "tests.test_config.test_config_multiple_mime_types_same_handler",
@@ -3785,8 +3670,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw3/test_selector_disabled_uses_fi2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:249: in test_selector_disabled_uses_first_handler\n    config_path.write_text(\"\"\"enable_selector = false\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw3/test_selector_disabled_uses_fi2/config/handlr/handlr.toml'",
-        "text_original_chars": 546,
         "time": 0.223
       },
       "name": "tests.test_config_advanced.test_selector_disabled_uses_first_handler",
@@ -3812,8 +3695,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:226: in test_autocomplete_mimes_extensions_valid_format\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 0.123
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_extensions_valid_format",
@@ -3823,8 +3704,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:106: in test_autocomplete_desktop_files_format\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 126,
         "time": 0.13
       },
       "name": "tests.test_autocomplete.test_autocomplete_desktop_files_format",
@@ -3842,8 +3721,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:494: in test_autocomplete_desktop_files_no_duplicate_filenames\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 142,
         "time": 0.09
       },
       "name": "tests.test_autocomplete.test_autocomplete_desktop_files_no_duplicate_filenames",
@@ -3853,8 +3730,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:402: in test_autocomplete_mimes_includes_audio_types\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.14
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_includes_audio_types",
@@ -3864,8 +3739,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:175: in test_autocomplete_desktop_files_stderr_is_empty\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 0.12
       },
       "name": "tests.test_autocomplete.test_autocomplete_desktop_files_stderr_is_empty",
@@ -3875,8 +3748,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:331: in test_autocomplete_mimes_custom_mimes_in_correct_section\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 143,
         "time": 0.118
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_custom_mimes_in_correct_section",
@@ -3886,8 +3757,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:37: in test_autocomplete_mimes_extensions_have_leading_dot\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 138,
         "time": 0.096
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_extensions_have_leading_dot",
@@ -3897,8 +3766,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:61: in test_mimeapps_list_ini_format_single_handler\n    assert content == (RESOURCES / \"mimeapps_single_handler.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 172,
         "time": 0.12
       },
       "name": "tests.test_config.test_mimeapps_list_ini_format_single_handler",
@@ -3916,8 +3783,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:686: in test_config_add_multiple_handlers_same_invocation\n    assert \"text/plain=vim.desktop;nano.desktop;emacs.desktop;\" in content\nE   AssertionError",
-        "text_original_chars": 172,
         "time": 0.314
       },
       "name": "tests.test_config.test_config_add_multiple_handlers_same_invocation",
@@ -3935,8 +3800,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_add.py:113: in test_add_to_existing_set_association\n    assert actual_content == expected_content\nE   AssertionError",
-        "text_original_chars": 127,
         "time": 0.203
       },
       "name": "tests.test_add.test_add_to_existing_set_association",
@@ -3954,8 +3817,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: MIME 'invalid@mime' error output mismatch",
-        "text": "tests/test_errors.py:226: in test_all_invalid_mimes_exit_with_code_2\n    assert result.stderr == expected, f\"MIME {mime!r} error output mismatch\"\nE   AssertionError: MIME 'invalid@mime' error output mismatch",
-        "text_original_chars": 207,
         "time": 0.106
       },
       "name": "tests.test_errors.test_all_invalid_mimes_exit_with_code_2",
@@ -3965,8 +3826,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw14/test_config_preserves_custom_s2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:79: in test_config_preserves_custom_selector_command\n    config_path.write_text(custom_config)\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw14/test_config_preserves_custom_s2/config/handlr/handlr.toml'",
-        "text_original_chars": 538,
         "time": 0.128
       },
       "name": "tests.test_config_advanced.test_config_preserves_custom_selector_command",
@@ -4032,8 +3891,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors.py:285: in test_error_messages_detail_invalid_mime_parsing\n    assert result.stderr == expected\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.138
       },
       "name": "tests.test_errors.test_error_messages_detail_invalid_mime_parsing",
@@ -4091,8 +3948,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors.py:411: in test_mime_type_with_spaces\n    assert result.stderr == expected\nE   AssertionError",
-        "text_original_chars": 111,
         "time": 0.11
       },
       "name": "tests.test_errors.test_mime_type_with_spaces",
@@ -4110,8 +3965,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:461: in test_config_preserves_added_associations_on_unset\n    assert content == (RESOURCES / \"mimeapps_unset_keeps_added.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 181,
         "time": 0.089
       },
       "name": "tests.test_config.test_config_preserves_added_associations_on_unset",
@@ -4121,8 +3974,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw3/test_selector_with_single_hand2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:283: in test_selector_with_single_handler_not_invoked\n    config_path.write_text(\"\"\"enable_selector = true\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw3/test_selector_with_single_hand2/config/handlr/handlr.toml'",
-        "text_original_chars": 549,
         "time": 0.144
       },
       "name": "tests.test_config_advanced.test_selector_with_single_handler_not_invoked",
@@ -4132,8 +3983,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:519: in test_autocomplete_invalid_flag_produces_error\n    assert result.stderr == expected\nE   AssertionError",
-        "text_original_chars": 136,
         "time": 0.113
       },
       "name": "tests.test_autocomplete.test_autocomplete_invalid_flag_produces_error",
@@ -4143,8 +3992,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:245: in test_autocomplete_mimes_mime_types_valid_format\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 0.122
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_mime_types_valid_format",
@@ -4154,8 +4001,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:122: in test_autocomplete_no_flags_produces_no_output\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 133,
         "time": 0.11
       },
       "name": "tests.test_autocomplete.test_autocomplete_no_flags_produces_no_output",
@@ -4165,8 +4010,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config_advanced.py:400: in test_config_with_invalid_toml_causes_panic\n    assert result.returncode != 0\nE   AssertionError",
-        "text_original_chars": 133,
         "time": 0.118
       },
       "name": "tests.test_config_advanced.test_config_with_invalid_toml_causes_panic",
@@ -4176,8 +4019,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:418: in test_autocomplete_mimes_includes_image_types\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 132,
         "time": 0.101
       },
       "name": "tests.test_autocomplete.test_autocomplete_mimes_includes_image_types",
@@ -4187,8 +4028,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_autocomplete.py:359: in test_autocomplete_desktop_flag_alone_works\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 130,
         "time": 0.108
       },
       "name": "tests.test_autocomplete.test_autocomplete_desktop_flag_alone_works",
@@ -4214,8 +4053,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:83: in test_mimeapps_list_format_multiple_handlers_sorted\n    assert content == (RESOURCES / \"mimeapps_multiple_handlers.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 181,
         "time": 0.309
       },
       "name": "tests.test_config.test_mimeapps_list_format_multiple_handlers_sorted",
@@ -4249,8 +4086,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config_advanced.py:26: in test_config_created_with_defaults_on_first_run\n    assert config_path.exists()\nE   AssertionError",
-        "text_original_chars": 134,
         "time": 0.087
       },
       "name": "tests.test_config_advanced.test_config_created_with_defaults_on_first_run",
@@ -4332,8 +4167,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:28: in test_list_single_association_shows_table\n    run_handlr([\"set\", \"text/plain\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 442,
         "time": 0.116
       },
       "name": "tests.test_list.test_list_single_association_shows_table",
@@ -4359,8 +4192,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw14/test_config_preserves_enable_s2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:106: in test_config_preserves_enable_selector_true\n    config_path.write_text(config_with_selector)\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw14/test_config_preserves_enable_s2/config/handlr/handlr.toml'",
-        "text_original_chars": 543,
         "time": 0.12
       },
       "name": "tests.test_config_advanced.test_config_preserves_enable_selector_true",
@@ -4402,8 +4233,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'video/*', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:73: in test_list_wildcard_mime_types\n    run_handlr([\"set\", \"video/*\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'video/*', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 425,
         "time": 0.141
       },
       "name": "tests.test_list.test_list_wildcard_mime_types",
@@ -4453,8 +4282,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'a/b', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:119: in test_list_short_mime_type_proper_table\n    run_handlr([\"set\", \"a/b\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'a/b', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 427,
         "time": 0.086
       },
       "name": "tests.test_list.test_list_short_mime_type_proper_table",
@@ -4472,8 +4299,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_list.py:228: in test_list_multiple_handlers_comma_separated\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 126,
         "time": 0.288
       },
       "name": "tests.test_list.test_list_multiple_handlers_comma_separated",
@@ -4523,8 +4348,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:319: in test_list_redirected_to_file_same_format\n    run_handlr([\"set\", \"text/plain\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 443,
         "time": 0.128
       },
       "name": "tests.test_list.test_list_redirected_to_file_same_format",
@@ -4534,8 +4357,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw3/test_selector_command_with_arg2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:328: in test_selector_command_with_arguments_parsed_correctly\n    config_path.write_text(\"\"\"enable_selector = true\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw3/test_selector_command_with_arg2/config/handlr/handlr.toml'",
-        "text_original_chars": 557,
         "time": 0.211
       },
       "name": "tests.test_config_advanced.test_selector_command_with_arguments_parsed_correctly",
@@ -4561,8 +4382,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw6/test_selector_with_multiple_wo2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:442: in test_selector_with_multiple_word_names_matched_correctly\n    config_path.write_text(\"\"\"enable_selector = true\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw6/test_selector_with_multiple_wo2/config/handlr/handlr.toml'",
-        "text_original_chars": 560,
         "time": 0.236
       },
       "name": "tests.test_config_advanced.test_selector_with_multiple_word_names_matched_correctly",
@@ -4596,8 +4415,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:840: in test_launch_with_quoted_arguments_in_exec\n    assert output == (RESOURCES / \"launch_quoted_exec.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 164,
         "time": 0.662
       },
       "name": "tests.test_launch.test_launch_with_quoted_arguments_in_exec",
@@ -4607,8 +4424,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:49: in test_launch_with_mime_type_and_single_arg\n    assert output == (RESOURCES / \"launch_single_arg.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 162,
         "time": 0.665
       },
       "name": "tests.test_launch.test_launch_with_mime_type_and_single_arg",
@@ -4618,8 +4433,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:189: in test_launch_with_urls_as_arguments\n    assert output == (RESOURCES / \"launch_urls.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 150,
         "time": 0.696
       },
       "name": "tests.test_launch.test_launch_with_urls_as_arguments",
@@ -4629,8 +4442,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:332: in test_launch_with_exec_command_with_multiple_field_codes\n    assert output == (RESOURCES / \"launch_multiple_field_codes.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 187,
         "time": 0.662
       },
       "name": "tests.test_launch.test_launch_with_exec_command_with_multiple_field_codes",
@@ -4656,8 +4467,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:472: in test_launch_with_absolute_paths_in_arguments\n    assert output_log.exists()\nE   AssertionError",
-        "text_original_chars": 123,
         "time": 0.673
       },
       "name": "tests.test_launch.test_launch_with_absolute_paths_in_arguments",
@@ -4675,8 +4484,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'x-scheme-handler/https', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:484: in test_list_scheme_handler_mime_type\n    run_handlr([\"set\", \"x-scheme-handler/https\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'x-scheme-handler/https', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 461,
         "time": 0.116
       },
       "name": "tests.test_list.test_list_scheme_handler_mime_type",
@@ -4702,8 +4509,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: text/plain should appear once, appears 0 times",
-        "text": "tests/test_list.py:532: in test_list_duplicate_mime_in_config_deduplicated\n    assert text_plain_count == 1, f\"text/plain should appear once, appears {text_plain_count} times\"\nE   AssertionError: text/plain should appear once, appears 0 times",
-        "text_original_chars": 242,
         "time": 0.128
       },
       "name": "tests.test_list.test_list_duplicate_mime_in_config_deduplicated",
@@ -4729,8 +4534,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:42: in test_list_multiple_associations_sorted_alphabetically\n    run_handlr([\"set\", \"text/plain\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 455,
         "time": 0.136
       },
       "name": "tests.test_list.test_list_multiple_associations_sorted_alphabetically",
@@ -4756,8 +4559,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw14/test_selector_invoked_with_mul2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:155: in test_selector_invoked_with_multiple_handlers\n    config_path.write_text(f\"\"\"enable_selector = true\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw14/test_selector_invoked_with_mul2/config/handlr/handlr.toml'",
-        "text_original_chars": 550,
         "time": 0.197
       },
       "name": "tests.test_config_advanced.test_selector_invoked_with_multiple_handlers",
@@ -4791,8 +4592,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_mime_types.py:190: in test_wildcard_pattern_audio_star\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.319
       },
       "name": "tests.test_mime_types.test_wildcard_pattern_audio_star",
@@ -4802,8 +4601,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'application/vnd.oasis.opendocument.spreadsheet', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:88: in test_list_wide_mime_types_table_alignment\n    run_handlr([\"set\", \"application/vnd.oasis.opendocument.spreadsheet\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'application/vnd.oasis.opendocument.spreadsheet', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 515,
         "time": 0.141
       },
       "name": "tests.test_list.test_list_wide_mime_types_table_alignment",
@@ -4813,8 +4610,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:133: in test_list_short_flag_a_equivalent_to_all\n    run_handlr([\"set\", \"text/plain\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 443,
         "time": 0.131
       },
       "name": "tests.test_list.test_list_short_flag_a_equivalent_to_all",
@@ -4824,8 +4619,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_list.py:267: in test_list_many_handlers_truncation\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 117,
         "time": 0.594
       },
       "name": "tests.test_list.test_list_many_handlers_truncation",
@@ -4835,8 +4628,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_list.py:350: in test_list_malformed_mime_in_config_skipped\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 0.128
       },
       "name": "tests.test_list.test_list_malformed_mime_in_config_skipped",
@@ -4846,8 +4637,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw3/test_selector_output_trimmed_o2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:373: in test_selector_output_trimmed_of_trailing_whitespace\n    config_path.write_text(\"\"\"enable_selector = true\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw3/test_selector_output_trimmed_o2/config/handlr/handlr.toml'",
-        "text_original_chars": 555,
         "time": 0.219
       },
       "name": "tests.test_config_advanced.test_selector_output_trimmed_of_trailing_whitespace",
@@ -4857,8 +4646,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw6/test_selector_join_with_newlin2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:480: in test_selector_join_with_newlines\n    config_path.write_text(\"\"\"enable_selector = true\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw6/test_selector_join_with_newlin2/config/handlr/handlr.toml'",
-        "text_original_chars": 536,
         "time": 0.273
       },
       "name": "tests.test_config_advanced.test_selector_join_with_newlines",
@@ -4868,8 +4655,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:496: in test_list_empty_after_all_unset\n    run_handlr([\"set\", \"text/plain\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 434,
         "time": 0.119
       },
       "name": "tests.test_list.test_list_empty_after_all_unset",
@@ -4879,8 +4664,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'video/*', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:540: in test_list_mixed_default_and_wildcard\n    run_handlr([\"set\", \"video/*\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'video/*', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 433,
         "time": 0.113
       },
       "name": "tests.test_list.test_list_mixed_default_and_wildcard",
@@ -4890,8 +4673,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:388: in test_list_table_structure_parsing\n    run_handlr([\"set\", \"text/plain\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 436,
         "time": 0.149
       },
       "name": "tests.test_list.test_list_table_structure_parsing",
@@ -4901,8 +4682,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:59: in test_list_all_flag_shows_default_and_system_sections\n    run_handlr([\"set\", \"text/plain\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 454,
         "time": 0.103
       },
       "name": "tests.test_list.test_list_all_flag_shows_default_and_system_sections",
@@ -4912,8 +4691,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:367: in test_launch_with_exec_without_field_codes\n    assert output == (RESOURCES / \"launch_no_field_codes.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 167,
         "time": 0.646
       },
       "name": "tests.test_launch.test_launch_with_exec_without_field_codes",
@@ -4923,8 +4700,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:224: in test_launch_with_file_field_code\n    assert output == (RESOURCES / \"launch_file_field.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 154,
         "time": 0.629
       },
       "name": "tests.test_launch.test_launch_with_file_field_code",
@@ -4934,8 +4709,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:84: in test_launch_with_multiple_arguments\n    assert output == (RESOURCES / \"launch_multiple_args.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 159,
         "time": 0.647
       },
       "name": "tests.test_launch.test_launch_with_multiple_arguments",
@@ -4945,8 +4718,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:509: in test_launch_with_uppercase_u_field_code\n    assert output == (RESOURCES / \"launch_uppercase_u.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 162,
         "time": 0.655
       },
       "name": "tests.test_launch.test_launch_with_uppercase_u_field_code",
@@ -4964,8 +4735,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_mime_types.py:122: in test_wildcard_pattern_video_star\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.337
       },
       "name": "tests.test_mime_types.test_wildcard_pattern_video_star",
@@ -4991,8 +4760,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:103: in test_list_after_unset_removes_entry\n    run_handlr([\"set\", \"text/plain\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 438,
         "time": 0.149
       },
       "name": "tests.test_list.test_list_after_unset_removes_entry",
@@ -5010,8 +4777,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:153: in test_list_many_associations_maintains_format\n    run_handlr([\"set\", mime, \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 439,
         "time": 0.093
       },
       "name": "tests.test_list.test_list_many_associations_maintains_format",
@@ -5021,8 +4786,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_mime_types.py:508: in test_application_wildcard\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 111,
         "time": 0.282
       },
       "name": "tests.test_mime_types.test_application_wildcard",
@@ -5032,8 +4795,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_list.py:377: in test_list_empty_handler_in_config_skipped\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 124,
         "time": 0.11
       },
       "name": "tests.test_list.test_list_empty_handler_in_config_skipped",
@@ -5043,8 +4804,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_list.py:296: in test_list_all_with_added_associations_section\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 0.093
       },
       "name": "tests.test_list.test_list_all_with_added_associations_section",
@@ -5102,8 +4861,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw6/test_selector_process_spawn_fa2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:527: in test_selector_process_spawn_failure_falls_back_to_first_handler\n    config_path.write_text(\"\"\"enable_selector = true\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw6/test_selector_process_spawn_fa2/config/handlr/handlr.toml'",
-        "text_original_chars": 567,
         "time": 0.187
       },
       "name": "tests.test_config_advanced.test_selector_process_spawn_failure_falls_back_to_first_handler",
@@ -5113,8 +4870,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'application/x-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:567: in test_list_very_long_mime_type_truncation\n    run_handlr([\"set\", long_mime, \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'application/x-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 494,
         "time": 0.113
       },
       "name": "tests.test_list.test_list_very_long_mime_type_truncation",
@@ -5132,8 +4887,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_mime_types.py:734: in test_unset_specific_with_wildcard_present\n    assert result.stdout.strip() == \"mpv.desktop\"\nE   AssertionError",
-        "text_original_chars": 143,
         "time": 0.394
       },
       "name": "tests.test_mime_types.test_unset_specific_with_wildcard_present",
@@ -5151,8 +4904,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'application/zip', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:432: in test_list_mime_type_ordering_strict_alphabetical\n    run_handlr([\"set\", \"application/zip\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'application/zip', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 461,
         "time": 0.1
       },
       "name": "tests.test_list.test_list_mime_type_ordering_strict_alphabetical",
@@ -5226,8 +4977,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: Should reject 'text/ plain' with space after slash",
-        "text": "tests/test_mime_types.py:995: in test_spaces_in_mime_type_rejected\n    assert result.returncode != 0, \"Should reject 'text/ plain' with space after slash\"\nE   AssertionError: Should reject 'text/ plain' with space after slash",
-        "text_original_chars": 225,
         "time": 0.11
       },
       "name": "tests.test_mime_types.test_spaces_in_mime_type_rejected",
@@ -5253,8 +5002,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: Open failed with stderr: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })\n, stdout:",
-        "text": "tests/test_open.py:45: in test_open_single_text_file\n    assert result.returncode == 0, f\"Open failed with stderr: {result.stderr}, stdout: {result.stdout}\"\nE   AssertionError: Open failed with stderr: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })\nE   , stdout:",
-        "text_original_chars": 295,
         "time": 0.214
       },
       "name": "tests.test_open.test_open_single_text_file",
@@ -5272,8 +5019,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:259: in test_launch_with_multiple_files_field_code\n    assert output == (RESOURCES / \"launch_multiple_files.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 168,
         "time": 0.644
       },
       "name": "tests.test_launch.test_launch_with_multiple_files_field_code",
@@ -5283,8 +5028,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:404: in test_launch_with_long_argument_list\n    assert output == (RESOURCES / \"launch_many_args.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 156,
         "time": 0.675
       },
       "name": "tests.test_launch.test_launch_with_long_argument_list",
@@ -5342,8 +5085,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: Open multiple files failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text": "tests/test_open.py:185: in test_open_multiple_files_same_handler_batching\n    assert result.returncode == 0, f\"Open multiple files failed: {result.stderr}\"\nE   AssertionError: Open multiple files failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text_original_chars": 283,
         "time": 0.193
       },
       "name": "tests.test_open.test_open_multiple_files_same_handler_batching",
@@ -5353,8 +5094,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_mime_types.py:531: in test_text_wildcard\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 104,
         "time": 0.297
       },
       "name": "tests.test_mime_types.test_text_wildcard",
@@ -5364,8 +5103,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: Open multiple files failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text": "tests/test_open.py:240: in test_open_multiple_files_without_batch_support\n    assert result.returncode == 0, f\"Open multiple files failed: {result.stderr}\"\nE   AssertionError: Open multiple files failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text_original_chars": 283,
         "time": 0.194
       },
       "name": "tests.test_open.test_open_multiple_files_without_batch_support",
@@ -5399,8 +5136,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_mime_types.py:631: in test_wildcard_in_mimeapps_list\n    assert mimeapps_path.read_text() == expected\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.109
       },
       "name": "tests.test_mime_types.test_wildcard_in_mimeapps_list",
@@ -5426,8 +5161,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: Open directory failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text": "tests/test_open.py:450: in test_open_directory_mime_detection\n    assert result.returncode == 0, f\"Open directory failed: {result.stderr}\"\nE   AssertionError: Open directory failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text_original_chars": 261,
         "time": 0.204
       },
       "name": "tests.test_open.test_open_directory_mime_detection",
@@ -5509,8 +5242,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_set_get_unset.py:195: in test_unset_nonexistent_mime\n    assert content == \"\"\nE   AssertionError",
-        "text_original_chars": 107,
         "time": 0.128
       },
       "name": "tests.test_set_get_unset.test_unset_nonexistent_mime",
@@ -5528,8 +5259,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw6/test_config_serialization_roun2/config/handlr/handlr.toml'",
-        "text": "tests/test_config_advanced.py:553: in test_config_serialization_roundtrip\n    config_path.write_text(custom_config)\n/usr/lib/python3.10/pathlib.py:1154: in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n/usr/lib/python3.10/pathlib.py:1119: in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nE   FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/popen-gw6/test_config_serialization_roun2/config/handlr/handlr.toml'",
-        "text_original_chars": 528,
         "time": 0.088
       },
       "name": "tests.test_config_advanced.test_config_serialization_roundtrip",
@@ -5555,8 +5284,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text": "tests/test_list.py:461: in test_list_no_output_to_stderr_on_success\n    run_handlr([\"set\", \"text/plain\", \"python3.10.desktop\"], check=True)\ntests/conftest.py:41: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:526: in run\n    raise CalledProcessError(retcode, process.args,\nE   subprocess.CalledProcessError: Command '['/workspace/executable', 'set', 'text/plain', 'python3.10.desktop']' returned non-zero exit status 2.",
-        "text_original_chars": 443,
         "time": 0.083
       },
       "name": "tests.test_list.test_list_no_output_to_stderr_on_success",
@@ -5694,8 +5421,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_set_get_unset.py:474: in test_config_file_format_after_multiple_operations\n    assert \"[Added Associations]\" in content\nE   AssertionError",
-        "text_original_chars": 149,
         "time": 0.4
       },
       "name": "tests.test_set_get_unset.test_config_file_format_after_multiple_operations",
@@ -5793,8 +5518,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_set_get_unset.py:726: in test_set_updates_existing_config_preserves_structure\n    assert \"[Added Associations]\" in content\nE   AssertionError",
-        "text_original_chars": 152,
         "time": 0.113
       },
       "name": "tests.test_set_get_unset.test_set_updates_existing_config_preserves_structure",
@@ -5804,8 +5527,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_set_get_unset.py:773: in test_config_rejects_trailing_whitespace_in_section_header\n    assert result.returncode != 0\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.118
       },
       "name": "tests.test_set_get_unset.test_config_rejects_trailing_whitespace_in_section_header",
@@ -5895,8 +5616,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: Open shell script failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text": "tests/test_open.py:349: in test_open_file_with_extension_mime_detection\n    assert result.returncode == 0, f\"Open shell script failed: {result.stderr}\"\nE   AssertionError: Open shell script failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text_original_chars": 277,
         "time": 0.195
       },
       "name": "tests.test_open.test_open_file_with_extension_mime_detection",
@@ -5914,8 +5633,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:290: in test_launch_with_wildcard_mime_type\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 117,
         "time": 0.203
       },
       "name": "tests.test_launch.test_launch_with_wildcard_mime_type",
@@ -5925,8 +5642,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: File URL open failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text": "tests/test_open.py:403: in test_open_file_url_scheme\n    assert result.returncode == 0, f\"File URL open failed: {result.stderr}\"\nE   AssertionError: File URL open failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text_original_chars": 250,
         "time": 0.221
       },
       "name": "tests.test_open.test_open_file_url_scheme",
@@ -5936,8 +5651,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: error: Found argument 'autocomplete' which wasn't expected, or isn't valid in this context\n\nIf you tried to supply `autocomplete` as a PATTERN use `-- autocomplete`\n\nUSAGE:\n    executable <SUBCOMMAND>\n\nFor more information try --help",
-        "text": "tests/test_user_edge_cases.py:22: in test_list_handlers_autocomplete\n    assert result.returncode == 0, result.stderr\nE   AssertionError: error: Found argument 'autocomplete' which wasn't expected, or isn't valid in this context\nE   \nE   If you tried to supply `autocomplete` as a PATTERN use `-- autocomplete`\nE   \nE   USAGE:\nE       executable <SUBCOMMAND>\nE   \nE   For more information try --help",
-        "text_original_chars": 399,
         "time": 0.138
       },
       "name": "tests.test_user_edge_cases.test_list_handlers_autocomplete",
@@ -5947,8 +5660,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_user_edge_cases.py:93: in test_autocomplete_desktop_files_no_tab_in_json_handler\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 144,
         "time": 0.097
       },
       "name": "tests.test_user_edge_cases.test_autocomplete_desktop_files_no_tab_in_json_handler",
@@ -5966,8 +5677,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: Open multiple types failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text": "tests/test_open.py:310: in test_open_multiple_files_different_handlers\n    assert result.returncode == 0, f\"Open multiple types failed: {result.stderr}\"\nE   AssertionError: Open multiple types failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text_original_chars": 280,
         "time": 0.243
       },
       "name": "tests.test_open.test_open_multiple_files_different_handlers",
@@ -5977,8 +5686,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_launch.py:439: in test_launch_with_unicode_in_arguments\n    assert output == (RESOURCES / \"launch_unicode.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 156,
         "time": 0.646
       },
       "name": "tests.test_launch.test_launch_with_unicode_in_arguments",
@@ -6012,8 +5719,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: Open mixed types failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text": "tests/test_open.py:497: in test_open_mixed_urls_and_files\n    assert result.returncode == 0, f\"Open mixed types failed: {result.stderr}\"\nE   AssertionError: Open mixed types failed: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text_original_chars": 261,
         "time": 0.363
       },
       "name": "tests.test_open.test_open_mixed_urls_and_files",
@@ -6095,8 +5800,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_user_edge_cases.py:583: in test_wildcard_doesnt_match_empty_subtype\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.226
       },
       "name": "tests.test_user_edge_cases.test_wildcard_doesnt_match_empty_subtype",
@@ -6154,8 +5857,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: Should find wildcard handler: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text": "tests/test_user_edge_cases.py:199: in test_get_handler_wildcard_fallback\n    assert result.returncode == 0, f\"Should find wildcard handler: {result.stderr}\"\nE   AssertionError: Should find wildcard handler: Error: Io(Os { code: 2, kind: NotFound, message: \"No such file or directory\" })",
-        "text_original_chars": 286,
         "time": 0.211
       },
       "name": "tests.test_user_edge_cases.test_get_handler_wildcard_fallback",
@@ -6165,8 +5866,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: error: Found argument 'autocomplete' which wasn't expected, or isn't valid in this context\n\nIf you tried to supply `autocomplete` as a PATTERN use `-- autocomplete`\n\nUSAGE:\n    executable <SUBCOMMAND>\n\nFor more information try --help",
-        "text": "tests/test_user_edge_cases.py:63: in test_autocomplete_mimes_flag\n    assert result.returncode == 0, result.stderr\nE   AssertionError: error: Found argument 'autocomplete' which wasn't expected, or isn't valid in this context\nE   \nE   If you tried to supply `autocomplete` as a PATTERN use `-- autocomplete`\nE   \nE   USAGE:\nE       executable <SUBCOMMAND>\nE   \nE   For more information try --help",
-        "text_original_chars": 396,
         "time": 0.118
       },
       "name": "tests.test_user_edge_cases.test_autocomplete_mimes_flag",
@@ -6184,8 +5883,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_user_edge_cases.py:42: in test_list_handlers_format_precise\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 123,
         "time": 0.142
       },
       "name": "tests.test_user_edge_cases.test_list_handlers_format_precise",
@@ -6195,8 +5892,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_user_edge_cases.py:262: in test_autocomplete_desktop_no_duplicates\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 130,
         "time": 0.082
       },
       "name": "tests.test_user_edge_cases.test_autocomplete_desktop_no_duplicates",
@@ -6214,8 +5909,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_user_edge_cases.py:240: in test_get_handler_specific_overrides_wildcard\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 0.459
       },
       "name": "tests.test_user_edge_cases.test_get_handler_specific_overrides_wildcard",
@@ -6225,8 +5918,6 @@
       "branch": "08a92821049f",
       "extra": {
         "message": "AssertionError: app2.desktop not found in output",
-        "text": "tests/test_user_edge_cases.py:169: in test_multiple_handlers_added_in_order\n    assert idx2 != -1, \"app2.desktop not found in output\"\nE   AssertionError: app2.desktop not found in output",
-        "text_original_chars": 186,
         "time": 0.531
       },
       "name": "tests.test_user_edge_cases.test_multiple_handlers_added_in_order",
@@ -6380,8 +6071,6 @@
       "branch": "685a7a45a873",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_argument_parsing.TestListSubcommand object at 0x7d6ce8de7730>\n\n    def test_list_combined_flags_reverse(self):\n        \"\"\"Test list with combined short flags -Va.\"\"\"\n        result = run_command([\"list\", \"-Va\"])\n>       assert result.returncode == 0\nE       AssertionError\n\neval/tests/test_argument_parsing.py:125: AssertionError",
-        "text_original_chars": 342,
         "time": 0.16
       },
       "name": "eval.tests.test_argument_parsing.TestListSubcommand.test_list_combined_flags_reverse",
@@ -6511,8 +6200,6 @@
       "branch": "685a7a45a873",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_argument_parsing.TestListSubcommand object at 0x7155665c75b0>\n\n    def test_list_combined_flags(self):\n        \"\"\"Test list with combined short flags -aV.\"\"\"\n        result = run_command([\"list\", \"-aV\"])\n>       assert result.returncode == 0\nE       AssertionError\n\neval/tests/test_argument_parsing.py:118: AssertionError",
-        "text_original_chars": 334,
         "time": 0.152
       },
       "name": "eval.tests.test_argument_parsing.TestListSubcommand.test_list_combined_flags",
@@ -7018,8 +6705,6 @@
       "branch": "1baede95cff7",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_get_subcommand_requires_mime_positional_before_json_flag():\n        # `get` requires a <mime> positional. Providing only --json is a parse error.\n        p = run([\"get\", \"--json\"])\n>       assert_parse_error(p, snippets=[\"<mime>\", \"executable get <mime> --json\"])\n\neval/tests/test_argparse_validation.py:120: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\np = CompletedProcess(args=['/workspace/executable', 'get', '--json'], returncode=2, stdout='', stderr='error: The followin...ents were not provided:\\n    <mime>\\n\\nUSAGE:\\n    executable get [FLAGS] <mime>\\n\\nFor more information try --help\\n')\n\n    def assert_parse_error(p: subprocess.CompletedProcess, *, snippets=()):\n        # clap-style parse errors exit with code 2 for this binary.\n        assert p.returncode == 2\n        out = out_all(p)\n        assert \"error:\" in out\n        assert \"USAGE:\" in out\n        assert \"For more information try --help\" in out\n        for s in snippets:\n>           assert s in out\nE           AssertionError\n\neval/tests/test_argparse_validation.py:36: AssertionError",
-        "text_original_chars": 1107,
         "time": 0.146
       },
       "name": "eval.tests.test_argparse_validation.test_get_subcommand_requires_mime_positional_before_json_flag",
@@ -7053,8 +6738,6 @@
       "branch": "1baede95cff7",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_combined_short_flags_equivalent_to_separate():\n        # We must not test -h/--help output directly, but we can use it to force\n        # deterministic output and compare combined vs separate parsing.\n        p_sep = run([\"list\", \"-a\", \"-h\"])\n        p_comb = run([\"list\", \"-ah\"])\n        assert p_sep.returncode == 0\n>       assert p_comb.returncode == 0\nE       AssertionError\n\neval/tests/test_argparse_validation.py:99: AssertionError",
-        "text_original_chars": 446,
         "time": 0.274
       },
       "name": "eval.tests.test_argparse_validation.test_combined_short_flags_equivalent_to_separate",
@@ -7128,8 +6811,6 @@
       "branch": "e39f8fa9d672",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_add_appends_second_handler_and_list_shows_both():\n        with TempFiles() as tmp:\n            env = xdg_env(tmp)\n            write_desktop(tmp, filename=\"a.desktop\", name=\"A\", exec_line=\"true %u\")\n            write_desktop(tmp, filename=\"b.desktop\", name=\"B\", exec_line=\"true %u\")\n    \n            assert run(\"set\", \"text/plain\", \"a.desktop\", env=env).returncode == 0\n            assert run(\"add\", \"text/plain\", \"b.desktop\", env=env).returncode == 0\n    \n            mimeapps = Path(env[\"XDG_CONFIG_HOME\"]) / \"mimeapps.list\"\n            content = mimeapps.read_text(\"utf-8\")\n>           assert \"text/plain=a.desktop;b.desktop;\" in content\nE           AssertionError\n\neval/tests/test_mimeapps_io.py:48: AssertionError",
-        "text_original_chars": 726,
         "time": 0.278
       },
       "name": "eval.tests.test_mimeapps_io.test_add_appends_second_handler_and_list_shows_both",
@@ -7915,8 +7596,6 @@
       "branch": "3ddc627ae7eb",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_desktop_entry_complex_exec_parses_mimetypes_via_autocomplete_list():\n        \"\"\"\\\n        Externalized from: src/common/desktop_entry.rs::tests::complex_exec\n        Original assertions:\n          - parse_file(\"tests/cmus.desktop\") yields entry with 2 mimes: audio/mp3, audio/ogg\n    \n        Upward trace:\n          main() -> Cmd::Autocomplete { desktop_files: true } -> MimeApps::list_handlers() ->\n          SystemApps::get_entries() -> DesktopEntry::try_from(path) -> parse_file(path)\n    \n        Downward trace:\n          list_handlers() prints each entry as: \"<file_name>\\t<display_name>\\n\".\n          Therefore presence of a discovered desktop file proves the parsing path ran.\n    \n        External behavior tested:\n          Create a fake XDG data home containing `applications/cmus.desktop` and assert it is listed.\n        \"\"\"\n        repo_root = Path(__file__).resolve().parents[2]\n        with tempfile.TemporaryDirectory() as td:\n            data_home = Path(td) / \"share\"\n            apps_dir = data_home / \"applications\"\n            apps_dir.mkdir(parents=True)\n            (apps_dir / \"cmus.desktop\").write_bytes(\n                (repo_root / \"tests\" / \"cmus.desktop\").read_bytes()\n            )\n    \n            r = run_cmd(\n                [\"autocomplete\", \"-d\"],\n                env={\n                    \"XDG_DATA_HOME\": str(data_home),\n                    \"XDG_CONFIG_HOME\": td,\n                    \"XDG_CACHE_HOME\": td,\n                },\n            )\n>           assert r.returncode == 0\nE           AssertionError\n\neval/tests/test_externalized_rs_like.py:145: AssertionError",
-        "text_original_chars": 1614,
         "time": 0.132
       },
       "name": "eval.tests.test_externalized_rs_like.test_ext_desktop_entry_complex_exec_parses_mimetypes_via_autocomplete_list",
@@ -7934,8 +7613,6 @@
       "branch": "3ddc627ae7eb",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_user_apps_wildcard_mimes_resolution_via_set_get():\n        \"\"\"\\\n        Externalized from: src/apps/user.rs::tests::wildcard_mimes\n        Original assertions:\n          - Add handler for video/* then override with video/webm\n          - get_handler(video/mp4) -> mpv.desktop\n          - get_handler(video/asdf) -> mpv.desktop\n          - get_handler(video/webm) -> brave.desktop\n    \n        Upward trace:\n          main() -> Cmd::Set { mime: MimeOrExtension, handler: Handler } -> MimeApps::set_handler\n          main() -> Cmd::Get { mime: MimeOrExtension } -> MimeApps::show_handler -> MimeApps::get_handler\n            -> wildcard fallback logic (video/*)\n    \n        Downward trace:\n          show_handler prints the selected handler string to stdout.\n    \n        External behavior tested:\n          Use isolated XDG_CONFIG_HOME and provide fake `.desktop` files in XDG_DATA_HOME so handler\n          validation succeeds.\n        \"\"\"\n        with tempfile.TemporaryDirectory() as td:\n            env = {\"XDG_CONFIG_HOME\": td, \"XDG_CACHE_HOME\": td}\n    \n            data_home = Path(td) / \"share\"\n            apps_dir = data_home / \"applications\"\n            apps_dir.mkdir(parents=True, exist_ok=True)\n            (apps_dir / \"mpv.desktop\").write_text(\n                \"[Desktop Entry]\\nName=mpv\\nExec=mpv %U\\nType=Application\\n\"\n            )\n            (apps_dir / \"brave.desktop\").write_text(\n                \"[Desktop Entry]\\nName=brave\\nExec=brave %U\\nType=Application\\n\"\n            )\n            env[\"XDG_DATA_HOME\"] = str(data_home)\n    \n            r = run_cmd([\"set\", \"video/*\", \"mpv.desktop\"], env=env)\n            assert r.returncode == 0, r.stderr\n            r = run_cmd([\"set\", \"video/webm\", \"brave.desktop\"], env=env)\n            assert r.returncode == 0, r.stderr\n    \n            r = run_cmd([\"get\", \"video/mp4\"], env=env)\n>           assert r.returncode == 0\nE           AssertionError\n\neval/tests/test_externalized_rs_like.py:191: AssertionError",
-        "text_original_chars": 1986,
         "time": 0.344
       },
       "name": "eval.tests.test_externalized_rs_like.test_ext_user_apps_wildcard_mimes_resolution_via_set_get",
@@ -7961,8 +7638,6 @@
       "branch": "7a2c25964028",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_creates_default_config_at_xdg_location_when_missing():\n        with TempHome() as th:\n            cfg = Path(th.env[\"XDG_CONFIG_HOME\"]) / \"handlr\" / \"handlr.toml\"\n            assert not cfg.exists()\n            res = run(\"list\", env=th.env)\n            assert res.returncode == 0\n>           assert cfg.exists()\nE           AssertionError\n\neval/tests/test_config_env.py:55: AssertionError",
-        "text_original_chars": 397,
         "time": 0.143
       },
       "name": "eval.tests.test_config_env.test_creates_default_config_at_xdg_location_when_missing",
@@ -7972,8 +7647,6 @@
       "branch": "7a2c25964028",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_malformed_config_panics_and_exits_nonzero():\n        # Current behavior: Config::load() unwraps confy::load => malformed TOML causes panic.\n        with TempHome() as th:\n            cfg = Path(th.env[\"XDG_CONFIG_HOME\"]) / \"handlr\" / \"handlr.toml\"\n            cfg.parent.mkdir(parents=True, exist_ok=True)\n            cfg.write_text(\"enable_selector = true\\nselector = [\\n\")\n    \n            res = run(\"list\", env=th.env)\n>           assert res.returncode != 0\nE           AssertionError\n\neval/tests/test_config_env.py:89: AssertionError",
-        "text_original_chars": 546,
         "time": 0.138
       },
       "name": "eval.tests.test_config_env.test_malformed_config_panics_and_exits_nonzero",
@@ -7983,8 +7656,6 @@
       "branch": "7a2c25964028",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_xdg_config_home_is_respected_for_config_location():\n        with TempHome() as th:\n            xdg = Path(th.tempdir) / \"custom_xdg\"\n            env = {\"HOME\": th.tempdir, \"XDG_CONFIG_HOME\": str(xdg)}\n            res = run(\"list\", env=env)\n            assert res.returncode == 0\n>           assert (xdg / \"handlr\" / \"handlr.toml\").exists()\nE           AssertionError\n\neval/tests/test_config_env.py:67: AssertionError",
-        "text_original_chars": 425,
         "time": 0.143
       },
       "name": "eval.tests.test_config_env.test_xdg_config_home_is_respected_for_config_location",
@@ -8458,8 +8129,6 @@
       "branch": "82d6adef335c",
       "extra": {
         "message": "AssertionError",
-        "text": "@pytest.mark.timeout(5)\n    def test_unknown_subcommand_suggests_did_you_mean():\n        r = run_cmd(\"nope\")\n        combined = (r.stdout + r.stderr).lower()\n        assert r.returncode != 0\n>       assert \"did you mean\" in combined\nE       AssertionError\n\neval/tests/test_subcommand_dispatch.py:121: AssertionError",
-        "text_original_chars": 315,
         "time": 0.133
       },
       "name": "eval.tests.test_subcommand_dispatch.test_unknown_subcommand_suggests_did_you_mean",
@@ -8469,8 +8138,6 @@
       "branch": "7f0cdc78441a",
       "extra": {
         "message": "test_unset_removes_and_get_fails depends on test_set_writes_mimeapps_list",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_unset_removes_and_get_fails depends on test_set_writes_mimeapps_list",
-        "text_original_chars": 139,
         "time": 0.001
       },
       "name": "eval.tests.test_set_get_unset.test_unset_removes_and_get_fails",
@@ -8480,8 +8147,6 @@
       "branch": "7f0cdc78441a",
       "extra": {
         "message": "test_list_contains_mapping depends on test_add_keeps_default_first",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_list_contains_mapping depends on test_add_keeps_default_first",
-        "text_original_chars": 132,
         "time": 0.001
       },
       "name": "eval.tests.test_add_list.test_list_contains_mapping",
@@ -8491,8 +8156,6 @@
       "branch": "7f0cdc78441a",
       "extra": {
         "message": "test_list_all_shows_added_associations depends on test_add_keeps_default_first",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_list_all_shows_added_associations depends on test_add_keeps_default_first",
-        "text_original_chars": 144,
         "time": 0.001
       },
       "name": "eval.tests.test_add_list.test_list_all_shows_added_associations",
@@ -8502,8 +8165,6 @@
       "branch": "7f0cdc78441a",
       "extra": {
         "message": "test_get_returns_handler depends on test_set_writes_mimeapps_list",
-        "text": "/usr/local/lib/python3.10/dist-packages/pytest_dependency.py:101: test_get_returns_handler depends on test_set_writes_mimeapps_list",
-        "text_original_chars": 131,
         "time": 0.001
       },
       "name": "eval.tests.test_set_get_unset.test_get_returns_handler",

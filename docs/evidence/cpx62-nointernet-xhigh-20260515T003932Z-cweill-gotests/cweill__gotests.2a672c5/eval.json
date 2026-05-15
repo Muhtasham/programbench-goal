@@ -675,6 +675,7 @@
     }
   ],
   "public_redactions": {
+    "extra_text": "redacted",
     "log_output": "redacted",
     "long_extra_text": "truncated to 2000 chars"
   },
@@ -809,8 +810,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_invalid_file():\n        \"\"\"Test error handling for non-Go file.\"\"\"\n        result = run(\"-all\", \"README.md\")\n        assert result.returncode == 0\n        output = result.stdout + result.stderr\n        # Should fail due to not being a Go file\n>       assert b\"no Go source files\" in output or b\"No Go source files\" in output\nE       AssertionError\n\neval/tests/test_basic_invocation.py:91: AssertionError",
-        "text_original_chars": 412,
         "time": 0.205
       },
       "name": "eval.tests.test_basic_invocation.test_invalid_file",
@@ -828,8 +827,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_function_with_function_parameter():\n        \"\"\"Test function with function parameter.\"\"\"\n        with TempFiles() as tf:\n            src = tf.create(\"example.go\", \"\"\"package example\n    \n    func Apply(fn func(int) int, value int) int {\n        return fn(value)\n    }\n    \"\"\")\n            result = run(\"-all\", str(src))\n            assert result.returncode == 0\n            assert b\"TestApply\" in result.stdout\n>           assert b\"func(int) int\" in result.stdout\nE           AssertionError\n\neval/tests/test_edge_cases.py:145: AssertionError",
-        "text_original_chars": 550,
         "time": 0.192
       },
       "name": "eval.tests.test_edge_cases.test_function_with_function_parameter",
@@ -839,8 +836,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_use_go_cmp_with_parallel():\n        \"\"\"Test -use_go_cmp with -parallel combination.\"\"\"\n        with TempFiles() as tf:\n            src = tf.create(\"example.go\", \"\"\"package example\n    \n    type Data struct {\n        Value int\n    }\n    \n    func GetData() Data {\n        return Data{Value: 42}\n    }\n    \"\"\")\n            result = run(\"-all\", \"-use_go_cmp\", \"-parallel\", str(src))\n            assert result.returncode == 0\n>           assert b\"cmp\" in result.stdout\nE           AssertionError\n\neval/tests/test_complex_scenarios.py:133: AssertionError",
-        "text_original_chars": 558,
         "time": 0.192
       },
       "name": "eval.tests.test_complex_scenarios.test_use_go_cmp_with_parallel",
@@ -1018,8 +1013,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_i_and_use_go_cmp_together():\n        \"\"\"Test -i and -use_go_cmp flags work together.\"\"\"\n        with TempFiles() as tf:\n            src = tf.create(\"example.go\", \"\"\"package example\n    \n    type Data struct {\n        Values []int\n    }\n    \n    func Process(input string) Data {\n        return Data{Values: []int{1, 2, 3}}\n    }\n    \"\"\")\n            result = run(\"-all\", \"-i\", \"-use_go_cmp\", str(src))\n            assert result.returncode == 0\n            assert b\"TestProcess\" in result.stdout\n            # Should have both features\n>           assert b\"cmp.\" in result.stdout\nE           AssertionError\n\neval/tests/test_formatting_options.py:115: AssertionError",
-        "text_original_chars": 673,
         "time": 0.156
       },
       "name": "eval.tests.test_formatting_options.test_i_and_use_go_cmp_together",
@@ -1029,8 +1022,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_use_go_cmp_flag():\n        \"\"\"Test -use_go_cmp flag for using cmp.Equal.\"\"\"\n        with TempFiles() as tf:\n            src = tf.create(\"example.go\", \"\"\"package example\n    \n    type Data struct {\n        Value int\n    }\n    \n    func GetData() Data {\n        return Data{Value: 42}\n    }\n    \"\"\")\n            result = run(\"-all\", \"-use_go_cmp\", str(src))\n            assert result.returncode == 0\n            assert b\"TestGetData\" in result.stdout\n            # Should import cmp\n>           assert b\"github.com/google/go-cmp/cmp\" in result.stdout\nE           AssertionError\n\neval/tests/test_formatting_options.py:72: AssertionError",
-        "text_original_chars": 642,
         "time": 0.134
       },
       "name": "eval.tests.test_formatting_options.test_use_go_cmp_flag",
@@ -1112,8 +1103,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_generic_function_union_constraint():\n        \"\"\"Test generic function with union type constraint.\"\"\"\n        with TempFiles() as tf:\n            src = tf.create(\"generic.go\", \"\"\"package generic\n    \n    func Max[T int64 | float64](a, b T) T {\n        if a > b {\n            return a\n        }\n        return b\n    }\n    \"\"\")\n            result = run(\"-all\", str(src))\n            assert result.returncode == 0\n            assert b\"TestMax\" in result.stdout\n            # Should use first type in union (int64)\n>           assert b\"Max[int64]\" in result.stdout\nE           AssertionError\n\neval/tests/test_generics.py:127: AssertionError",
-        "text_original_chars": 644,
         "time": 0.157
       },
       "name": "eval.tests.test_generics.test_generic_function_union_constraint",
@@ -1131,8 +1120,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_generic_function_with_error_return():\n        \"\"\"Test generic function returning error.\"\"\"\n        with TempFiles() as tf:\n            src = tf.create(\"generic.go\", \"\"\"package generic\n    \n    import \"errors\"\n    \n    func Find[T comparable](slice []T, target T) (int, error) {\n        for i, v := range slice {\n            if v == target {\n                return i, nil\n            }\n        }\n        return -1, errors.New(\"not found\")\n    }\n    \"\"\")\n            result = run(\"-all\", str(src))\n            assert result.returncode == 0\n            assert b\"TestFind\" in result.stdout\n            # Should have wantErr handling\n            assert b\"wantErr bool\" in result.stdout\n            # Should instantiate with concrete type\n>           assert b\"Find[string]\" in result.stdout\nE           AssertionError\n\neval/tests/test_generics.py:168: AssertionError",
-        "text_original_chars": 869,
         "time": 0.136
       },
       "name": "eval.tests.test_generics.test_generic_function_with_error_return",
@@ -1150,8 +1137,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_recursive_directory():\n        \"\"\"Test processing recursive directory with ./... pattern.\"\"\"\n        # Create nested structure\n        with TempFiles() as tf:\n            (Path(tf.tempdir) / \"pkg\" / \"sub\").mkdir(parents=True)\n            f1 = tf.create(\"pkg/file1.go\", \"\"\"package pkg\n    \n    func Func1() int { return 1 }\n    \"\"\")\n            f2 = tf.create(\"pkg/sub/file2.go\", \"\"\"package sub\n    \n    func Func2() int { return 2 }\n    \"\"\")\n            # Run from workspace root, use absolute path\n            result = run(\"-all\", f\"{tf.tempdir}/pkg/...\")\n            # Should process both files recursively\n            output = result.stdout + result.stderr\n>           assert b\"TestFunc1\" in output or b\"Func1\" in output\nE           AssertionError\n\neval/tests/test_input_handling.py:89: AssertionError",
-        "text_original_chars": 813,
         "time": 0.14
       },
       "name": "eval.tests.test_input_handling.test_recursive_directory",
@@ -1201,8 +1186,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_file_with_syntax_errors():\n        \"\"\"Test file with syntax errors.\"\"\"\n        with TempFiles() as tf:\n            bad = tf.create(\"bad.go\", \"\"\"package bad\n    \n    func Bad( {\n        this is not valid go code\n    }\n    \"\"\")\n            result = run(\"-all\", str(bad))\n            # Returns 0 but shows error\n            assert result.returncode == 0\n            output = result.stdout + result.stderr\n            # Should mention syntax or parse error\n>           assert b\"Parse\" in output or b\"parse\" in output or b\"expected\" in output\nE           AssertionError\n\neval/tests/test_input_handling.py:149: AssertionError",
-        "text_original_chars": 628,
         "time": 0.112
       },
       "name": "eval.tests.test_input_handling.test_file_with_syntax_errors",
@@ -1276,8 +1259,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_excl_precedence_over_only():\n        \"\"\"Test that -excl takes precedence over -only.\"\"\"\n        result = run(\"-only\", \"Multiply\", \"-excl\", \"Multiply\", \"-all\", \"testdata/calculator.go\")\n        assert result.returncode == 0\n        # -excl should win, so no Multiply test\n        assert b\"TestCalculator_Multiply\" not in result.stdout\n        # And no other tests either since only matched Multiply\n>       assert b\"TestCalculator_Divide\" not in result.stdout\nE       AssertionError\n\neval/tests/test_selection_flags.py:103: AssertionError",
-        "text_original_chars": 546,
         "time": 0.108
       },
       "name": "eval.tests.test_selection_flags.test_excl_precedence_over_only",
@@ -1383,8 +1364,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_custom_template_dir():\n        \"\"\"Test -template_dir flag with custom templates.\"\"\"\n        # Use the existing custom templates in testdata\n        result = run(\"-all\", \"-template_dir\", \"testdata/customtemplates\", \"testdata/calculator.go\")\n        assert result.returncode == 0\n        # Should generate tests (format depends on custom template)\n>       assert b\"TestCalculator\" in result.stdout\nE       AssertionError\n\neval/tests/test_templates.py:77: AssertionError",
-        "text_original_chars": 476,
         "time": 0.107
       },
       "name": "eval.tests.test_templates.test_custom_template_dir",
@@ -1402,8 +1381,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_template_dir_via_env_var():\n        \"\"\"Test GOTESTS_TEMPLATE_DIR environment variable.\"\"\"\n        result = run(\"-all\", \"testdata/calculator.go\",\n                     env={\"GOTESTS_TEMPLATE_DIR\": \"testdata/customtemplates\"})\n        assert result.returncode == 0\n        # Should use custom template from env var\n>       assert b\"TestCalculator\" in result.stdout\nE       AssertionError\n\neval/tests/test_templates.py:86: AssertionError",
-        "text_original_chars": 442,
         "time": 0.135
       },
       "name": "eval.tests.test_templates.test_template_dir_via_env_var",
@@ -1421,8 +1398,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_template_dir_precedence_over_template():\n        \"\"\"Test -template_dir takes precedence over -template.\"\"\"\n        result = run(\"-all\", \"-template\", \"testify\", \"-template_dir\", \"testdata/customtemplates\",\n                     \"testdata/calculator.go\")\n        assert result.returncode == 0\n        # Should use template_dir, not testify\n>       assert b\"TestCalculator\" in result.stdout\nE       AssertionError\n\neval/tests/test_templates.py:94: AssertionError",
-        "text_original_chars": 467,
         "time": 0.125
       },
       "name": "eval.tests.test_templates.test_template_dir_precedence_over_template",
@@ -1456,8 +1431,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_generic_method_on_generic_type():\n        \"\"\"Test method on generic type.\"\"\"\n        with TempFiles() as tf:\n            src = tf.create(\"generic.go\", \"\"\"package generic\n    \n    type Set[T comparable] struct {\n        items map[T]struct{}\n    }\n    \n    func (s *Set[T]) Add(item T) {\n        if s.items == nil {\n            s.items = make(map[T]struct{})\n        }\n        s.items[item] = struct{}{}\n    }\n    \"\"\")\n            result = run(\"-all\", str(src))\n            assert result.returncode == 0\n            assert b\"TestSet_Add\" in result.stdout\n            # Should instantiate generic type with concrete type\n>           assert b\"Set[string]\" in result.stdout\nE           AssertionError\n\neval/tests/test_generics.py:107: AssertionError",
-        "text_original_chars": 753,
         "time": 0.178
       },
       "name": "eval.tests.test_generics.test_generic_method_on_generic_type",
@@ -1467,8 +1440,6 @@
       "branch": "375015dacd58",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_generic_function_comparable_constraint():\n        \"\"\"Test generic function with 'comparable' constraint.\"\"\"\n        with TempFiles() as tf:\n            src = tf.create(\"generic.go\", \"\"\"package generic\n    \n    func Equal[T comparable](a, b T) bool {\n        return a == b\n    }\n    \"\"\")\n            result = run(\"-all\", str(src))\n            assert result.returncode == 0\n            assert b\"TestEqual\" in result.stdout\n            # Should instantiate with string for comparable\n>           assert b\"Equal[string]\" in result.stdout\nE           AssertionError\n\neval/tests/test_generics.py:65: AssertionError",
-        "text_original_chars": 617,
         "time": 0.169
       },
       "name": "eval.tests.test_generics.test_generic_function_comparable_constraint",
@@ -1598,8 +1569,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:639: in test_generic_type_multiple_type_params\n    assert \"m := &GenericMap[string, int]{}\" in stdout\nE   AssertionError",
-        "text_original_chars": 150,
         "time": 0.197
       },
       "name": "tests.test_core_generation.test_generic_type_multiple_type_params",
@@ -1625,8 +1594,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:812: in test_higher_order_function\n    assert \"f func(int) int\" in stdout\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.177
       },
       "name": "tests.test_core_generation.test_higher_order_function",
@@ -1636,8 +1603,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:1103: in test_imports_are_added_correctly\n    assert '\"bytes\"' in stdout  # For io.Writer handling\nE   AssertionError",
-        "text_original_chars": 147,
         "time": 0.188
       },
       "name": "tests.test_core_generation.test_imports_are_added_correctly",
@@ -1655,8 +1620,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Missing expected SSRF protection error. Got: \u26a0\ufe0f  WARNING: Function source code will be sent to AI provider at file:///etc/passwd\n   Ensure your code does not contain secrets or sensitive information.\n\noutput.Process: AI provider ollama is not available - ensure Ollama is running at file:///etc/passwd",
-        "text": "tests/test_ai_feature.py:117: in test_ai_endpoint_validation_invalid_scheme\n    assert 'invalid endpoint: invalid URL scheme \"file\": only http and https are allowed' in output, \\\nE   AssertionError: Missing expected SSRF protection error. Got: \u26a0\ufe0f  WARNING: Function source code will be sent to AI provider at file:///etc/passwd\nE      Ensure your code does not contain secrets or sensitive information.\nE   \nE   output.Process: AI provider ollama is not available - ensure Ollama is running at file:///etc/passwd",
-        "text_original_chars": 512,
         "time": 0.191
       },
       "name": "tests.test_ai_feature.test_ai_endpoint_validation_invalid_scheme",
@@ -1666,8 +1629,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:386: in test_hidden_files_are_skipped\n    assert output.strip() == expected.strip()\nE   AssertionError",
-        "text_original_chars": 120,
         "time": 0.191
       },
       "name": "tests.test_cli.test_hidden_files_are_skipped",
@@ -1685,8 +1646,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:279: in test_excl_takes_precedence_over_exported\n    assert output.strip() == expected.strip()\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.164
       },
       "name": "tests.test_cli.test_excl_takes_precedence_over_exported",
@@ -1736,8 +1695,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:170: in test_print_inputs_flag\n    assert output.strip() == expected.strip()\nE   AssertionError",
-        "text_original_chars": 113,
         "time": 0.157
       },
       "name": "tests.test_cli.test_print_inputs_flag",
@@ -1747,8 +1704,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:506: in test_unexported_receiver_method\n    assert \"func Test_unexportedStruct_UnexportedReceiverMethod(t *testing.T)\" in stdout\nE   AssertionError",
-        "text_original_chars": 177,
         "time": 0.169
       },
       "name": "tests.test_core_generation.test_unexported_receiver_method",
@@ -1798,8 +1753,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:341: in test_io_writer_interface\n    assert \"wantC string\" in stdout\nE   AssertionError",
-        "text_original_chars": 117,
         "time": 0.131
       },
       "name": "tests.test_core_generation.test_io_writer_interface",
@@ -1817,8 +1770,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:612: in test_excl_and_only_together\n    assert \"No tests generated\" in output\nE   AssertionError",
-        "text_original_chars": 114,
         "time": 0.138
       },
       "name": "tests.test_cli.test_excl_and_only_together",
@@ -1868,8 +1819,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected exit code 1 for empty model, got 0",
-        "text": "tests/test_ai_feature.py:46: in test_ai_model_validation\n    assert returncode == 1, f\"Expected exit code 1 for empty model, got {returncode}\"\nE   AssertionError: Expected exit code 1 for empty model, got 0",
-        "text_original_chars": 206,
         "time": 0.113
       },
       "name": "tests.test_ai_feature.test_ai_model_validation",
@@ -1943,8 +1892,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:132: in test_syntax_error_file\n    assert output.strip() == expected.strip()\nE   AssertionError",
-        "text_original_chars": 113,
         "time": 0.131
       },
       "name": "tests.test_cli.test_syntax_error_file",
@@ -1954,8 +1901,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:562: in test_invalid_template_params_json\n    assert output.strip() == expected.strip()\nE   AssertionError",
-        "text_original_chars": 124,
         "time": 0.126
       },
       "name": "tests.test_cli.test_invalid_template_params_json",
@@ -1989,8 +1934,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_defensive_paths.py:193: in test_hidden_file_is_ignored\n    assert \"TestHidden\" not in output\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.131
       },
       "name": "tests.test_defensive_paths.test_hidden_file_is_ignored",
@@ -2000,8 +1943,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_defensive_paths.py:340: in test_non_go_file_extension\n    assert \"no Go source files\" in output\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 0.129
       },
       "name": "tests.test_defensive_paths.test_non_go_file_extension",
@@ -2011,8 +1952,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:83: in test_invalid_excl_regex_error\n    assert output == (RESOURCES / \"invalid_regex_excl.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 152,
         "time": 0.146
       },
       "name": "tests.test_edge_cases.test_invalid_excl_regex_error",
@@ -2070,8 +2009,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "Ollama not running with model - skip in non-AI environments",
-        "text": "/workspace/eval/tests/test_ai_feature.py:140: Ollama not running with model - skip in non-AI environments",
-        "text_original_chars": 105,
         "time": 0.0
       },
       "name": "tests.test_ai_feature.test_ai_integration_with_ollama",
@@ -2113,8 +2050,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:624: in test_recursive_with_filter\n    assert \"Generated TestTopLevel\" in output\nE   AssertionError",
-        "text_original_chars": 117,
         "time": 0.157
       },
       "name": "tests.test_cli.test_recursive_with_filter",
@@ -2132,8 +2067,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:372: in test_struct_types\n    assert \"b struct {\" in stdout\nE   AssertionError",
-        "text_original_chars": 108,
         "time": 0.179
       },
       "name": "tests.test_core_generation.test_struct_types",
@@ -2143,8 +2076,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "Ollama not running - skip in non-AI environments",
-        "text": "/workspace/eval/tests/test_ai_feature.py:201: Ollama not running - skip in non-AI environments",
-        "text_original_chars": 94,
         "time": 0.0
       },
       "name": "tests.test_ai_feature.test_ai_warning_about_data_sent",
@@ -2154,8 +2085,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:859: in test_complex_signature_multi_level_nesting\n    assert \"a []func(int, string) (bool, error)\" in stdout\nE   AssertionError",
-        "text_original_chars": 158,
         "time": 0.146
       },
       "name": "tests.test_core_generation.test_complex_signature_multi_level_nesting",
@@ -2165,8 +2094,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected exit code 1 for invalid min-cases, got 0",
-        "text": "tests/test_ai_feature.py:63: in test_ai_min_cases_validation\n    assert returncode == 1, f\"Expected exit code 1 for invalid min-cases, got {returncode}\"\nE   AssertionError: Expected exit code 1 for invalid min-cases, got 0",
-        "text_original_chars": 222,
         "time": 0.169
       },
       "name": "tests.test_ai_feature.test_ai_min_cases_validation",
@@ -2176,8 +2103,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:694: in test_long_parameter_list\n    assert \"i interface{}\" in stdout\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.157
       },
       "name": "tests.test_core_generation.test_long_parameter_list",
@@ -2219,8 +2144,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:554: in test_generic_function_comparable_constraint\n    assert \"GenericComparable[string]\" in stdout\nE   AssertionError",
-        "text_original_chars": 149,
         "time": 0.149
       },
       "name": "tests.test_core_generation.test_generic_function_comparable_constraint",
@@ -2246,8 +2169,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:359: in test_invalid_excl_regex\n    assert output.strip() == expected.strip()\nE   AssertionError",
-        "text_original_chars": 114,
         "time": 0.14
       },
       "name": "tests.test_cli.test_invalid_excl_regex",
@@ -2281,8 +2202,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:234: in test_recursive_pattern\n    assert \"Generated TestTopLevel\" in output\nE   AssertionError",
-        "text_original_chars": 113,
         "time": 0.108
       },
       "name": "tests.test_cli.test_recursive_pattern",
@@ -2300,8 +2219,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:573: in test_nonexistent_template_params_file\n    assert output.strip() == expected.strip()\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 0.167
       },
       "name": "tests.test_cli.test_nonexistent_template_params_file",
@@ -2319,8 +2236,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:458: in test_complex_function_signatures\n    assert output.strip() == expected.strip()\nE   AssertionError",
-        "text_original_chars": 123,
         "time": 0.149
       },
       "name": "tests.test_cli.test_complex_function_signatures",
@@ -2330,8 +2245,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_defensive_paths.py:59: in test_empty_source_file\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 144,
         "time": 0.11
       },
       "name": "tests.test_defensive_paths.test_empty_source_file",
@@ -2373,8 +2286,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:268: in test_invalid_template_params_json\n    assert output == (RESOURCES / \"template_params_invalid_json.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 167,
         "time": 0.112
       },
       "name": "tests.test_edge_cases.test_invalid_template_params_json",
@@ -2408,8 +2319,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_defensive_paths.py:390: in test_unicode_in_source_file\n    assert \"TestCalculate\u0394\" in output\nE   AssertionError",
-        "text_original_chars": 122,
         "time": 0.145
       },
       "name": "tests.test_defensive_paths.test_unicode_in_source_file",
@@ -2419,8 +2328,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:560: in test_blank_identifier_in_returns\n    assert normalized == (RESOURCES / \"blank_identifier_output.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 165,
         "time": 0.126
       },
       "name": "tests.test_edge_cases.test_blank_identifier_in_returns",
@@ -2446,8 +2353,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:117: in test_nonexistent_file_error\n    assert output == (RESOURCES / \"nonexistent_file.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 149,
         "time": 0.11
       },
       "name": "tests.test_edge_cases.test_nonexistent_file_error",
@@ -2457,8 +2362,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_defensive_paths.py:295: in test_recursive_directory_pattern_nonexistent\n    assert \"input.Files: filepath.Walk: lstat /nonexistent/pkg: no such file or directory\" == output\nE   AssertionError",
-        "text_original_chars": 202,
         "time": 0.116
       },
       "name": "tests.test_defensive_paths.test_recursive_directory_pattern_nonexistent",
@@ -2476,8 +2379,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected exit code 1 for invalid max-cases, got 0",
-        "text": "tests/test_ai_feature.py:80: in test_ai_max_cases_validation\n    assert returncode == 1, f\"Expected exit code 1 for invalid max-cases, got {returncode}\"\nE   AssertionError: Expected exit code 1 for invalid max-cases, got 0",
-        "text_original_chars": 222,
         "time": 0.167
       },
       "name": "tests.test_ai_feature.test_ai_max_cases_validation",
@@ -2511,8 +2412,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:394: in test_function_types\n    assert \"a func(int) string\" in stdout\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.179
       },
       "name": "tests.test_core_generation.test_function_types",
@@ -2570,8 +2469,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:743: in test_anonymous_struct_parameter\n    assert \"config struct {\" in stdout\nE   AssertionError",
-        "text_original_chars": 127,
         "time": 0.157
       },
       "name": "tests.test_core_generation.test_anonymous_struct_parameter",
@@ -2589,8 +2486,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:414: in test_interface_types\n    assert \"interface{}\" in output\nE   AssertionError",
-        "text_original_chars": 107,
         "time": 0.162
       },
       "name": "tests.test_edge_cases.test_interface_types",
@@ -2616,8 +2511,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:596: in test_generic_function_union_constraint\n    assert \"UnionConstraint[int64]\" in stdout\nE   AssertionError",
-        "text_original_chars": 141,
         "time": 0.146
       },
       "name": "tests.test_core_generation.test_generic_function_union_constraint",
@@ -2643,8 +2536,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli.py:479: in test_regex_alternation_pattern\n    assert output.strip() == expected.strip()\nE   AssertionError",
-        "text_original_chars": 121,
         "time": 0.143
       },
       "name": "tests.test_cli.test_regex_alternation_pattern",
@@ -2662,8 +2553,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_final_gapfill.py:208: in test_malformed_template_causes_imports_process_error\n    assert \"output.Process: imports.Process:\" in result.stdout\nE   AssertionError",
-        "text_original_chars": 170,
         "time": 0.134
       },
       "name": "tests.test_final_gapfill.test_malformed_template_causes_imports_process_error",
@@ -2681,8 +2570,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:282: in test_missing_template_params_file\n    assert output == (RESOURCES / \"template_params_missing_file.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 167,
         "time": 0.147
       },
       "name": "tests.test_edge_cases.test_missing_template_params_file",
@@ -2692,8 +2579,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:18: in test_empty_go_file_error\n    assert output == (RESOURCES / \"blankfile_output.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.145
       },
       "name": "tests.test_edge_cases.test_empty_go_file_error",
@@ -2703,8 +2588,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_defensive_paths.py:119: in test_file_with_only_whitespace\n    assert \"Parser.Parse source file\" in output_normalized\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.131
       },
       "name": "tests.test_defensive_paths.test_file_with_only_whitespace",
@@ -2722,8 +2605,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_final_gapfill.py:317: in test_directory_glob_filters_hidden_files\n    assert result.stdout == (resources / \"glob_hidden.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 170,
         "time": 0.141
       },
       "name": "tests.test_final_gapfill.test_directory_glob_filters_hidden_files",
@@ -2733,8 +2614,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:49: in test_malformed_template_syntax_error\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 162,
         "time": 0.119
       },
       "name": "tests.test_error_paths_gapfill.test_malformed_template_syntax_error",
@@ -2744,8 +2623,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_defensive_paths.py:412: in test_deeply_nested_directory_structure\n    assert \"TestDeepFunc\" in output\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.114
       },
       "name": "tests.test_defensive_paths.test_deeply_nested_directory_structure",
@@ -2755,8 +2632,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:219: in test_deeply_nested_types\n    assert normalized == (RESOURCES / \"deeply_nested_types_output.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 160,
         "time": 0.115
       },
       "name": "tests.test_edge_cases.test_deeply_nested_types",
@@ -2766,8 +2641,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:127: in test_invalid_test_file_in_directory\n    assert output == (RESOURCES / \"invalidtest_output.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 159,
         "time": 0.11
       },
       "name": "tests.test_edge_cases.test_invalid_test_file_in_directory",
@@ -2777,8 +2650,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_defensive_paths.py:320: in test_recursive_directory_pattern_with_hidden_dirs\n    assert \"TestVisibleFunc\" in output\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.117
       },
       "name": "tests.test_defensive_paths.test_recursive_directory_pattern_with_hidden_dirs",
@@ -2788,8 +2659,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected exit code 1 for invalid min/max range, got 0",
-        "text": "tests/test_ai_feature.py:97: in test_ai_min_max_range_validation\n    assert returncode == 1, f\"Expected exit code 1 for invalid min/max range, got {returncode}\"\nE   AssertionError: Expected exit code 1 for invalid min/max range, got 0",
-        "text_original_chars": 234,
         "time": 0.159
       },
       "name": "tests.test_ai_feature.test_ai_min_max_range_validation",
@@ -2807,8 +2676,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:425: in test_nonexistent_directory\n    assert output == (RESOURCES / \"nonexistent_directory.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 153,
         "time": 0.163
       },
       "name": "tests.test_edge_cases.test_nonexistent_directory",
@@ -2818,8 +2685,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:769: in test_anonymous_interface_parameter\n    assert \"handler interface {\" in stdout\nE   AssertionError",
-        "text_original_chars": 134,
         "time": 0.189
       },
       "name": "tests.test_core_generation.test_anonymous_interface_parameter",
@@ -2829,8 +2694,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:137: in test_template_generates_invalid_go_syntax\n    assert normalize_temp_path(normalize_output(stdout)) == normalize_temp_path(normalize_output(expected))\nE   AssertionError",
-        "text_original_chars": 210,
         "time": 0.16
       },
       "name": "tests.test_error_paths_gapfill.test_template_generates_invalid_go_syntax",
@@ -2848,8 +2711,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_final_gapfill.py:229: in test_source_file_with_no_package_declaration\n    assert \"Parser.Parse source file:\" in result.stdout\nE   AssertionError",
-        "text_original_chars": 155,
         "time": 0.175
       },
       "name": "tests.test_final_gapfill.test_source_file_with_no_package_declaration",
@@ -2859,8 +2720,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:617: in test_generic_type_method\n    assert \"s := &GenericSet[string]{}\" in stdout\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.178
       },
       "name": "tests.test_core_generation.test_generic_type_method",
@@ -2878,8 +2737,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:308: in test_variadic_parameters\n    assert normalized == (RESOURCES / \"variadic_output.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 149,
         "time": 0.162
       },
       "name": "tests.test_edge_cases.test_variadic_parameters",
@@ -2905,8 +2762,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:69: in test_invalid_template_name_no_tmpl_files\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 166,
         "time": 0.144
       },
       "name": "tests.test_error_paths_gapfill.test_invalid_template_name_no_tmpl_files",
@@ -2916,8 +2771,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_goparser_gapfill.py:652: in test_deeply_nested_generic_constraints\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 133,
         "time": 0.157
       },
       "name": "tests.test_goparser_gapfill.test_deeply_nested_generic_constraints",
@@ -2927,8 +2780,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_defensive_paths.py:169: in test_go_file_with_syntax_error\n    assert \"Parser.Parse source file\" in output\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 0.114
       },
       "name": "tests.test_defensive_paths.test_go_file_with_syntax_error",
@@ -2954,8 +2805,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:42: in test_missing_package_declaration_error\n    assert normalized == (RESOURCES / \"missing_package_output.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 169,
         "time": 0.126
       },
       "name": "tests.test_edge_cases.test_missing_package_declaration_error",
@@ -2965,8 +2814,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:137: in test_undefined_types_handled_gracefully\n    assert output == (RESOURCES / \"undefinedtypes_output.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 166,
         "time": 0.113
       },
       "name": "tests.test_edge_cases.test_undefined_types_handled_gracefully",
@@ -2976,8 +2823,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_final_gapfill.py:368: in test_multiple_levels_recursive_finds_all_files\n    assert \"Generated TestL1\" in result.stdout\nE   AssertionError",
-        "text_original_chars": 148,
         "time": 0.15
       },
       "name": "tests.test_final_gapfill.test_multiple_levels_recursive_finds_all_files",
@@ -3003,8 +2848,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:259: in test_nonexistent_template_directory\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 162,
         "time": 0.11
       },
       "name": "tests.test_error_paths_gapfill.test_nonexistent_template_directory",
@@ -3022,8 +2865,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected parser error but got: package blankfile\n\nimport (\n\t\"os\"\n\t\"testing\"\n)\n\nfunc TestNot(t *testing.T) {\n\ttype args struct {\n\t\tthis *os.File\n\t}\n\ttests := []struct {\n\t\tname string\n\t\targs args\n\t\twant string\n\t}{\n\t\t// TODO: Add test cases.\n\t}\n\tfor _, tt := range tests {\n\t\tif got := Not(tt.args.this); got != tt.want {\n\t\t\tt.Errorf(\"%q. Not() = %v, want %v\", tt.name, got, tt.want)\n\t\t}\n\t}\n}",
-        "text": "tests/test_harvest.py:96: in test_blank_go_file_in_directory\n    assert \"Parser.Parse source file: other file parser.ParseFile\" in stdout, f\"Expected parser error but got: {stdout[:500]}\"\nE   AssertionError: Expected parser error but got: package blankfile\nE   \nE   import (\nE   \t\"os\"\nE   \t\"testing\"\nE   )\nE   \nE   func TestNot(t *testing.T) {\nE   \ttype args struct {\nE   \t\tthis *os.File\nE   \t}\nE   \ttests := []struct {\nE   \t\tname string\nE   \t\targs args\nE   \t\twant string\nE   \t}{\nE   \t\t// TODO: Add test cases.\nE   \t}\nE   \tfor _, tt := range tests {\nE   \t\tif got := Not(tt.args.this); got != tt.want {\nE   \t\t\tt.Errorf(\"%q. Not() = %v, want %v\", tt.name, got, tt.want)\nE   \t\t}\nE   \t}\nE   }",
-        "text_original_chars": 688,
         "time": 0.123
       },
       "name": "tests.test_harvest.test_blank_go_file_in_directory",
@@ -3081,8 +2922,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/print_inputs_with_multiple_arguments.go\nExpected length: 601\nActual length: 573\nFirst difference at position: 350",
-        "text": "tests/test_harvest.py:376: in test_print_inputs_with_multiple_arguments\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/print_inputs_with_multiple_arguments.go\nE   Expected length: 601\nE   Actual length: 573\nE   First difference at position: 350",
-        "text_original_chars": 373,
         "time": 0.295
       },
       "name": "tests.test_harvest.test_print_inputs_with_multiple_arguments",
@@ -3124,8 +2963,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:157: in test_invalid_json_template_params_string\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 167,
         "time": 0.183
       },
       "name": "tests.test_error_paths_gapfill.test_invalid_json_template_params_string",
@@ -3143,8 +2980,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gotests_core_gapfill.py:77: in test_non_naked_init_with_return_value_generates_test\n    assert \"Generated Test_init\" in output\nE   AssertionError",
-        "text_original_chars": 156,
         "time": 0.167
       },
       "name": "tests.test_gotests_core_gapfill.test_non_naked_init_with_return_value_generates_test",
@@ -3162,8 +2997,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:328: in test_build_tags_preserved\n    assert \"// +build linux darwin\" in output\nE   AssertionError",
-        "text_original_chars": 123,
         "time": 0.149
       },
       "name": "tests.test_edge_cases.test_build_tags_preserved",
@@ -3173,8 +3006,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:90: in test_header_template_execution_error\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 162,
         "time": 0.181
       },
       "name": "tests.test_error_paths_gapfill.test_header_template_execution_error",
@@ -3184,8 +3015,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_goparser_gapfill.py:552: in test_variadic_function_parameters\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 0.175
       },
       "name": "tests.test_goparser_gapfill.test_variadic_function_parameters",
@@ -3203,8 +3032,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:65: in test_mismatched_braces_error\n    assert normalized == (RESOURCES / \"mismatched_braces_output.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 161,
         "time": 0.168
       },
       "name": "tests.test_edge_cases.test_mismatched_braces_error",
@@ -3214,8 +3041,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_final_gapfill.py:275: in test_recursive_walk_with_hidden_directory_skips_correctly\n    assert result.stdout == (resources / \"walk_hidden_dir.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 191,
         "time": 0.161
       },
       "name": "tests.test_final_gapfill.test_recursive_walk_with_hidden_directory_skips_correctly",
@@ -3233,8 +3058,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_core_generation.py:790: in test_function_returning_function\n    assert \"want func(string) string\" in stdout\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.137
       },
       "name": "tests.test_core_generation.test_function_returning_function",
@@ -3268,8 +3091,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_goparser_gapfill.py:82: in test_empty_file_error\n    assert result.stdout == \"Parser.Parse source file: file is empty\\n\"\nE   AssertionError",
-        "text_original_chars": 150,
         "time": 0.151
       },
       "name": "tests.test_goparser_gapfill.test_empty_file_error",
@@ -3311,8 +3132,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_final_gapfill.py:106: in test_recursive_pattern_with_deeply_nested_base\n    assert \"Generated TestLevel1\" in result.stdout\nE   AssertionError",
-        "text_original_chars": 152,
         "time": 0.135
       },
       "name": "tests.test_final_gapfill.test_recursive_pattern_with_deeply_nested_base",
@@ -3322,8 +3141,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_goparser_gapfill.py:730: in test_comment_with_special_characters\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.124
       },
       "name": "tests.test_goparser_gapfill.test_comment_with_special_characters",
@@ -3341,8 +3158,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:508: in test_function_literals_as_parameters\n    assert \"fn func(int) string\" in output\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.127
       },
       "name": "tests.test_edge_cases.test_function_literals_as_parameters",
@@ -3352,8 +3167,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:316: in test_non_go_file\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 143,
         "time": 0.131
       },
       "name": "tests.test_error_paths_gapfill.test_non_go_file",
@@ -3363,8 +3176,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_goparser_gapfill.py:374: in test_single_line_package_comment\n    assert lines[1] == \"// Single line package doc\"\nE   AssertionError",
-        "text_original_chars": 142,
         "time": 0.109
       },
       "name": "tests.test_goparser_gapfill.test_single_line_package_comment",
@@ -3374,8 +3185,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected test file parse error but got: package invalidtest\n\nimport (\n\t\"os\"\n\t\"testing\"\n)\n\nThis is not Go code.\n\nfunc TestNot(t *testing.T) {\n\ttype args struct {\n\t\tthis *os.File\n\t}\n\ttests := []struct {\n\t\tname string\n\t\targs args\n\t\twant string\n\t}{\n\t\t// TODO: Add test cases.\n\t}\n\tfor _, tt := range tests {\n\t\tif got := Not(tt.args.this); got != tt.want {\n\t\t\tt.Errorf(\"%q. Not() = %v, want %v\", tt.name, got, tt.want)\n\t\t}\n\t}\n}",
-        "text": "tests/test_harvest.py:110: in test_test_file_with_garbage_data\n    assert \"Parser.Parse test file: target parser.ParseFile()\" in stdout, f\"Expected test file parse error but got: {stdout[:500]}\"\nE   AssertionError: Expected test file parse error but got: package invalidtest\nE   \nE   import (\nE   \t\"os\"\nE   \t\"testing\"\nE   )\nE   \nE   This is not Go code.\nE   \nE   func TestNot(t *testing.T) {\nE   \ttype args struct {\nE   \t\tthis *os.File\nE   \t}\nE   \ttests := []struct {\nE   \t\tname string\nE   \t\targs args\nE   \t\twant string\nE   \t}{\nE   \t\t// TODO: Add test cases.\nE   \t}\nE   \tfor _, tt := range tests {\nE   \t\tif got := Not(tt.args.this); got != tt.want {\nE   \t\t\tt.Errorf(\"%q. Not() = %v, want %v\", tt.name, got, tt.want)\nE   \t\t}\nE   \t}\nE   }",
-        "text_original_chars": 736,
         "time": 0.116
       },
       "name": "tests.test_harvest.test_test_file_with_garbage_data",
@@ -3385,8 +3194,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/method_on_a_struct_pointer.go\nExpected length: 568\nActual length: 557\nFirst difference at position: 265",
-        "text": "tests/test_harvest.py:402: in test_method_on_a_struct_pointer\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/method_on_a_struct_pointer.go\nE   Expected length: 568\nE   Actual length: 557\nE   First difference at position: 265",
-        "text_original_chars": 353,
         "time": 0.308
       },
       "name": "tests.test_harvest.test_method_on_a_struct_pointer",
@@ -3396,8 +3203,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gotests_core_gapfill.py:109: in test_init_function_with_parameters_generates_test\n    assert \"Generated Test_init\" in output\nE   AssertionError",
-        "text_original_chars": 154,
         "time": 0.179
       },
       "name": "tests.test_gotests_core_gapfill.test_init_function_with_parameters_generates_test",
@@ -3407,8 +3212,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:178: in test_invalid_json_template_params_file\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 165,
         "time": 0.178
       },
       "name": "tests.test_error_paths_gapfill.test_invalid_json_template_params_file",
@@ -3426,8 +3229,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_final_gapfill.py:295: in test_recursive_walk_with_hidden_file_skips_correctly\n    assert result.stdout == (resources / \"walk_hidden_file.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 187,
         "time": 0.171
       },
       "name": "tests.test_final_gapfill.test_recursive_walk_with_hidden_file_skips_correctly",
@@ -3445,8 +3246,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_edge_cases.py:74: in test_invalid_only_regex_error\n    assert output == (RESOURCES / \"invalid_regex_only.txt\").read_text()\nE   AssertionError",
-        "text_original_chars": 152,
         "time": 0.173
       },
       "name": "tests.test_edge_cases.test_invalid_only_regex_error",
@@ -3456,8 +3255,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:112: in test_function_template_execution_error\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 165,
         "time": 0.151
       },
       "name": "tests.test_error_paths_gapfill.test_function_template_execution_error",
@@ -3483,8 +3280,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_goparser_gapfill.py:116: in test_complex_comment_spacing_preservation\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 136,
         "time": 0.179
       },
       "name": "tests.test_goparser_gapfill.test_complex_comment_spacing_preservation",
@@ -3502,8 +3297,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_final_gapfill.py:125: in test_recursive_pattern_on_empty_directory_tree\n    assert result.stdout.startswith(\"No tests generated for \")\nE   AssertionError",
-        "text_original_chars": 164,
         "time": 0.146
       },
       "name": "tests.test_final_gapfill.test_recursive_pattern_on_empty_directory_tree",
@@ -3513,8 +3306,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:336: in test_invalid_go_syntax_in_source\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 159,
         "time": 0.137
       },
       "name": "tests.test_error_paths_gapfill.test_invalid_go_syntax_in_source",
@@ -3524,8 +3315,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_goparser_gapfill.py:619: in test_package_comment_with_build_tags\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.166
       },
       "name": "tests.test_goparser_gapfill.test_package_comment_with_build_tags",
@@ -3535,8 +3324,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_goparser_gapfill.py:179: in test_multiple_comment_groups_with_gaps\n    assert lines[1] == \"// Comment group 1\"\nE   AssertionError",
-        "text_original_chars": 140,
         "time": 0.142
       },
       "name": "tests.test_goparser_gapfill.test_multiple_comment_groups_with_gaps",
@@ -3578,8 +3365,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/functions_and_receivers_with_same_names_except_exporting.go\nExpected length: 3086\nActual length: 2996\nFirst difference at position: 1021",
-        "text": "tests/test_harvest.py:1182: in test_functions_and_receivers_with_same_names_except_exporting\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/functions_and_receivers_with_same_names_except_exporting.go\nE   Expected length: 3086\nE   Actual length: 2996\nE   First difference at position: 1021",
-        "text_original_chars": 417,
         "time": 0.213
       },
       "name": "tests.test_harvest.test_functions_and_receivers_with_same_names_except_exporting",
@@ -3597,8 +3382,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected 'no Go source files' error but got: No tests generated for testdata/.hidden.go",
-        "text": "tests/test_harvest.py:123: in test_hidden_file\n    assert \"input.Files: no Go source files found at\" in stdout, f\"Expected 'no Go source files' error but got: {stdout[:500]}\"\nE   AssertionError: Expected 'no Go source files' error but got: No tests generated for testdata/.hidden.go",
-        "text_original_chars": 282,
         "time": 0.129
       },
       "name": "tests.test_harvest.test_hidden_file",
@@ -3608,8 +3391,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions_filtering_exported_with_only.go\nExpected length: 590\nActual length: 975\nFirst difference at position: -1",
-        "text": "tests/test_harvest.py:1401: in test_multiple_functions_filtering_exported_with_only\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions_filtering_exported_with_only.go\nE   Expected length: 590\nE   Actual length: 975\nE   First difference at position: -1",
-        "text_original_chars": 395,
         "time": 0.228
       },
       "name": "tests.test_harvest.test_multiple_functions_filtering_exported_with_only",
@@ -3627,8 +3408,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions_filtering_exported_with_excl.go\nExpected length: 431\nActual length: 745\nFirst difference at position: 261",
-        "text": "tests/test_harvest.py:1490: in test_multiple_functions_filtering_exported_with_excl\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions_filtering_exported_with_excl.go\nE   Expected length: 431\nE   Actual length: 745\nE   First difference at position: 261",
-        "text_original_chars": 396,
         "time": 0.229
       },
       "name": "tests.test_harvest.test_multiple_functions_filtering_exported_with_excl",
@@ -3638,8 +3417,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/function_with_defined_interface_type_parameter_and_result.go\nExpected length: 380\nActual length: 346\nFirst difference at position: 25",
-        "text": "tests/test_harvest.py:662: in test_function_with_defined_interface_type_parameter_and_result\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/function_with_defined_interface_type_parameter_and_result.go\nE   Expected length: 380\nE   Actual length: 346\nE   First difference at position: 25",
-        "text_original_chars": 414,
         "time": 0.254
       },
       "name": "tests.test_harvest.test_function_with_defined_interface_type_parameter_and_result",
@@ -3649,8 +3426,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/print_inputs_with_single_argument.go\nExpected length: 594\nActual length: 570\nFirst difference at position: 265",
-        "text": "tests/test_harvest.py:428: in test_print_inputs_with_single_argument\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/print_inputs_with_single_argument.go\nE   Expected length: 594\nE   Actual length: 570\nE   First difference at position: 265",
-        "text_original_chars": 367,
         "time": 0.225
       },
       "name": "tests.test_harvest.test_print_inputs_with_single_argument",
@@ -3668,8 +3443,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:199: in test_missing_template_params_file\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 160,
         "time": 0.175
       },
       "name": "tests.test_error_paths_gapfill.test_missing_template_params_file",
@@ -3719,8 +3492,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/struct_value_method_with_struct_value_return_type.go\nExpected length: 351\nActual length: 307\nFirst difference at position: 25",
-        "text": "tests/test_harvest.py:480: in test_struct_value_method_with_struct_value_return_type\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/struct_value_method_with_struct_value_return_type.go\nE   Expected length: 351\nE   Actual length: 307\nE   First difference at position: 25",
-        "text_original_chars": 398,
         "time": 0.243
       },
       "name": "tests.test_harvest.test_struct_value_method_with_struct_value_return_type",
@@ -3730,8 +3501,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_gotests_core_gapfill.py:186: in test_init_method_with_receiver_not_filtered\n    assert \"Generated TestConfig_init\" in output\nE   AssertionError",
-        "text_original_chars": 154,
         "time": 0.141
       },
       "name": "tests.test_gotests_core_gapfill.test_init_method_with_receiver_not_filtered",
@@ -3757,8 +3526,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/io_writer_parameters.go\nExpected length: 2123\nActual length: 1500\nFirst difference at position: 29",
-        "text": "tests/test_harvest.py:1052: in test_iowriter_parameters\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/io_writer_parameters.go\nE   Expected length: 2123\nE   Actual length: 1500\nE   First difference at position: 29",
-        "text_original_chars": 342,
         "time": 0.234
       },
       "name": "tests.test_harvest.test_iowriter_parameters",
@@ -3776,8 +3543,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_named_results.go\nExpected length: 816\nActual length: 822\nFirst difference at position: 181",
-        "text": "tests/test_harvest.py:922: in test_multiple_named_results\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_named_results.go\nE   Expected length: 816\nE   Actual length: 822\nE   First difference at position: 181",
-        "text_original_chars": 345,
         "time": 0.234
       },
       "name": "tests.test_harvest.test_multiple_named_results",
@@ -3787,8 +3552,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/function_with_named_imports.go\nExpected length: 410\nActual length: 381\nFirst difference at position: 49",
-        "text": "tests/test_harvest.py:818: in test_function_with_named_imports\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/function_with_named_imports.go\nE   Expected length: 410\nE   Actual length: 381\nE   First difference at position: 49",
-        "text_original_chars": 354,
         "time": 0.219
       },
       "name": "tests.test_harvest.test_function_with_named_imports",
@@ -3806,8 +3569,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/function_with_imported_struct_receiver_parameter_and_result.go\nExpected length: 388\nActual length: 359\nFirst difference at position: 35",
-        "text": "tests/test_harvest.py:714: in test_function_with_imported_struct_receiver_parameter_and_result\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/function_with_imported_struct_receiver_parameter_and_result.go\nE   Expected length: 388\nE   Actual length: 359\nE   First difference at position: 35",
-        "text_original_chars": 418,
         "time": 0.225
       },
       "name": "tests.test_harvest.test_function_with_imported_struct_receiver_parameter_and_result",
@@ -3817,8 +3578,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions_with_only_filtering_on_receiver.go\nExpected length: 431\nActual length: 47\nFirst difference at position: 0",
-        "text": "tests/test_harvest.py:1323: in test_multiple_functions_with_only_filtering_on_receiver\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions_with_only_filtering_on_receiver.go\nE   Expected length: 431\nE   Actual length: 47\nE   First difference at position: 0",
-        "text_original_chars": 399,
         "time": 0.19
       },
       "name": "tests.test_harvest.test_multiple_functions_with_only_filtering_on_receiver",
@@ -3852,8 +3611,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/existing_test_file_with_multiple_imports.go\nExpected length: 722\nActual length: 909\nFirst difference at position: 0",
-        "text": "tests/test_harvest.py:1735: in test_existing_test_file_with_multiple_imports\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/existing_test_file_with_multiple_imports.go\nE   Expected length: 722\nE   Actual length: 909\nE   First difference at position: 0",
-        "text_original_chars": 380,
         "time": 0.192
       },
       "name": "tests.test_harvest.test_existing_test_file_with_multiple_imports",
@@ -3863,8 +3620,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/receiver_is_indirect_imported_struct.go\nExpected length: 289\nActual length: 251\nFirst difference at position: 45",
-        "text": "tests/test_harvest.py:1208: in test_receiver_is_indirect_imported_struct\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/receiver_is_indirect_imported_struct.go\nE   Expected length: 289\nE   Actual length: 251\nE   First difference at position: 45",
-        "text_original_chars": 373,
         "time": 0.193
       },
       "name": "tests.test_harvest.test_receiver_is_indirect_imported_struct",
@@ -3890,8 +3645,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/target_test_file.go\nExpected length: 1369\nActual length: 436\nFirst difference at position: 29",
-        "text": "tests/test_harvest.py:157: in test_target_test_file\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/target_test_file.go\nE   Expected length: 1369\nE   Actual length: 436\nE   First difference at position: 29",
-        "text_original_chars": 333,
         "time": 0.21
       },
       "name": "tests.test_harvest.test_target_test_file",
@@ -3917,8 +3670,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions_with_excl.go\nExpected length: 431\nActual length: 420\nFirst difference at position: 261",
-        "text": "tests/test_harvest.py:1438: in test_multiple_functions_with_excl\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions_with_excl.go\nE   Expected length: 431\nE   Actual length: 420\nE   First difference at position: 261",
-        "text_original_chars": 358,
         "time": 0.207
       },
       "name": "tests.test_harvest.test_multiple_functions_with_excl",
@@ -3928,8 +3679,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions_excluding_on_receiver.go\nExpected length: 915\nActual length: 1300\nFirst difference at position: 600",
-        "text": "tests/test_harvest.py:1527: in test_multiple_functions_excluding_on_receiver\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions_excluding_on_receiver.go\nE   Expected length: 915\nE   Actual length: 1300\nE   First difference at position: 600",
-        "text_original_chars": 383,
         "time": 0.203
       },
       "name": "tests.test_harvest.test_multiple_functions_excluding_on_receiver",
@@ -3939,8 +3688,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/undefined_types.go\nExpected length: 623\nActual length: 589\nFirst difference at position: 31",
-        "text": "tests/test_harvest.py:1865: in test_undefined_types\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/undefined_types.go\nE   Expected length: 623\nE   Actual length: 589\nE   First difference at position: 31",
-        "text_original_chars": 331,
         "time": 0.236
       },
       "name": "tests.test_harvest.test_undefined_types",
@@ -3950,8 +3697,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions_with_both_only_and_excl.go\nExpected length: 431\nActual length: 745\nFirst difference at position: 261",
-        "text": "tests/test_harvest.py:1579: in test_multiple_functions_with_both_only_and_excl\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions_with_both_only_and_excl.go\nE   Expected length: 431\nE   Actual length: 745\nE   First difference at position: 261",
-        "text_original_chars": 386,
         "time": 0.218
       },
       "name": "tests.test_harvest.test_multiple_functions_with_both_only_and_excl",
@@ -3961,8 +3706,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/function_with_struct_pointer_argument_and_return_type.go\nExpected length: 558\nActual length: 524\nFirst difference at position: 25",
-        "text": "tests/test_harvest.py:454: in test_function_with_struct_pointer_argument_and_return_type\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/function_with_struct_pointer_argument_and_return_type.go\nE   Expected length: 558\nE   Actual length: 524\nE   First difference at position: 25",
-        "text_original_chars": 406,
         "time": 0.255
       },
       "name": "tests.test_harvest.test_function_with_struct_pointer_argument_and_return_type",
@@ -3972,8 +3715,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:219: in test_invalid_only_regex\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 150,
         "time": 0.155
       },
       "name": "tests.test_error_paths_gapfill.test_invalid_only_regex",
@@ -3983,8 +3724,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected 'file is empty' error but got: No tests generated for testdata/blankfile/blank.go",
-        "text": "tests/test_harvest.py:84: in test_blank_go_file\n    assert \"Parser.Parse source file: file is empty\" in stdout, f\"Expected 'file is empty' error but got: {stdout[:500]}\"\nE   AssertionError: Expected 'file is empty' error but got: No tests generated for testdata/blankfile/blank.go",
-        "text_original_chars": 280,
         "time": 0.136
       },
       "name": "tests.test_harvest.test_blank_go_file",
@@ -4010,8 +3749,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/two_different_structs_with_same_method_name.go\nExpected length: 999\nActual length: 997\nFirst difference at position: 367",
-        "text": "tests/test_harvest.py:948: in test_two_different_structs_with_same_method_name\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/two_different_structs_with_same_method_name.go\nE   Expected length: 999\nE   Actual length: 997\nE   First difference at position: 367",
-        "text_original_chars": 387,
         "time": 0.29
       },
       "name": "tests.test_harvest.test_two_different_structs_with_same_method_name",
@@ -4021,8 +3758,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/function_with_channel_parameter_and_result.go\nExpected length: 388\nActual length: 354\nFirst difference at position: 25",
-        "text": "tests/test_harvest.py:844: in test_function_with_channel_parameter_and_result\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/function_with_channel_parameter_and_result.go\nE   Expected length: 388\nE   Actual length: 354\nE   First difference at position: 25",
-        "text_original_chars": 384,
         "time": 0.289
       },
       "name": "tests.test_harvest.test_function_with_channel_parameter_and_result",
@@ -4048,8 +3783,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions_with_only_filtering_on_method.go\nExpected length: 431\nActual length: 47\nFirst difference at position: 0",
-        "text": "tests/test_harvest.py:1349: in test_multiple_functions_with_only_filtering_on_method\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions_with_only_filtering_on_method.go\nE   Expected length: 431\nE   Actual length: 47\nE   First difference at position: 0",
-        "text_original_chars": 395,
         "time": 0.23
       },
       "name": "tests.test_harvest.test_multiple_functions_with_only_filtering_on_method",
@@ -4059,8 +3792,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/functions_and_methods_with_name_receivers_parameters_and_results.go\nExpected length: 1680\nActual length: 1429\nFirst difference at position: 45",
-        "text": "tests/test_harvest.py:1104: in test_functions_and_methods_with_name_receivers_parameters_and_results\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/functions_and_methods_with_name_receivers_parameters_and_results.go\nE   Expected length: 1680\nE   Actual length: 1429\nE   First difference at position: 45",
-        "text_original_chars": 431,
         "time": 0.268
       },
       "name": "tests.test_harvest.test_functions_and_methods_with_name_receivers_parameters_and_results",
@@ -4102,8 +3833,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions.go\nExpected length: 1311\nActual length: 1300\nFirst difference at position: 816",
-        "text": "tests/test_harvest.py:1234: in test_multiple_functions\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions.go\nE   Expected length: 1311\nE   Actual length: 1300\nE   First difference at position: 816",
-        "text_original_chars": 340,
         "time": 0.257
       },
       "name": "tests.test_harvest.test_multiple_functions",
@@ -4129,8 +3858,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/target_test_file.go\nExpected length: 1369\nActual length: 956\nFirst difference at position: 29",
-        "text": "tests/test_harvest.py:183: in test_target_test_file_without_only_flag\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/target_test_file.go\nE   Expected length: 1369\nE   Actual length: 956\nE   First difference at position: 29",
-        "text_original_chars": 351,
         "time": 0.265
       },
       "name": "tests.test_harvest.test_target_test_file_without_only_flag",
@@ -4140,8 +3867,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/function_with_return_value_custom_template.go\nExpected length: 292\nActual length: 107\nFirst difference at position: 0",
-        "text": "tests/test_harvest.py:2197: in test_test_custom_template_path\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/function_with_return_value_custom_template.go\nE   Expected length: 292\nE   Actual length: 107\nE   First difference at position: 0",
-        "text_original_chars": 367,
         "time": 0.176
       },
       "name": "tests.test_harvest.test_test_custom_template_path",
@@ -4151,8 +3876,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions_with_case-insensitive_excl.go\nExpected length: 431\nActual length: 420\nFirst difference at position: 261",
-        "text": "tests/test_harvest.py:1464: in test_multiple_functions_with_case_insensitive_excl\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions_with_case-insensitive_excl.go\nE   Expected length: 431\nE   Actual length: 420\nE   First difference at position: 261",
-        "text_original_chars": 392,
         "time": 0.225
       },
       "name": "tests.test_harvest.test_multiple_functions_with_case_insensitive_excl",
@@ -4162,8 +3885,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/template_testify_printinputs.go\nExpected length: 1671\nActual length: 1602\nFirst difference at position: 822",
-        "text": "tests/test_harvest.py:2327: in test_with_templatetestify_and_printinputs\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/template_testify_printinputs.go\nE   Expected length: 1671\nE   Actual length: 1602\nE   First difference at position: 822",
-        "text_original_chars": 368,
         "time": 0.225
       },
       "name": "tests.test_harvest.test_with_templatetestify_and_printinputs",
@@ -4173,8 +3894,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions_excluding_on_method.go\nExpected length: 915\nActual length: 1300\nFirst difference at position: 600",
-        "text": "tests/test_harvest.py:1553: in test_multiple_functions_excluding_on_method\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions_excluding_on_method.go\nE   Expected length: 915\nE   Actual length: 1300\nE   First difference at position: 600",
-        "text_original_chars": 379,
         "time": 0.237
       },
       "name": "tests.test_harvest.test_multiple_functions_excluding_on_method",
@@ -4192,8 +3911,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/subtest_edition_-_functions_and_receivers_with_same_names_except_exporting.go\nExpected length: 3180\nActual length: 3086\nFirst difference at position: 1051",
-        "text": "tests/test_harvest.py:1891: in test_subtest_edition_functions_and_receivers_with_same_names_except_exporting\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/subtest_edition_-_functions_and_receivers_with_same_names_except_exporting.go\nE   Expected length: 3180\nE   Actual length: 3086\nE   First difference at position: 1051",
-        "text_original_chars": 451,
         "time": 0.208
       },
       "name": "tests.test_harvest.test_subtest_edition_functions_and_receivers_with_same_names_except_exporting",
@@ -4203,8 +3920,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions_with_only_and_excl_competing.go\nExpected length: 431\nActual length: 420\nFirst difference at position: 261",
-        "text": "tests/test_harvest.py:1605: in test_multiple_functions_with_only_and_excl_competing\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions_with_only_and_excl_competing.go\nE   Expected length: 431\nE   Actual length: 420\nE   First difference at position: 261",
-        "text_original_chars": 396,
         "time": 0.221
       },
       "name": "tests.test_harvest.test_multiple_functions_with_only_and_excl_competing",
@@ -4214,8 +3929,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/use_template_params_test.go\nExpected length: 345\nActual length: 107\nFirst difference at position: 0",
-        "text": "tests/test_harvest.py:2249: in test_test_use_external_params_and_custom_template\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/use_template_params_test.go\nE   Expected length: 345\nE   Actual length: 107\nE   First difference at position: 0",
-        "text_original_chars": 368,
         "time": 0.189
       },
       "name": "tests.test_harvest.test_test_use_external_params_and_custom_template",
@@ -4225,8 +3938,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/existing_test_file_with_package_level_comments.go\nExpected length: 787\nActual length: 313\nFirst difference at position: 0",
-        "text": "tests/test_harvest.py:1995: in test_existing_test_file_with_package_level_comments_with_newline\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/existing_test_file_with_package_level_comments.go\nE   Expected length: 787\nE   Actual length: 313\nE   First difference at position: 0",
-        "text_original_chars": 405,
         "time": 0.226
       },
       "name": "tests.test_harvest.test_existing_test_file_with_package_level_comments_with_newline",
@@ -4236,8 +3947,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_error_paths_gapfill.py:239: in test_invalid_excl_regex\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 150,
         "time": 0.117
       },
       "name": "tests.test_error_paths_gapfill.test_invalid_excl_regex",
@@ -4279,8 +3988,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/multiple_functions_filtering_exported.go\nExpected length: 986\nActual length: 975\nFirst difference at position: 816",
-        "text": "tests/test_harvest.py:1375: in test_multiple_functions_filtering_exported\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/multiple_functions_filtering_exported.go\nE   Expected length: 986\nE   Actual length: 975\nE   First difference at position: 816",
-        "text_original_chars": 376,
         "time": 0.257
       },
       "name": "tests.test_harvest.test_multiple_functions_filtering_exported",
@@ -4290,8 +3997,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/underlying_types.go\nExpected length: 707\nActual length: 736\nFirst difference at position: 29",
-        "text": "tests/test_harvest.py:974: in test_underlying_types\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/underlying_types.go\nE   Expected length: 707\nE   Actual length: 736\nE   First difference at position: 29",
-        "text_original_chars": 332,
         "time": 0.271
       },
       "name": "tests.test_harvest.test_underlying_types",
@@ -4301,8 +4006,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:147: in test_directory_filters_hidden_files\n    assert \"HiddenMain\" not in output\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 0.179
       },
       "name": "tests.test_input_gapfill.test_directory_filters_hidden_files",
@@ -4328,8 +4031,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/receiver_struct_with_reserved_field_names.go\nExpected length: 1792\nActual length: 338\nFirst difference at position: 81",
-        "text": "tests/test_harvest.py:1130: in test_receiver_struct_with_reserved_field_names\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/receiver_struct_with_reserved_field_names.go\nE   Expected length: 1792\nE   Actual length: 338\nE   First difference at position: 81",
-        "text_original_chars": 384,
         "time": 0.227
       },
       "name": "tests.test_harvest.test_receiver_struct_with_reserved_field_names",
@@ -4355,8 +4056,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:254: in test_nonexistent_path_errors\n    assert output == golden\nE   AssertionError",
-        "text_original_chars": 111,
         "time": 0.158
       },
       "name": "tests.test_input_gapfill.test_nonexistent_path_errors",
@@ -4382,8 +4081,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:293: in test_recursive_directory_with_only_test_files_no_output\n    assert \"No tests generated\" in output\nE   AssertionError",
-        "text_original_chars": 152,
         "time": 0.137
       },
       "name": "tests.test_input_gapfill.test_recursive_directory_with_only_test_files_no_output",
@@ -4393,8 +4090,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/template_testify_subtests_printinputs.go\nExpected length: 1813\nActual length: 1591\nFirst difference at position: 29",
-        "text": "tests/test_harvest.py:2353: in test_with_templatetestify_and_subtests_and_printinputs\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/template_testify_subtests_printinputs.go\nE   Expected length: 1813\nE   Actual length: 1591\nE   First difference at position: 29",
-        "text_original_chars": 389,
         "time": 0.222
       },
       "name": "tests.test_harvest.test_with_templatetestify_and_subtests_and_printinputs",
@@ -4412,8 +4107,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/function_with_return_value_custom_template.go\nExpected length: 292\nActual length: 107\nFirst difference at position: 0",
-        "text": "tests/test_harvest.py:2389: in test_with_templatetestify_templatedirtestdatacustomtemplates\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/function_with_return_value_custom_template.go\nE   Expected length: 292\nE   Actual length: 107\nE   First difference at position: 0",
-        "text_original_chars": 397,
         "time": 0.179
       },
       "name": "tests.test_harvest.test_with_templatetestify_templatedirtestdatacustomtemplates",
@@ -4423,8 +4116,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/function_with_return_value_template_data.go\nExpected length: 292\nActual length: 107\nFirst difference at position: 0",
-        "text": "tests/test_harvest.py:2435: in test_with_templatedata\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/function_with_return_value_template_data.go\nE   Expected length: 292\nE   Actual length: 107\nE   First difference at position: 0",
-        "text_original_chars": 357,
         "time": 0.18
       },
       "name": "tests.test_harvest.test_with_templatedata",
@@ -4450,8 +4141,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/test_t_receiver.go\nExpected length: 406\nActual length: 404\nFirst difference at position: 125",
-        "text": "tests/test_harvest.py:1917: in test_test_t_method_receiver\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/test_t_receiver.go\nE   Expected length: 406\nE   Actual length: 404\nE   First difference at position: 125",
-        "text_original_chars": 339,
         "time": 0.201
       },
       "name": "tests.test_harvest.test_test_t_method_receiver",
@@ -4469,8 +4158,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/custom_importer_fails.go\nExpected length: 1311\nActual length: 1300\nFirst difference at position: 816",
-        "text": "tests/test_harvest.py:1631: in test_custom_importer_fails\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/custom_importer_fails.go\nE   Expected length: 1311\nE   Actual length: 1300\nE   First difference at position: 816",
-        "text_original_chars": 346,
         "time": 0.235
       },
       "name": "tests.test_harvest.test_custom_importer_fails",
@@ -4504,8 +4191,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:48: in test_recursive_pattern_skips_hidden_directories\n    assert \"Generated TestVisibleMain\" in output\nE   AssertionError",
-        "text_original_chars": 150,
         "time": 0.129
       },
       "name": "tests.test_input_gapfill.test_recursive_pattern_skips_hidden_directories",
@@ -4523,8 +4208,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:446: in test_recursive_pattern_on_deep_subdirectory\n    assert \"Generated TestLevel2Func\" in output\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.135
       },
       "name": "tests.test_input_gapfill.test_recursive_pattern_on_deep_subdirectory",
@@ -4534,8 +4217,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:423: in test_recursive_pattern_with_subdirectory_prefix\n    assert \"Generated TestLevel1Func\" in output\nE   AssertionError",
-        "text_original_chars": 150,
         "time": 0.12
       },
       "name": "tests.test_input_gapfill.test_recursive_pattern_with_subdirectory_prefix",
@@ -4545,8 +4226,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/existing_test_file_with_package_level_comments_without_newline.go\nExpected length: 938\nActual length: 334\nFirst difference at position: 0",
-        "text": "tests/test_harvest.py:2021: in test_existing_test_file_with_package_level_comments_without_newline\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/existing_test_file_with_package_level_comments_without_newline.go\nE   Expected length: 938\nE   Actual length: 334\nE   First difference at position: 0",
-        "text_original_chars": 424,
         "time": 0.251
       },
       "name": "tests.test_harvest.test_existing_test_file_with_package_level_comments_without_newline",
@@ -4556,8 +4235,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected 1 TestVisible function, got 0",
-        "text": "tests/test_input_gapfill.py:75: in test_recursive_pattern_skips_test_files\n    assert test_visible_count == 1, f\"Expected 1 TestVisible function, got {test_visible_count}\"\nE   AssertionError: Expected 1 TestVisible function, got 0",
-        "text_original_chars": 230,
         "time": 0.158
       },
       "name": "tests.test_input_gapfill.test_recursive_pattern_skips_test_files",
@@ -4567,8 +4244,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:173: in test_directory_filters_test_files\n    assert output == golden\nE   AssertionError",
-        "text_original_chars": 116,
         "time": 0.2
       },
       "name": "tests.test_input_gapfill.test_directory_filters_test_files",
@@ -4594,8 +4269,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:207: in test_single_file_hidden_file_rejected\n    assert \"no Go source files found\" in output\nE   AssertionError",
-        "text_original_chars": 140,
         "time": 0.174
       },
       "name": "tests.test_input_gapfill.test_single_file_hidden_file_rejected",
@@ -4605,8 +4278,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_main_gapfill.py:120: in test_ai_flag_warning_message_displayed\n    assert \"\u26a0\ufe0f  WARNING: Function source code will be sent to AI provider\" in stderr\nE   AssertionError",
-        "text_original_chars": 177,
         "time": 0.165
       },
       "name": "tests.test_main_gapfill.test_ai_flag_warning_message_displayed",
@@ -4632,8 +4303,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/struct_receiver_with_multiple_fields.go\nExpected length: 696\nActual length: 388\nFirst difference at position: 83",
-        "text": "tests/test_harvest.py:1000: in test_struct_receiver_with_multiple_fields\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/struct_receiver_with_multiple_fields.go\nE   Expected length: 696\nE   Actual length: 388\nE   First difference at position: 83",
-        "text_original_chars": 373,
         "time": 0.255
       },
       "name": "tests.test_harvest.test_struct_receiver_with_multiple_fields",
@@ -4643,8 +4312,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/receiver_struct_with_fields_with_complex_package_names.go\nExpected length: 598\nActual length: 409\nFirst difference at position: 41",
-        "text": "tests/test_harvest.py:1156: in test_receiver_struct_with_fields_with_complex_package_names\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/receiver_struct_with_fields_with_complex_package_names.go\nE   Expected length: 598\nE   Actual length: 409\nE   First difference at position: 41",
-        "text_original_chars": 409,
         "time": 0.252
       },
       "name": "tests.test_harvest.test_receiver_struct_with_fields_with_complex_package_names",
@@ -4662,8 +4329,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_main_gapfill.py:244: in test_ai_flag_all_validations_run_before_processing\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 138,
         "time": 0.137
       },
       "name": "tests.test_main_gapfill.test_ai_flag_all_validations_run_before_processing",
@@ -4673,8 +4338,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:340: in test_recursive_directory_with_no_go_files\n    assert \"No tests generated\" in output\nE   AssertionError",
-        "text_original_chars": 138,
         "time": 0.129
       },
       "name": "tests.test_input_gapfill.test_recursive_directory_with_no_go_files",
@@ -4716,8 +4379,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Min cases < 1 should cause exit code 1",
-        "text": "tests/test_main_gapfill.py:60: in test_ai_flag_min_cases_zero_error\n    assert result.returncode == 1, \"Min cases < 1 should cause exit code 1\"\nE   AssertionError: Min cases < 1 should cause exit code 1",
-        "text_original_chars": 202,
         "time": 0.113
       },
       "name": "tests.test_main_gapfill.test_ai_flag_min_cases_zero_error",
@@ -4735,8 +4396,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Empty model should cause exit code 1",
-        "text": "tests/test_main_gapfill.py:44: in test_ai_flag_empty_model_error\n    assert result.returncode == 1, \"Empty model should cause exit code 1\"\nE   AssertionError: Empty model should cause exit code 1",
-        "text_original_chars": 195,
         "time": 0.113
       },
       "name": "tests.test_main_gapfill.test_ai_flag_empty_model_error",
@@ -4746,8 +4405,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_main_gapfill.py:321: in test_ai_flag_with_write_output\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.122
       },
       "name": "tests.test_main_gapfill.test_ai_flag_with_write_output",
@@ -4757,8 +4414,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Max cases > 100 should cause exit code 1",
-        "text": "tests/test_main_gapfill.py:88: in test_ai_flag_max_cases_over_limit_error\n    assert result.returncode == 1, \"Max cases > 100 should cause exit code 1\"\nE   AssertionError: Max cases > 100 should cause exit code 1",
-        "text_original_chars": 212,
         "time": 0.131
       },
       "name": "tests.test_main_gapfill.test_ai_flag_max_cases_over_limit_error",
@@ -4776,8 +4431,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/no_init_funcs.go\nExpected length: 828\nActual length: 435\nFirst difference at position: 45",
-        "text": "tests/test_harvest.py:1943: in test_init_function\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/no_init_funcs.go\nE   Expected length: 828\nE   Actual length: 435\nE   First difference at position: 45",
-        "text_original_chars": 327,
         "time": 0.226
       },
       "name": "tests.test_harvest.test_init_function",
@@ -4795,8 +4448,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/existing_test_file.go\nExpected length: 2054\nActual length: 2043\nFirst difference at position: 1574",
-        "text": "tests/test_harvest.py:1657: in test_existing_test_file\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/existing_test_file.go\nE   Expected length: 2054\nE   Actual length: 2043\nE   First difference at position: 1574",
-        "text_original_chars": 341,
         "time": 0.233
       },
       "name": "tests.test_harvest.test_existing_test_file",
@@ -4862,8 +4513,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_named_parallel.py:189: in test_testify_template_nosubtests_named\n    assert stdout == expected\nE   AssertionError",
-        "text_original_chars": 124,
         "time": 0.161
       },
       "name": "tests.test_named_parallel.test_testify_template_nosubtests_named",
@@ -4873,8 +4522,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/existing_test_file_with_package_level_mixed_types_comments.go\nExpected length: 1131\nActual length: 334\nFirst difference at position: 0",
-        "text": "tests/test_harvest.py:2047: in test_existing_test_file_with_mixed_types_package_level_comments\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/existing_test_file_with_package_level_mixed_types_comments.go\nE   Expected length: 1131\nE   Actual length: 334\nE   First difference at position: 0",
-        "text_original_chars": 417,
         "time": 0.249
       },
       "name": "tests.test_harvest.test_existing_test_file_with_mixed_types_package_level_comments",
@@ -4884,8 +4531,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:94: in test_recursive_pattern_processes_multiple_nested_levels\n    assert \"Generated TestLevel1Func\" in output  # nested/level1.go\nE   AssertionError",
-        "text_original_chars": 177,
         "time": 0.108
       },
       "name": "tests.test_input_gapfill.test_recursive_pattern_processes_multiple_nested_levels",
@@ -4895,8 +4540,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:192: in test_single_file_valid_go_file\n    assert output == golden\nE   AssertionError",
-        "text_original_chars": 113,
         "time": 0.147
       },
       "name": "tests.test_input_gapfill.test_single_file_valid_go_file",
@@ -4906,8 +4549,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_input_gapfill.py:227: in test_single_file_non_go_extension_rejected\n    assert \"no Go source files found\" in output\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.163
       },
       "name": "tests.test_input_gapfill.test_single_file_non_go_extension_rejected",
@@ -4973,8 +4614,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Negative min cases should cause exit code 1",
-        "text": "tests/test_main_gapfill.py:74: in test_ai_flag_min_cases_negative_error\n    assert result.returncode == 1, \"Negative min cases should cause exit code 1\"\nE   AssertionError: Negative min cases should cause exit code 1",
-        "text_original_chars": 216,
         "time": 0.159
       },
       "name": "tests.test_main_gapfill.test_ai_flag_min_cases_negative_error",
@@ -4984,8 +4623,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_named_parallel.py:297: in test_multiple_named_returns_with_named_parallel\n    assert stdout == expected\nE   AssertionError",
-        "text_original_chars": 133,
         "time": 0.144
       },
       "name": "tests.test_named_parallel.test_multiple_named_returns_with_named_parallel",
@@ -5011,8 +4648,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_named_parallel.py:310: in test_i_flag_with_named_parallel_prints_inputs\n    assert stdout == expected\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.174
       },
       "name": "tests.test_named_parallel.test_i_flag_with_named_parallel_prints_inputs",
@@ -5030,8 +4665,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_named_parallel.py:337: in test_exported_flag_with_named_parallel\n    assert stdout == expected\nE   AssertionError",
-        "text_original_chars": 124,
         "time": 0.176
       },
       "name": "tests.test_named_parallel.test_exported_flag_with_named_parallel",
@@ -5041,8 +4674,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Min > max should cause exit code 1",
-        "text": "tests/test_main_gapfill.py:103: in test_ai_flag_min_greater_than_max_error\n    assert result.returncode == 1, \"Min > max should cause exit code 1\"\nE   AssertionError: Min > max should cause exit code 1",
-        "text_original_chars": 201,
         "time": 0.143
       },
       "name": "tests.test_main_gapfill.test_ai_flag_min_greater_than_max_error",
@@ -5052,8 +4683,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_output_options_gapfill.py:30: in test_use_go_cmp_adds_import\n    assert '\"github.com/google/go-cmp/cmp\"' in stdout\nE   AssertionError",
-        "text_original_chars": 144,
         "time": 0.162
       },
       "name": "tests.test_output_options_gapfill.test_use_go_cmp_adds_import",
@@ -5063,8 +4692,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_main_gapfill.py:232: in test_ai_flag_custom_endpoint_in_warning\n    assert \"http://custom-server:9999\" in stderr\nE   AssertionError",
-        "text_original_chars": 142,
         "time": 0.155
       },
       "name": "tests.test_main_gapfill.test_ai_flag_custom_endpoint_in_warning",
@@ -5082,8 +4709,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/struct_receiver_with_anonymous_fields.go\nExpected length: 656\nActual length: 388\nFirst difference at position: 83",
-        "text": "tests/test_harvest.py:1026: in test_struct_receiver_with_anonymous_fields\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/struct_receiver_with_anonymous_fields.go\nE   Expected length: 656\nE   Actual length: 388\nE   First difference at position: 83",
-        "text_original_chars": 375,
         "time": 0.216
       },
       "name": "tests.test_harvest.test_struct_receiver_with_anonymous_fields",
@@ -5093,8 +4718,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_output_options_gapfill.py:244: in test_write_flag_with_custom_template\n    assert \"Generated TestProcess\" in output\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.11
       },
       "name": "tests.test_output_options_gapfill.test_write_flag_with_custom_template",
@@ -5112,8 +4735,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Generated output does not match golden file.\nGolden: /workspace/testdata/goldens/existing_test_file_with_package_level_comments.go\nExpected length: 787\nActual length: 313\nFirst difference at position: 0",
-        "text": "tests/test_harvest.py:1969: in test_existing_test_file_with_package_level_comments\n    assert actual_normalized.strip() == expected_normalized.strip(), (\nE   AssertionError: Generated output does not match golden file.\nE   Golden: /workspace/testdata/goldens/existing_test_file_with_package_level_comments.go\nE   Expected length: 787\nE   Actual length: 313\nE   First difference at position: 0",
-        "text_original_chars": 392,
         "time": 0.238
       },
       "name": "tests.test_harvest.test_existing_test_file_with_package_level_comments",
@@ -5131,8 +4752,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_output_options_gapfill.py:380: in test_struct_with_complex_types_uses_go_cmp\n    assert '\"github.com/google/go-cmp/cmp\"' in stdout\nE   AssertionError",
-        "text_original_chars": 160,
         "time": 0.135
       },
       "name": "tests.test_output_options_gapfill.test_struct_with_complex_types_uses_go_cmp",
@@ -5150,8 +4769,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_output_options_gapfill.py:440: in test_named_flag_with_use_go_cmp\n    assert '\"github.com/google/go-cmp/cmp\"' in stdout\nE   AssertionError",
-        "text_original_chars": 149,
         "time": 0.133
       },
       "name": "tests.test_output_options_gapfill.test_named_flag_with_use_go_cmp",
@@ -5169,8 +4786,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected 1 generated test, got 2",
-        "text": "tests/test_input_gapfill.py:128: in test_directory_pattern_non_recursive\n    assert generated_count == 1, f\"Expected 1 generated test, got {generated_count}\"\nE   AssertionError: Expected 1 generated test, got 2",
-        "text_original_chars": 210,
         "time": 0.116
       },
       "name": "tests.test_input_gapfill.test_directory_pattern_non_recursive",
@@ -5196,8 +4811,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_output_options_gapfill.py:692: in test_multiple_files_with_use_go_cmp\n    assert '\"github.com/google/go-cmp/cmp\"' in content1\nE   AssertionError",
-        "text_original_chars": 155,
         "time": 0.154
       },
       "name": "tests.test_output_options_gapfill.test_multiple_files_with_use_go_cmp",
@@ -5215,8 +4828,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected 1 go-cmp import, found 0",
-        "text": "tests/test_output_options_gapfill.py:758: in test_large_number_of_functions_with_use_go_cmp\n    assert import_count == 1, f\"Expected 1 go-cmp import, found {import_count}\"\nE   AssertionError: Expected 1 go-cmp import, found 0",
-        "text_original_chars": 225,
         "time": 0.169
       },
       "name": "tests.test_output_options_gapfill.test_large_number_of_functions_with_use_go_cmp",
@@ -5226,8 +4837,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_named_parallel.py:228: in test_interface_parameters_with_named_parallel\n    assert stdout == expected\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 0.16
       },
       "name": "tests.test_named_parallel.test_interface_parameters_with_named_parallel",
@@ -5245,8 +4854,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_named_parallel.py:351: in test_use_go_cmp_with_named_parallel\n    assert stdout == expected\nE   AssertionError",
-        "text_original_chars": 121,
         "time": 0.164
       },
       "name": "tests.test_named_parallel.test_use_go_cmp_with_named_parallel",
@@ -5272,8 +4879,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_render_helpers_gapfill.py:73: in test_receiver_name_conflict_with_name_field\n    assert \"n := Name{\" in stdout\nE   AssertionError",
-        "text_original_chars": 140,
         "time": 0.139
       },
       "name": "tests.test_render_helpers_gapfill.test_receiver_name_conflict_with_name_field",
@@ -5291,8 +4896,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_output_options_gapfill.py:82: in test_custom_template_dir_loads_templates\n    assert \"Custom template test\" in stdout\nE   AssertionError",
-        "text_original_chars": 147,
         "time": 0.168
       },
       "name": "tests.test_output_options_gapfill.test_custom_template_dir_loads_templates",
@@ -5302,8 +4905,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected 1 go-cmp import, found 0",
-        "text": "tests/test_output_options_gapfill.py:188: in test_multiple_functions_with_imports\n    assert import_count == 1, f\"Expected 1 go-cmp import, found {import_count}\"\nE   AssertionError: Expected 1 go-cmp import, found 0",
-        "text_original_chars": 215,
         "time": 0.161
       },
       "name": "tests.test_output_options_gapfill.test_multiple_functions_with_imports",
@@ -5313,8 +4914,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_render_helpers_gapfill.py:123: in test_approximation_constraint_int\n    assert stdout == (RESOURCES / \"approximation_constraints.golden\").read_text()\nE   AssertionError",
-        "text_original_chars": 179,
         "time": 0.134
       },
       "name": "tests.test_render_helpers_gapfill.test_approximation_constraint_int",
@@ -5324,8 +4923,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_output_options_gapfill.py:286: in test_write_flag_with_use_go_cmp\n    assert '\"github.com/google/go-cmp/cmp\"' in content\nE   AssertionError",
-        "text_original_chars": 150,
         "time": 0.151
       },
       "name": "tests.test_output_options_gapfill.test_write_flag_with_use_go_cmp",
@@ -5335,8 +4932,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_render_helpers_gapfill.py:137: in test_approximation_constraint_string\n    assert \"ApproximationString[string]\" in stdout\nE   AssertionError",
-        "text_original_chars": 151,
         "time": 0.134
       },
       "name": "tests.test_render_helpers_gapfill.test_approximation_constraint_string",
@@ -5354,8 +4949,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_render_helpers_gapfill.py:276: in test_union_constraint_basic_types_first\n    assert \"UnionBasicTypes[int32]\" in stdout\nE   AssertionError",
-        "text_original_chars": 149,
         "time": 0.122
       },
       "name": "tests.test_render_helpers_gapfill.test_union_constraint_basic_types_first",
@@ -5373,8 +4966,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_render_helpers_gapfill.py:314: in test_union_constraint_non_basic_type_first\n    assert \"UnionCustomAndBasic[CustomType]\" in stdout\nE   AssertionError",
-        "text_original_chars": 161,
         "time": 0.129
       },
       "name": "tests.test_render_helpers_gapfill.test_union_constraint_non_basic_type_first",
@@ -5384,8 +4975,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_output_options_gapfill.py:410: in test_parallel_flag_with_use_go_cmp\n    assert '\"github.com/google/go-cmp/cmp\"' in stdout\nE   AssertionError",
-        "text_original_chars": 152,
         "time": 0.115
       },
       "name": "tests.test_output_options_gapfill.test_parallel_flag_with_use_go_cmp",
@@ -5435,8 +5024,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_render_helpers_gapfill.py:460: in test_comparable_constraint_maps_to_string\n    assert \"ComparableConstraint[string]\" in stdout\nE   AssertionError",
-        "text_original_chars": 157,
         "time": 0.142
       },
       "name": "tests.test_render_helpers_gapfill.test_comparable_constraint_maps_to_string",
@@ -5494,8 +5081,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:93: in test_custom_template_directory\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 146,
         "time": 0.16
       },
       "name": "tests.test_templates.test_custom_template_directory",
@@ -5505,8 +5090,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError: Expected 1 go-cmp import, found 0",
-        "text": "tests/test_output_options_gapfill.py:573: in test_write_with_go_cmp_merges_import_correctly\n    assert cmp_import_count == 1, f\"Expected 1 go-cmp import, found {cmp_import_count}\"\nE   AssertionError: Expected 1 go-cmp import, found 0",
-        "text_original_chars": 233,
         "time": 0.141
       },
       "name": "tests.test_output_options_gapfill.test_write_with_go_cmp_merges_import_correctly",
@@ -5532,8 +5115,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:187: in test_env_variable_template_dir\n    assert normalize_output(result.stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 154,
         "time": 0.148
       },
       "name": "tests.test_templates.test_env_variable_template_dir",
@@ -5575,8 +5156,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:272: in test_invalid_json_in_template_params\n    assert output == expected\nE   AssertionError",
-        "text_original_chars": 117,
         "time": 0.12
       },
       "name": "tests.test_templates.test_invalid_json_in_template_params",
@@ -5594,8 +5173,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_render_helpers_gapfill.py:94: in test_receiver_name_conflict_with_test_arg_t\n    assert \"tr   T\" in stdout\nE   AssertionError",
-        "text_original_chars": 136,
         "time": 0.147
       },
       "name": "tests.test_render_helpers_gapfill.test_receiver_name_conflict_with_test_arg_t",
@@ -5613,8 +5190,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_render_helpers_gapfill.py:156: in test_approximation_constraint_float\n    assert \"ApproximationFloat[float64]\" in stdout\nE   AssertionError",
-        "text_original_chars": 150,
         "time": 0.137
       },
       "name": "tests.test_render_helpers_gapfill.test_approximation_constraint_float",
@@ -5632,8 +5207,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:392: in test_testify_template_with_printinputs\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 155,
         "time": 0.143
       },
       "name": "tests.test_templates.test_testify_template_with_printinputs",
@@ -5683,8 +5256,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_render_helpers_gapfill.py:295: in test_union_constraint_string_first\n    assert \"UnionWithString[string]\" in stdout\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.136
       },
       "name": "tests.test_render_helpers_gapfill.test_union_constraint_string_first",
@@ -5702,8 +5273,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:518: in test_testify_with_all_flags_combined\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 153,
         "time": 0.159
       },
       "name": "tests.test_templates.test_testify_with_all_flags_combined",
@@ -5713,8 +5282,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_render_helpers_gapfill.py:333: in test_interface_constraint_default_to_string\n    assert \"InterfaceConstraint[string]\" in stdout\nE   AssertionError",
-        "text_original_chars": 158,
         "time": 0.118
       },
       "name": "tests.test_render_helpers_gapfill.test_interface_constraint_default_to_string",
@@ -5740,8 +5307,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:113: in test_template_params_from_file\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 147,
         "time": 0.168
       },
       "name": "tests.test_templates.test_template_params_from_file",
@@ -5751,8 +5316,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:133: in test_template_params_from_string\n    assert normalize_output(stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 149,
         "time": 0.173
       },
       "name": "tests.test_templates.test_template_params_from_string",
@@ -5762,8 +5325,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:215: in test_cli_flag_overrides_env_variable\n    assert normalize_output(result.stdout) == normalize_output(expected)\nE   AssertionError",
-        "text_original_chars": 160,
         "time": 0.138
       },
       "name": "tests.test_templates.test_cli_flag_overrides_env_variable",
@@ -5773,8 +5334,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:320: in test_missing_template_params_file\n    assert output == expected\nE   AssertionError",
-        "text_original_chars": 114,
         "time": 0.174
       },
       "name": "tests.test_templates.test_missing_template_params_file",
@@ -5800,8 +5359,6 @@
       "branch": "93dd70c81295",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_templates.py:442: in test_template_with_malformed_syntax\n    assert output == expected\nE   AssertionError",
-        "text_original_chars": 116,
         "time": 0.156
       },
       "name": "tests.test_templates.test_template_with_malformed_syntax",
@@ -6683,8 +6240,6 @@
       "branch": "3a25ac310f27",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_precedence_excl_over_only():\n        rc, out, err = run([\"-excl\", \"Multiply\", \"-only\", \"Multiply\", \"testdata/calculator.go\"])\n        assert err.strip() == \"\"\n>       assert \"No tests generated\" in out\nE       AssertionError\n\neval/tests/test_argparse_validation.py:112: AssertionError",
-        "text_original_chars": 293,
         "time": 0.154
       },
       "name": "eval.tests.test_argparse_validation.test_precedence_excl_over_only",
@@ -7022,8 +6577,6 @@
       "branch": "80bb683f1ec0",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_generate_blank_go_file_errors_and_has_no_tests_message():\n        \"\"\"\n        Externalized from: gotests_test.go::TestGenerateTests (case name: \"Blank Go file\")\n    \n        Original: GenerateTests(srcPath=testdata/blankfile/blank.go) expects wantErr and wantNoTests.\n    \n        Upward trace: main() -> run() -> generator.GenerateTests on PATH.\n            Triggered via `-all testdata/blankfile/blank.go`.\n        Downward trace: generation fails -> error printed to stdout/stderr and non-zero exit.\n            No generated test package header should appear.\n    \n        External: run and assert non-zero exit and that output indicates no tests generated.\n        \"\"\"\n        src = REPO_ROOT / \"testdata\" / \"blankfile\" / \"blank.go\"\n        res = run_gotests(\"-all\", \"-nosubtests\", str(src))\n        assert res.returncode == 0\n        combined = (res.stdout + res.stderr).decode(\"utf-8\", errors=\"replace\").lower()\n        # error message wording differs across versions; check robustly for \"no tests\" and parse failure.\n>       assert \"file is empty\" in combined\nE       AssertionError\n\neval/tests/test_gotests_externalized.py:98: AssertionError",
-        "text_original_chars": 1162,
         "time": 0.182
       },
       "name": "eval.tests.test_gotests_externalized.test_ext_generate_blank_go_file_errors_and_has_no_tests_message",
@@ -7033,8 +6586,6 @@
       "branch": "80bb683f1ec0",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_ext_generate_print_inputs_with_multiple_arguments_matches_golden():\n        \"\"\"\n        Externalized from: gotests_test.go::TestGenerateTests (case name: \"Print inputs with multiple arguments\")\n    \n        Original: GenerateTests(testdata/test006.go, printInputs=true) == goldens/print_inputs_with_multiple_arguments.go\n    \n        Upward trace: main() -> run() -> generator.GenerateTests with printInputs enabled by `-i`.\n            Triggered via `-all -i testdata/test006.go`.\n        Downward trace: generator includes fmt.Sprintf error message inputs in generated code -> stdout.\n    \n        External: run, normalize, compare to golden.\n        \"\"\"\n        src = REPO_ROOT / \"testdata\" / \"test006.go\"\n        res = run_gotests(\"-all\", \"-nosubtests\", \"-i\", str(src))\n        assert res.returncode == 0\n        out = normalize_generated(res.stdout.decode(\"utf-8\", errors=\"replace\"))\n>       assert out == golden(\"print_inputs_with_multiple_arguments.go\")\nE       AssertionError\n\neval/tests/test_gotests_externalized.py:137: AssertionError",
-        "text_original_chars": 1053,
         "time": 0.183
       },
       "name": "eval.tests.test_gotests_externalized.test_ext_generate_print_inputs_with_multiple_arguments_matches_golden",
@@ -7068,8 +6619,6 @@
       "branch": "f84478ba4e51",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_flag_template_dir_overrides_env_template_dir_even_if_env_is_bad():\n        good = REPO_ROOT / \"testdata\" / \"customtemplates\"\n        bad = REPO_ROOT / \"testdata\" / \"bad_customtemplates\"\n    \n        r = run(\n            \"-template_dir\",\n            str(good),\n            \"-all\",\n            str(_fixture_gofile()),\n            env={\"GOTESTS_TEMPLATE_DIR\": str(bad)},\n        )\n        assert r.returncode == 0\n>       assert \"testCases := []struct\" in r.stdout\nE       AssertionError\n\neval/tests/test_env_and_config.py:80: AssertionError",
-        "text_original_chars": 547,
         "time": 0.156
       },
       "name": "eval.tests.test_env_and_config.test_flag_template_dir_overrides_env_template_dir_even_if_env_is_bad",
@@ -7087,8 +6636,6 @@
       "branch": "f84478ba4e51",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_env_GOTESTS_TEMPLATE_DIR_is_used_when_flag_not_set():\n        tdir = REPO_ROOT / \"testdata\" / \"customtemplates\"\n        r = run(\"-template_dir\", str(tdir), \"-all\", str(_fixture_gofile()))\n        assert r.returncode == 0\n        # Custom templates change the variable name from `tests` to `testCases`.\n>       assert \"testCases := []struct\" in r.stdout\nE       AssertionError\n\neval/tests/test_env_and_config.py:65: AssertionError",
-        "text_original_chars": 438,
         "time": 0.17
       },
       "name": "eval.tests.test_env_and_config.test_env_GOTESTS_TEMPLATE_DIR_is_used_when_flag_not_set",
@@ -7202,8 +6749,6 @@
       "branch": "bee6efaf094f",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_help_has_expected_tab_indentation_for_description_lines():\n        p = run_cmd([\"--help\"])\n>       assert re.search(r\"^\\s+\\tgenerate test cases using AI\", p.stderr, re.M)\nE       AssertionError\n\neval/tests/test_help_output.py:118: AssertionError",
-        "text_original_chars": 254,
         "time": 0.18
       },
       "name": "eval.tests.test_help_output.test_help_has_expected_tab_indentation_for_description_lines",
@@ -7349,8 +6894,6 @@
       "branch": "bee6efaf094f",
       "extra": {
         "message": "AssertionError",
-        "text": "baseline_help_stderr_normalized = 'Usage of ./executable:\\n  -ai\\n    \\tgenerate test cases using AI (requires Ollama)\\n  -ai-endpoint string\\n    \\tOll...eepEqual\\n  -version\\n    \\tprint version information and exit\\n  -w\\twrite output to (test) files instead of stdout\\n'\n\n    def test_baseline_help_text_matches_fixture_except_usage_path(\n        baseline_help_stderr_normalized,\n    ):\n        p = run_cmd([\"--help\"])\n>       assert _normalize_usage_path(p.stderr) == baseline_help_stderr_normalized\nE       AssertionError\n\neval/tests/test_help_output.py:145: AssertionError",
-        "text_original_chars": 579,
         "time": 0.145
       },
       "name": "eval.tests.test_help_output.test_baseline_help_text_matches_fixture_except_usage_path",

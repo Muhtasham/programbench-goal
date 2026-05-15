@@ -855,6 +855,7 @@
     }
   ],
   "public_redactions": {
+    "extra_text": "redacted",
     "log_output": "redacted",
     "long_extra_text": "truncated to 2000 chars"
   },
@@ -1000,8 +1001,6 @@
       "branch": "86ccb6017898",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_files = <conftest.TempFiles object at 0x7c42603561d0>\n\n    def test_config_with_custom_styles(temp_files):\n        \"\"\"Test config with custom styles including bold, italic.\"\"\"\n        config = \"\"\"\n    [[keywords]]\n    words = ['BOLD']\n    style = { fg = \"red\", bold = true }\n    \n    [[keywords]]\n    words = ['ITALIC']\n    style = { fg = \"blue\", italic = true }\n    \"\"\"\n        config_file = temp_files.create(\"style_config.toml\", config)\n        result = run(\"--config-path\", config_file, stdin=\"BOLD and ITALIC\")\n        assert result.returncode == 0\n        assert b\"BOLD\" in result.stdout\n        assert b\"ITALIC\" in result.stdout\n>       assert b\"\\x1b[\" in result.stdout\nE       AssertionError\n\neval/tests/test_configuration.py:62: AssertionError",
-        "text_original_chars": 757,
         "time": 0.163
       },
       "name": "eval.tests.test_configuration.test_config_with_custom_styles",
@@ -1011,8 +1010,6 @@
       "branch": "86ccb6017898",
       "extra": {
         "message": "AssertionError",
-        "text": "temp_files = <conftest.TempFiles object at 0x70feb3313370>\n\n    def test_config_path_valid(temp_files):\n        \"\"\"Test loading a valid custom config file.\"\"\"\n        config = \"\"\"\n    [[keywords]]\n    words = ['CUSTOM']\n    style = { fg = \"red\" }\n    \"\"\"\n        config_file = temp_files.create(\"config.toml\", config)\n        result = run(\"--config-path\", config_file, stdin=\"CUSTOM keyword\")\n        assert result.returncode == 0\n        assert b\"CUSTOM\" in result.stdout\n>       assert b\"\\x1b[\" in result.stdout\nE       AssertionError\n\neval/tests/test_configuration.py:16: AssertionError",
-        "text_original_chars": 589,
         "time": 0.162
       },
       "name": "eval.tests.test_configuration.test_config_path_valid",
@@ -1670,8 +1667,6 @@
       "branch": "86ccb6017898",
       "extra": {
         "message": "subprocess.TimeoutExpired: Command '['./executable', '/tmp/tmp7ggnqc84/long.log', '--print']' timed out after 5.0 seconds",
-        "text": "temp_files = <conftest.TempFiles object at 0x7d7abe4319c0>\n\n    def test_file_with_long_lines(temp_files):\n        \"\"\"Test file with very long lines.\"\"\"\n        long_line = \"word \" * 10000\n        log_file = temp_files.create(\"long.log\", long_line)\n>       result = run(log_file, \"--print\")\n\neval/tests/test_input_handling.py:61: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \neval/tests/conftest.py:16: in run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:505: in run\n    stdout, stderr = process.communicate(input, timeout=timeout)\n/usr/lib/python3.10/subprocess.py:1154: in communicate\n    stdout, stderr = self._communicate(input, endtime, timeout)\n/usr/lib/python3.10/subprocess.py:2022: in _communicate\n    self._check_timeout(endtime, orig_timeout, stdout, stderr)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <Popen: returncode: -9 args: ['./executable', '/tmp/tmp7ggnqc84/long.log', '...>\nendtime = 26924.052158497, orig_timeout = 5.0, stdout_seq = [], stderr_seq = []\nskip_check_and_raise = False\n\n    def _check_timeout(self, endtime, orig_timeout, stdout_seq, stderr_seq,\n                       skip_check_and_raise=False):\n        \"\"\"Convenience for checking if a timeout has expired.\"\"\"\n        if endtime is None:\n            return\n        if skip_check_and_raise or _time() > endtime:\n>           raise TimeoutExpired(\n                    self.args, orig_timeout,\n                    output=b''.join(stdout_seq) if stdout_seq else None,\n                    stderr=b''.join(stderr_seq) if stderr_seq else None)\nE           subprocess.TimeoutExpired: Command '['./executable', '/tmp/tmp7ggnqc84/long.log', '--print']' timed out after 5.0 seconds\n\n/usr/lib/python3.10/subprocess.py:1198: TimeoutExpired",
-        "text_original_chars": 1812,
         "time": 15.013
       },
       "name": "eval.tests.test_input_handling.test_file_with_long_lines",
@@ -2113,8 +2108,6 @@
       "branch": "8d05e17648bb",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_enable_and_disable_exclusive():\n        \"\"\"Test that enable and disable flags are mutually exclusive\"\"\"\n        result = run(\"--print\", \"--disable=numbers\", \"--enable=dates\",\n                     stdin=\"Date 2024-03-09 Number 123\")\n        # Should produce an error when both enable and disable are used\n>       assert result.returncode != 0\nE       AssertionError\n\neval/tests/test_highlighter_control.py:112: AssertionError",
-        "text_original_chars": 433,
         "time": 0.131
       },
       "name": "eval.tests.test_highlighter_control.test_enable_and_disable_exclusive",
@@ -2244,8 +2237,6 @@
       "branch": "8d05e17648bb",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_pointer_highlighting():\n        \"\"\"Test that memory pointers are highlighted\"\"\"\n        result = run(\"--print\", stdin=\"Pointer: 0x7fff5fbff8a0 and 0xdeadbeef\")\n        assert result.returncode == 0\n>       assert b\"0x\" in result.stdout\nE       AssertionError\n\neval/tests/test_highlighters.py:168: AssertionError",
-        "text_original_chars": 320,
         "time": 0.128
       },
       "name": "eval.tests.test_highlighters.test_pointer_highlighting",
@@ -2367,8 +2358,6 @@
       "branch": "8d05e17648bb",
       "extra": {
         "message": "subprocess.TimeoutExpired: Command '['./executable', '--print']' timed out after 5.0 seconds",
-        "text": "def test_very_long_line():\n        \"\"\"Test handling of very long lines\"\"\"\n        long_line = \"X\" * 100000 + \" 123\\n\"\n>       result = run(\"--print\", stdin=long_line)\n\neval/tests/test_edge_cases.py:8: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \neval/tests/conftest.py:15: in run\n    return subprocess.run(\n/usr/lib/python3.10/subprocess.py:505: in run\n    stdout, stderr = process.communicate(input, timeout=timeout)\n/usr/lib/python3.10/subprocess.py:1154: in communicate\n    stdout, stderr = self._communicate(input, endtime, timeout)\n/usr/lib/python3.10/subprocess.py:2022: in _communicate\n    self._check_timeout(endtime, orig_timeout, stdout, stderr)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <Popen: returncode: -9 args: ['./executable', '--print']>\nendtime = 26944.754554734, orig_timeout = 5.0, stdout_seq = [], stderr_seq = []\nskip_check_and_raise = False\n\n    def _check_timeout(self, endtime, orig_timeout, stdout_seq, stderr_seq,\n                       skip_check_and_raise=False):\n        \"\"\"Convenience for checking if a timeout has expired.\"\"\"\n        if endtime is None:\n            return\n        if skip_check_and_raise or _time() > endtime:\n>           raise TimeoutExpired(\n                    self.args, orig_timeout,\n                    output=b''.join(stdout_seq) if stdout_seq else None,\n                    stderr=b''.join(stderr_seq) if stderr_seq else None)\nE           subprocess.TimeoutExpired: Command '['./executable', '--print']' timed out after 5.0 seconds\n\n/usr/lib/python3.10/subprocess.py:1198: TimeoutExpired",
-        "text_original_chars": 1629,
         "time": 15.014
       },
       "name": "eval.tests.test_edge_cases.test_very_long_line",
@@ -2378,8 +2367,6 @@
       "branch": "8d05e17648bb",
       "extra": {
         "message": "subprocess.TimeoutExpired: Command '['./executable', '/tmp/tmpvjzysxtz/long.log', '--print']' timed out after 5.0 seconds",
-        "text": "temp_files = <conftest.temp_files.<locals>.TempFiles object at 0x79f3085bb700>\n\n    def test_file_with_long_lines(temp_files):\n        \"\"\"Test file with very long lines\"\"\"\n        long_line = \"A\" * 10000 + \" 12345\\n\"\n        test_file = temp_files.create(\"long.log\", long_line)\n>       result = run(str(test_file), \"--print\")\n\neval/tests/test_file_input.py:48: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \neval/tests/conftest.py:15: in run\n    return subprocess.run(\n/usr/lib/python3.10/subprocess.py:505: in run\n    stdout, stderr = process.communicate(input, timeout=timeout)\n/usr/lib/python3.10/subprocess.py:1154: in communicate\n    stdout, stderr = self._communicate(input, endtime, timeout)\n/usr/lib/python3.10/subprocess.py:2022: in _communicate\n    self._check_timeout(endtime, orig_timeout, stdout, stderr)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <Popen: returncode: -9 args: ['./executable', '/tmp/tmpvjzysxtz/long.log', '...>\nendtime = 26944.804083634, orig_timeout = 5.0, stdout_seq = [], stderr_seq = []\nskip_check_and_raise = False\n\n    def _check_timeout(self, endtime, orig_timeout, stdout_seq, stderr_seq,\n                       skip_check_and_raise=False):\n        \"\"\"Convenience for checking if a timeout has expired.\"\"\"\n        if endtime is None:\n            return\n        if skip_check_and_raise or _time() > endtime:\n>           raise TimeoutExpired(\n                    self.args, orig_timeout,\n                    output=b''.join(stdout_seq) if stdout_seq else None,\n                    stderr=b''.join(stderr_seq) if stderr_seq else None)\nE           subprocess.TimeoutExpired: Command '['./executable', '/tmp/tmpvjzysxtz/long.log', '--print']' timed out after 5.0 seconds\n\n/usr/lib/python3.10/subprocess.py:1198: TimeoutExpired",
-        "text_original_chars": 1841,
         "time": 15.019
       },
       "name": "eval.tests.test_file_input.test_file_with_long_lines",
@@ -2477,8 +2464,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli_basic.py:259: in test_binary_file_non_utf8\n    assert output == expected\nE   AssertionError",
-        "text_original_chars": 106,
         "time": 0.113
       },
       "name": "tests.test_cli_basic.test_binary_file_non_utf8",
@@ -2568,8 +2553,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli_basic.py:523: in test_disable_multiple_highlighters\n    assert \"https://example.com\" in output\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 0.09
       },
       "name": "tests.test_cli_basic.test_disable_multiple_highlighters",
@@ -2627,8 +2610,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli_basic.py:466: in test_directory_instead_of_file\n    assert \"Path is not a file\" in output\nE   AssertionError",
-        "text_original_chars": 123,
         "time": 0.097
       },
       "name": "tests.test_cli_basic.test_directory_instead_of_file",
@@ -2686,8 +2667,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli_basic.py:365: in test_highlight_flag_missing_value\n    assert result.stderr.decode() == expected\nE   AssertionError",
-        "text_original_chars": 130,
         "time": 0.082
       },
       "name": "tests.test_cli_basic.test_highlight_flag_missing_value",
@@ -2705,8 +2684,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:28: in test_generate_fish_completions_exact_output\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 129,
         "time": 0.106
       },
       "name": "tests.test_completions.test_generate_fish_completions_exact_output",
@@ -2716,8 +2693,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:149: in test_completion_flag_ignores_file_argument\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 129,
         "time": 0.099
       },
       "name": "tests.test_completions.test_completion_flag_ignores_file_argument",
@@ -2727,8 +2702,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:83: in test_zsh_completions_contains_compdef_and_function\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 136,
         "time": 0.092
       },
       "name": "tests.test_completions.test_zsh_completions_contains_compdef_and_function",
@@ -2746,8 +2719,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:68: in test_custom_keywords_config\n    assert result.stdout == (RESOURCES / \"custom_keywords_output.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 161,
         "time": 0.098
       },
       "name": "tests.test_config.test_custom_keywords_config",
@@ -2765,8 +2736,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:16: in test_generate_bash_completions_exact_output\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 129,
         "time": 0.114
       },
       "name": "tests.test_completions.test_generate_bash_completions_exact_output",
@@ -2776,8 +2745,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:545: in test_follow_mode_with_enable_flag\n    assert \"https://test.com\" in output\nE   AssertionError",
-        "text_original_chars": 129,
         "time": 1.813
       },
       "name": "tests.test_advanced_modes.test_follow_mode_with_enable_flag",
@@ -2787,8 +2754,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:190: in test_follow_mode_with_disable_flag\n    assert \"12345\" in clean_output\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 1.814
       },
       "name": "tests.test_advanced_modes.test_follow_mode_with_disable_flag",
@@ -2798,8 +2763,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:64: in test_follow_mode_basic_append\n    assert \"Appended line 3\" in clean_output\nE   AssertionError",
-        "text_original_chars": 129,
         "time": 1.814
       },
       "name": "tests.test_advanced_modes.test_follow_mode_basic_append",
@@ -2809,8 +2772,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_cli_basic.py:240: in test_large_file_1500_lines\n    assert first_5_lines == expected\nE   AssertionError",
-        "text_original_chars": 114,
         "time": 1.597
       },
       "name": "tests.test_cli_basic.test_large_file_1500_lines",
@@ -2820,8 +2781,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:302: in test_follow_mode_multiline_batch\n    assert f\"Batch line {i}\" in clean_output\nE   AssertionError",
-        "text_original_chars": 133,
         "time": 2.113
       },
       "name": "tests.test_advanced_modes.test_follow_mode_multiline_batch",
@@ -2831,8 +2790,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:400: in test_follow_mode_large_file_initial_read\n    assert \"Newly appended line 1\" in clean_output\nE   AssertionError",
-        "text_original_chars": 147,
         "time": 2.417
       },
       "name": "tests.test_advanced_modes.test_follow_mode_large_file_initial_read",
@@ -2890,8 +2847,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:19: in test_custom_config_numbers\n    assert b'\\x1b[31m123\\x1b[0m' in result.stdout\nE   AssertionError",
-        "text_original_chars": 123,
         "time": 0.134
       },
       "name": "tests.test_config.test_custom_config_numbers",
@@ -2909,8 +2864,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:40: in test_generate_zsh_completions_exact_output\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 0.078
       },
       "name": "tests.test_completions.test_generate_zsh_completions_exact_output",
@@ -2920,8 +2873,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:160: in test_completion_flag_with_other_flags_still_generates\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 140,
         "time": 0.113
       },
       "name": "tests.test_completions.test_completion_flag_with_other_flags_still_generates",
@@ -2931,8 +2882,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:204: in test_zsh_completions_includes_option_arguments\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 133,
         "time": 0.12
       },
       "name": "tests.test_completions.test_zsh_completions_includes_option_arguments",
@@ -2942,8 +2891,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:270: in test_config_keywords_with_no_builtin\n    assert result.stdout == (RESOURCES / \"config_no_builtin.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 166,
         "time": 0.135
       },
       "name": "tests.test_config.test_config_keywords_with_no_builtin",
@@ -2953,8 +2900,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:100: in test_bash_completions_includes_all_major_flags\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 133,
         "time": 0.14
       },
       "name": "tests.test_completions.test_bash_completions_includes_all_major_flags",
@@ -2964,8 +2909,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:80: in test_custom_regexes_config\n    assert result.stdout == (RESOURCES / \"custom_regex_output.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 157,
         "time": 0.107
       },
       "name": "tests.test_config.test_custom_regexes_config",
@@ -2975,8 +2918,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:233: in test_custom_quote_character\n    assert result.stdout == (RESOURCES / \"custom_quote_char_output.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 164,
         "time": 0.104
       },
       "name": "tests.test_config.test_custom_quote_character",
@@ -2986,8 +2927,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:167: in test_unicode_keywords_in_config\n    assert result.stdout == (RESOURCES / \"unicode_output.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 158,
         "time": 0.091
       },
       "name": "tests.test_config.test_unicode_keywords_in_config",
@@ -2997,8 +2936,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:116: in test_type_mismatch_in_config\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 110,
         "time": 0.106
       },
       "name": "tests.test_config.test_type_mismatch_in_config",
@@ -3064,8 +3001,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:318: in test_missing_regex_field\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 106,
         "time": 0.132
       },
       "name": "tests.test_config.test_missing_regex_field",
@@ -3091,8 +3026,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors.py:66: in test_directory_instead_of_file_path\n    assert result.stderr.decode() == expected\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 0.099
       },
       "name": "tests.test_errors.test_directory_instead_of_file_path",
@@ -3102,8 +3035,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:51: in test_bash_completions_contains_function_definition\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 136,
         "time": 0.103
       },
       "name": "tests.test_completions.test_bash_completions_contains_function_definition",
@@ -3113,8 +3044,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:171: in test_bash_completions_includes_highlighter_names\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 0.105
       },
       "name": "tests.test_completions.test_bash_completions_includes_highlighter_names",
@@ -3132,8 +3061,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:221: in test_bash_completions_output_is_stable\n    assert result1.returncode == 0\nE   AssertionError",
-        "text_original_chars": 126,
         "time": 0.191
       },
       "name": "tests.test_completions.test_bash_completions_output_is_stable",
@@ -3143,8 +3070,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:245: in test_multiple_regex_patterns\n    assert result.stdout == (RESOURCES / \"multiple_regexes_output.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 164,
         "time": 0.136
       },
       "name": "tests.test_config.test_multiple_regex_patterns",
@@ -3154,8 +3079,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:93: in test_config_with_all_sections\n    assert result.stdout == (RESOURCES / \"all_sections_output.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 160,
         "time": 0.104
       },
       "name": "tests.test_config.test_config_with_all_sections",
@@ -3165,8 +3088,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:282: in test_style_attributes_bold_italic_underline\n    assert result.stdout == (RESOURCES / \"style_attributes_output.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 179,
         "time": 0.129
       },
       "name": "tests.test_config.test_style_attributes_bold_italic_underline",
@@ -3176,8 +3097,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:119: in test_multiple_completion_flags_bash_wins\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 127,
         "time": 0.093
       },
       "name": "tests.test_completions.test_multiple_completion_flags_bash_wins",
@@ -3187,8 +3106,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:97: in test_follow_mode_with_highlighting\n    assert \"999\" in output\nE   AssertionError",
-        "text_original_chars": 116,
         "time": 1.811
       },
       "name": "tests.test_advanced_modes.test_follow_mode_with_highlighting",
@@ -3198,8 +3115,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:43: in test_invalid_toml_syntax\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 105,
         "time": 0.113
       },
       "name": "tests.test_config.test_invalid_toml_syntax",
@@ -3209,8 +3124,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:178: in test_invalid_regex_pattern\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 108,
         "time": 0.104
       },
       "name": "tests.test_config.test_invalid_regex_pattern",
@@ -3220,8 +3133,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:331: in test_follow_mode_with_custom_highlights\n    assert \"FAILED\" in output\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 1.811
       },
       "name": "tests.test_advanced_modes.test_follow_mode_with_custom_highlights",
@@ -3231,8 +3142,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:433: in test_follow_mode_with_special_characters\n    assert \"caf\u00e9\" in clean_output\nE   AssertionError",
-        "text_original_chars": 130,
         "time": 1.811
       },
       "name": "tests.test_advanced_modes.test_follow_mode_with_special_characters",
@@ -3242,8 +3151,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:130: in test_config_with_cli_highlight\n    assert result.stdout == (RESOURCES / \"config_with_highlight.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 164,
         "time": 0.123
       },
       "name": "tests.test_config.test_config_with_cli_highlight",
@@ -3253,8 +3160,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:330: in test_missing_keywords_field\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 109,
         "time": 0.091
       },
       "name": "tests.test_config.test_missing_keywords_field",
@@ -3272,8 +3177,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors.py:98: in test_invalid_toml_config_syntax_error\n    assert result.stderr.decode() == expected\nE   AssertionError",
-        "text_original_chars": 130,
         "time": 0.09
       },
       "name": "tests.test_errors.test_invalid_toml_config_syntax_error",
@@ -3283,8 +3186,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:68: in test_fish_completions_contains_complete_commands\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 134,
         "time": 0.159
       },
       "name": "tests.test_completions.test_fish_completions_contains_complete_commands",
@@ -3294,8 +3195,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:188: in test_fish_completions_includes_highlighter_choices\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 137,
         "time": 0.139
       },
       "name": "tests.test_completions.test_fish_completions_includes_highlighter_choices",
@@ -3305,8 +3204,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:138: in test_completion_flag_ignores_stdin\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 121,
         "time": 0.139
       },
       "name": "tests.test_completions.test_completion_flag_ignores_stdin",
@@ -3316,8 +3213,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:104: in test_invalid_field_value\n    assert result.returncode == 1\nE   AssertionError",
-        "text_original_chars": 106,
         "time": 0.123
       },
       "name": "tests.test_config.test_invalid_field_value",
@@ -3343,8 +3238,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:295: in test_unknown_section_ignored\n    assert b'\\x1b[31m123\\x1b[0m' in result.stdout\nE   AssertionError",
-        "text_original_chars": 126,
         "time": 0.114
       },
       "name": "tests.test_config.test_unknown_section_ignored",
@@ -3370,8 +3263,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:233: in test_fish_completions_output_is_stable\n    assert result1.returncode == 0\nE   AssertionError",
-        "text_original_chars": 126,
         "time": 0.173
       },
       "name": "tests.test_completions.test_fish_completions_output_is_stable",
@@ -3397,8 +3288,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:194: in test_comprehensive_highlighting_default\n    assert result.stdout == (RESOURCES / \"default_highlighting.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 172,
         "time": 0.126
       },
       "name": "tests.test_config.test_comprehensive_highlighting_default",
@@ -3432,8 +3321,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors.py:443: in test_no_arguments_and_no_stdin\n    assert output == expected\nE   AssertionError",
-        "text_original_chars": 108,
         "time": 0.186
       },
       "name": "tests.test_errors.test_no_arguments_and_no_stdin",
@@ -3531,8 +3418,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError: Output does not match golden file for example1",
-        "text": "tests/test_harvest.py:57: in test_example1_log_file\n    assert result.stdout == expected, \"Output does not match golden file for example1\"\nE   AssertionError: Output does not match golden file for example1",
-        "text_original_chars": 205,
         "time": 0.226
       },
       "name": "tests.test_harvest.test_example1_log_file",
@@ -3550,8 +3435,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:155: in test_partial_config\n    assert result.stdout == (RESOURCES / \"partial_config_output.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 153,
         "time": 0.107
       },
       "name": "tests.test_config.test_partial_config",
@@ -3569,8 +3452,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:358: in test_many_keywords_in_list\n    assert result.returncode == 0\nE   AssertionError",
-        "text_original_chars": 108,
         "time": 0.079
       },
       "name": "tests.test_config.test_many_keywords_in_list",
@@ -3580,8 +3461,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:127: in test_follow_mode_empty_file_then_content\n    assert \"First line added\" in clean_output\nE   AssertionError",
-        "text_original_chars": 142,
         "time": 1.811
       },
       "name": "tests.test_advanced_modes.test_follow_mode_empty_file_then_content",
@@ -3591,8 +3470,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_errors.py:113: in test_binary_file_as_config_path\n    assert result.stderr.decode() == expected\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 0.131
       },
       "name": "tests.test_errors.test_binary_file_as_config_path",
@@ -3602,8 +3479,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:363: in test_follow_mode_file_with_no_final_newline\n    assert \"Line without newline\" in clean_output\nE   AssertionError",
-        "text_original_chars": 149,
         "time": 1.81
       },
       "name": "tests.test_advanced_modes.test_follow_mode_file_with_no_final_newline",
@@ -3637,8 +3512,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:307: in test_bright_color_variants\n    assert result.stdout == (RESOURCES / \"bright_colors_output.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 159,
         "time": 0.146
       },
       "name": "tests.test_config.test_bright_color_variants",
@@ -3672,8 +3545,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError: Should exit with error for config with wrong types",
-        "text": "tests/test_errors.py:285: in test_config_file_with_wrong_types\n    assert result.returncode == 1, \"Should exit with error for config with wrong types\"\nE   AssertionError: Should exit with error for config with wrong types",
-        "text_original_chars": 221,
         "time": 0.111
       },
       "name": "tests.test_errors.test_config_file_with_wrong_types",
@@ -3691,8 +3562,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_completions.py:245: in test_zsh_completions_output_is_stable\n    assert result1.returncode == 0\nE   AssertionError",
-        "text_original_chars": 125,
         "time": 0.177
       },
       "name": "tests.test_completions.test_zsh_completions_output_is_stable",
@@ -3702,8 +3571,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_config.py:209: in test_comprehensive_highlighting_custom\n    assert result.stdout == (RESOURCES / \"custom_highlighting.golden\").read_bytes()\nE   AssertionError",
-        "text_original_chars": 170,
         "time": 0.09
       },
       "name": "tests.test_config.test_comprehensive_highlighting_custom",
@@ -3753,8 +3620,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:471: in test_follow_mode_with_long_lines\n    assert \"END_MARKER\" in clean_output\nE   AssertionError",
-        "text_original_chars": 128,
         "time": 2.112
       },
       "name": "tests.test_advanced_modes.test_follow_mode_with_long_lines",
@@ -4340,8 +4205,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:26: in test_custom_pager_with_cat_and_file_placeholder\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 130,
         "time": 0.137
       },
       "name": "tests.test_pager.test_custom_pager_with_cat_and_file_placeholder",
@@ -4359,8 +4222,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:60: in test_print_flag_bypasses_pager\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 113,
         "time": 0.114
       },
       "name": "tests.test_pager.test_print_flag_bypasses_pager",
@@ -4370,8 +4231,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:41: in test_custom_pager_head_limits_output\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 119,
         "time": 0.11
       },
       "name": "tests.test_pager.test_custom_pager_head_limits_output",
@@ -4397,8 +4256,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:131: in test_custom_pager_without_args_errors\n    assert result.returncode != 0\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.115
       },
       "name": "tests.test_pager.test_custom_pager_without_args_errors",
@@ -4424,8 +4281,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError: Output does not match golden file for example2",
-        "text": "tests/test_harvest.py:68: in test_example2_log_file\n    assert result.stdout == expected, \"Output does not match golden file for example2\"\nE   AssertionError: Output does not match golden file for example2",
-        "text_original_chars": 205,
         "time": 2.874
       },
       "name": "tests.test_harvest.test_example2_log_file",
@@ -4435,8 +4290,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:161: in test_nonexistent_pager_command_errors\n    assert result.returncode != 0\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.128
       },
       "name": "tests.test_pager.test_nonexistent_pager_command_errors",
@@ -4462,8 +4315,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:195: in test_pager_with_quoted_arguments\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 116,
         "time": 0.145
       },
       "name": "tests.test_pager.test_pager_with_quoted_arguments",
@@ -4513,8 +4364,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError: Expected 'tailspin.temp' to appear twice in first line, got: #x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m45#x1B[0m #x1B[37mINFO#x1B[0m Starting application server",
-        "text": "tests/test_pager.py:239: in test_file_placeholder_multiple_occurrences\n    assert first_line.count('tailspin.temp') == 2, \\\nE   AssertionError: Expected 'tailspin.temp' to appear twice in first line, got: #x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m45#x1B[0m #x1B[37mINFO#x1B[0m Starting application server",
-        "text_original_chars": 433,
         "time": 0.133
       },
       "name": "tests.test_pager.test_file_placeholder_multiple_occurrences",
@@ -4548,8 +4397,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:286: in test_print_flag_overrides_pager\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 115,
         "time": 0.101
       },
       "name": "tests.test_pager.test_print_flag_overrides_pager",
@@ -4559,8 +4406,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:300: in test_pager_with_grep_filtering\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 114,
         "time": 0.113
       },
       "name": "tests.test_pager.test_pager_with_grep_filtering",
@@ -4570,8 +4415,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:342: in test_pager_without_file_placeholder\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 119,
         "time": 0.096
       },
       "name": "tests.test_pager.test_pager_without_file_placeholder",
@@ -4581,8 +4424,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError: Output does not match golden file for example4",
-        "text": "tests/test_harvest.py:90: in test_example4_log_file\n    assert result.stdout == expected, \"Output does not match golden file for example4\"\nE   AssertionError: Output does not match golden file for example4",
-        "text_original_chars": 205,
         "time": 0.209
       },
       "name": "tests.test_harvest.test_example4_log_file",
@@ -4592,8 +4433,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:96: in test_pager_flag_overrides_env_var\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 116,
         "time": 0.144
       },
       "name": "tests.test_pager.test_pager_flag_overrides_env_var",
@@ -4603,8 +4442,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:115: in test_stdin_always_prints_to_stdout\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 118,
         "time": 0.139
       },
       "name": "tests.test_pager.test_stdin_always_prints_to_stdout",
@@ -4614,8 +4451,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:79: in test_tailspin_pager_env_var\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 110,
         "time": 0.139
       },
       "name": "tests.test_pager.test_tailspin_pager_env_var",
@@ -4625,8 +4460,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:161: in test_follow_mode_rapid_appends\n    assert f\"Rapid line {i}\" in clean_output\nE   AssertionError",
-        "text_original_chars": 131,
         "time": 2.413
       },
       "name": "tests.test_advanced_modes.test_follow_mode_rapid_appends",
@@ -4636,8 +4469,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:146: in test_custom_pager_empty_command_errors\n    assert result.returncode != 0\nE   AssertionError",
-        "text_original_chars": 119,
         "time": 0.13
       },
       "name": "tests.test_pager.test_custom_pager_empty_command_errors",
@@ -4647,8 +4478,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:177: in test_pager_with_nonzero_exit_status_errors\n    assert result.returncode != 0\nE   AssertionError",
-        "text_original_chars": 123,
         "time": 0.105
       },
       "name": "tests.test_pager.test_pager_with_nonzero_exit_status_errors",
@@ -4682,8 +4511,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError: Expected 'N /path' format, got: #x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m45#x1B[0m #x1B[37mINFO#x1B[0m Starting application server\n#x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m46#x1B[0m #x1B[32mDEBUG#x1B[0m Connecting to database at localhost:#x1B[36m5432#x1B[0m\n#x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m47#x1B[0m #x1B[37mINFO#x1B[0m Successfully connected to database\n#x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m48#x1B[0m #x1B[33mWARN#x1B[0m Configuration file not found, using defaults\n#x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m49#x1B[0m #x1B[31mERROR#x1B[0m Failed to load plugin: plugin_name.so\n#x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m50#x1B[0m #x1B[37mINFO#x1B[0m Server listening on http://#x1B[3;34m0#x1B[0m#x1B[31m.#x1B[0m#x1B[3;34m0#x1B[0m#x1B[31m.#x1B[0m#x1B[3;34m0#x1B[0m#x1B[31m.#x1B[0m#x1B[3;34m0#x1B[0m:8080",
-        "text": "tests/test_pager.py:324: in test_pager_command_with_wc_shows_temp_path\n    assert len(parts) == 2, f\"Expected 'N /path' format, got: {output}\"\nE   AssertionError: Expected 'N /path' format, got: #x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m45#x1B[0m #x1B[37mINFO#x1B[0m Starting application server\nE   #x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m46#x1B[0m #x1B[32mDEBUG#x1B[0m Connecting to database at localhost:#x1B[36m5432#x1B[0m\nE   #x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m47#x1B[0m #x1B[37mINFO#x1B[0m Successfully connected to database\nE   #x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m48#x1B[0m #x1B[33mWARN#x1B[0m Configuration file not found, using defaults\nE   #x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m49#x1B[0m #x1B[31mERROR#x1B[0m Failed to load plugin: plugin_name.so\nE   #x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m #x1B[0m#x1B[34m10#x1B[0m#x1B[2m:#x1B[0m#x1B[34m23#x1B[0m#x1B[2m:#x1B[0m#x1B[34m50#x1B[0m #x1B[37mINFO#x1B[0m Server listening on http://#x1B[3;34m0#x1B[0m#x1B[31m.#x1B[0m#x1B[3;34m0#x1B[0m#x1B[31m.#x1B[0m#x1B[3;34m0#x1B[0m#x1B[31m.#x1B[0m#x1B[3;34m0#x1B[0m:8080",
-        "text_original_chars": 1777,
         "time": 0.102
       },
       "name": "tests.test_pager.test_pager_command_with_wc_shows_temp_path",
@@ -4693,8 +4520,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:358: in test_pager_with_multiple_spaces_in_args\n    assert result.stdout.decode().strip() == 'test output'\nE   AssertionError",
-        "text_original_chars": 145,
         "time": 0.136
       },
       "name": "tests.test_pager.test_pager_with_multiple_spaces_in_args",
@@ -4704,8 +4529,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:372: in test_pager_with_special_shell_characters\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 124,
         "time": 0.14
       },
       "name": "tests.test_pager.test_pager_with_special_shell_characters",
@@ -4715,8 +4538,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_advanced_modes.py:513: in test_follow_mode_multiple_appends_sequence\n    assert \"Batch 1\" in clean_output\nE   AssertionError",
-        "text_original_chars": 135,
         "time": 2.714
       },
       "name": "tests.test_advanced_modes.test_follow_mode_multiple_appends_sequence",
@@ -4726,8 +4547,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError: Output does not match golden file for example5",
-        "text": "tests/test_harvest.py:101: in test_example5_log_file\n    assert result.stdout == expected, \"Output does not match golden file for example5\"\nE   AssertionError: Output does not match golden file for example5",
-        "text_original_chars": 206,
         "time": 0.163
       },
       "name": "tests.test_harvest.test_example5_log_file",
@@ -4737,8 +4556,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:406: in test_pager_with_tail_command\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 112,
         "time": 0.115
       },
       "name": "tests.test_pager.test_pager_with_tail_command",
@@ -4748,8 +4565,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError: Expected 30 lines in large.log, got #x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m",
-        "text": "tests/test_pager.py:423: in test_large_file_line_count_preserved\n    assert parts[0] == '30', f\"Expected 30 lines in large.log, got {parts[0]}\"\nE   AssertionError: Expected 30 lines in large.log, got #x1B[35m2024#x1B[0m#x1B[2m-#x1B[0m#x1B[35m01#x1B[0m#x1B[2m-#x1B[0m#x1B[35m15#x1B[0m#x1B[31m",
-        "text_original_chars": 291,
         "time": 0.174
       },
       "name": "tests.test_pager.test_large_file_line_count_preserved",
@@ -4759,8 +4574,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:437: in test_pager_command_with_awk\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 111,
         "time": 0.144
       },
       "name": "tests.test_pager.test_pager_command_with_awk",
@@ -4786,8 +4599,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError: Output does not match golden file for example3",
-        "text": "tests/test_harvest.py:79: in test_example3_log_file\n    assert result.stdout == expected, \"Output does not match golden file for example3\"\nE   AssertionError: Output does not match golden file for example3",
-        "text_original_chars": 205,
         "time": 2.442
       },
       "name": "tests.test_harvest.test_example3_log_file",
@@ -4797,8 +4608,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:392: in test_stdin_with_pager_flag_ignores_pager\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 124,
         "time": 0.169
       },
       "name": "tests.test_pager.test_stdin_with_pager_flag_ignores_pager",
@@ -4808,8 +4617,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "AssertionError",
-        "text": "tests/test_pager.py:451: in test_pager_command_with_sed\n    assert result.stdout == expected\nE   AssertionError",
-        "text_original_chars": 111,
         "time": 0.162
       },
       "name": "tests.test_pager.test_pager_command_with_sed",
@@ -4819,8 +4626,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "subprocess.TimeoutExpired: Command '['/workspace/executable', '--print']' timed out after 30 seconds",
-        "text": "tests/test_cli_basic.py:587: in test_very_long_line_over_10000_chars\n    result = run_binary(args=[\"--print\"], stdin_data=input_text)\ntests/conftest.py:37: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:505: in run\n    stdout, stderr = process.communicate(input, timeout=timeout)\n/usr/lib/python3.10/subprocess.py:1154: in communicate\n    stdout, stderr = self._communicate(input, endtime, timeout)\n/usr/lib/python3.10/subprocess.py:2022: in _communicate\n    self._check_timeout(endtime, orig_timeout, stdout, stderr)\n/usr/lib/python3.10/subprocess.py:1198: in _check_timeout\n    raise TimeoutExpired(\nE   subprocess.TimeoutExpired: Command '['/workspace/executable', '--print']' timed out after 30 seconds",
-        "text_original_chars": 730,
         "time": 90.039
       },
       "name": "tests.test_cli_basic.test_very_long_line_over_10000_chars",
@@ -4830,8 +4635,6 @@
       "branch": "4b122006061d",
       "extra": {
         "message": "subprocess.TimeoutExpired: Command '['/workspace/executable', '--print', '/workspace/eval/test_resources/test_errors/very_long_line.txt']' timed out after 30 seconds",
-        "text": "tests/test_errors.py:121: in test_very_long_line_handling\n    result = run_binary(args=[\"--print\", str(RESOURCES / \"very_long_line.txt\")])\ntests/conftest.py:37: in _run\n    result = subprocess.run(\n/usr/lib/python3.10/subprocess.py:505: in run\n    stdout, stderr = process.communicate(input, timeout=timeout)\n/usr/lib/python3.10/subprocess.py:1154: in communicate\n    stdout, stderr = self._communicate(input, endtime, timeout)\n/usr/lib/python3.10/subprocess.py:2022: in _communicate\n    self._check_timeout(endtime, orig_timeout, stdout, stderr)\n/usr/lib/python3.10/subprocess.py:1198: in _check_timeout\n    raise TimeoutExpired(\nE   subprocess.TimeoutExpired: Command '['/workspace/executable', '--print', '/workspace/eval/test_resources/test_errors/very_long_line.txt']' timed out after 30 seconds",
-        "text_original_chars": 800,
         "time": 90.052
       },
       "name": "tests.test_errors.test_very_long_line_handling",
@@ -5081,8 +4884,6 @@
       "branch": "a6e580777513",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_argument_parsing.TestEnableFlag object at 0x761371be7d90>\n\n    def test_enable_without_value(self):\n        \"\"\"Test --enable without providing a value.\"\"\"\n        result = run_command([\"--enable\"])\n        assert result.returncode == 2\n        assert \"a value is required\" in result.stderr\n>       assert \"possible values:\" in result.stderr\nE       AssertionError\n\neval/tests/test_argument_parsing.py:227: AssertionError",
-        "text_original_chars": 433,
         "time": 0.098
       },
       "name": "eval.tests.test_argument_parsing.TestEnableFlag.test_enable_without_value",
@@ -5308,8 +5109,6 @@
       "branch": "a6e580777513",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_argument_parsing.TestDisableFlag object at 0x7a95e0566020>\n\n    def test_disable_without_value(self):\n        \"\"\"Test --disable without providing a value.\"\"\"\n        result = run_command([\"--disable\"])\n        assert result.returncode == 2\n        assert \"a value is required\" in result.stderr\n>       assert \"possible values:\" in result.stderr\nE       AssertionError\n\neval/tests/test_argument_parsing.py:263: AssertionError",
-        "text_original_chars": 437,
         "time": 0.127
       },
       "name": "eval.tests.test_argument_parsing.TestDisableFlag.test_disable_without_value",
@@ -5391,8 +5190,6 @@
       "branch": "a6e580777513",
       "extra": {
         "message": "AssertionError",
-        "text": "self = <test_argument_parsing.TestFlagConflicts object at 0x7fb05a1c0760>\n\n    def test_enable_and_disable_conflict(self):\n        \"\"\"Test that --enable and --disable cannot be used together.\"\"\"\n        result = run_command([\"--enable=numbers\", \"--disable=urls\", \"--print\"], input_data=\"test\\n\")\n>       assert result.returncode == 1\nE       AssertionError\n\neval/tests/test_argument_parsing.py:311: AssertionError",
-        "text_original_chars": 413,
         "time": 0.105
       },
       "name": "eval.tests.test_argument_parsing.TestFlagConflicts.test_enable_and_disable_conflict",
@@ -5722,8 +5519,6 @@
       "branch": "cfb7237a9672",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['--config-path'], expected_rc = 2\nstderr_needles = [\"a value is required for '--config-path <CONFIG_PATH>'\"]\n\n    @pytest.mark.parametrize(\n        \"args, expected_rc, stderr_needles\",\n        [\n            ([\"-e\"], 2, [\"a value is required for '--exec <EXEC>'\"]),\n            ([\"--pager\"], 2, [\"a value is required for '--pager <PAGER>'\"]),\n            ([\"--config-path\"], 2, [\"a value is required for '--config-path <CONFIG_PATH>'\"]),\n            ([\"--enable\"], 2, [\"a value is required for '--enable <ENABLED_HIGHLIGHTERS>'\"]),\n            ([\"--highlight\"], 2, [\"a value is required for '--highlight <COLOR_WORD>'\"]),\n        ],\n    )\n    def test_missing_required_option_values(args, expected_rc, stderr_needles):\n        p = run(args)\n        assert p.returncode == expected_rc\n        for n in stderr_needles:\n>           assert n in p.stderr\nE           AssertionError\n\neval/tests/test_args_parsing.py:66: AssertionError",
-        "text_original_chars": 935,
         "time": 0.141
       },
       "name": "eval.tests.test_args_parsing.test_missing_required_option_values[args2-2-stderr_needles2]",
@@ -5749,8 +5544,6 @@
       "branch": "cfb7237a9672",
       "extra": {
         "message": "AssertionError: error: unexpected argument '--print=true' found\n\n  tip: to pass '--print=true' as a value, use '-- --print=true'\n\nUsage: executable [OPTIONS] [FILE]\n\nFor more information, try '--help'.",
-        "text": "args = ['--print=true'], needle = \"unexpected value 'true' for '--print'\"\n\n    @pytest.mark.parametrize(\n        \"args, needle\",\n        [\n            ([\"--follow=true\"], \"unexpected value 'true' for '--follow'\"),\n            ([\"--follow=false\"], \"unexpected value 'false' for '--follow'\"),\n            ([\"--print=true\"], \"unexpected value 'true' for '--print'\"),\n        ],\n    )\n    def test_boolean_flags_do_not_accept_values(args, needle):\n        p = run(args)\n>       assert_argparse_error(p, needle)\n\neval/tests/test_args_parsing.py:79: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\np = CompletedProcess(args=['/workspace/executable', '--print=true'], returncode=2, stdout='', stderr=\"error: unexpected ar...rue' as a value, use '-- --print=true'\\n\\nUsage: executable [OPTIONS] [FILE]\\n\\nFor more information, try '--help'.\\n\")\nneedles = (\"unexpected value 'true' for '--print'\",)\nn = \"unexpected value 'true' for '--print'\"\n\n    def assert_argparse_error(p: subprocess.CompletedProcess, *needles: str):\n        # clap-style parsing errors use exit code 2\n        assert p.returncode == 2, (p.returncode, p.stdout, p.stderr)\n        for n in needles:\n>           assert n in p.stderr, p.stderr\nE           AssertionError: error: unexpected argument '--print=true' found\nE           \nE             tip: to pass '--print=true' as a value, use '-- --print=true'\nE           \nE           Usage: executable [OPTIONS] [FILE]\nE           \nE           For more information, try '--help'.\n\neval/tests/test_args_parsing.py:27: AssertionError",
-        "text_original_chars": 1575,
         "time": 0.123
       },
       "name": "eval.tests.test_args_parsing.test_boolean_flags_do_not_accept_values[args2-unexpected value 'true' for '--print']",
@@ -5784,8 +5577,6 @@
       "branch": "cfb7237a9672",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['-e'], expected_rc = 2\nstderr_needles = [\"a value is required for '--exec <EXEC>'\"]\n\n    @pytest.mark.parametrize(\n        \"args, expected_rc, stderr_needles\",\n        [\n            ([\"-e\"], 2, [\"a value is required for '--exec <EXEC>'\"]),\n            ([\"--pager\"], 2, [\"a value is required for '--pager <PAGER>'\"]),\n            ([\"--config-path\"], 2, [\"a value is required for '--config-path <CONFIG_PATH>'\"]),\n            ([\"--enable\"], 2, [\"a value is required for '--enable <ENABLED_HIGHLIGHTERS>'\"]),\n            ([\"--highlight\"], 2, [\"a value is required for '--highlight <COLOR_WORD>'\"]),\n        ],\n    )\n    def test_missing_required_option_values(args, expected_rc, stderr_needles):\n        p = run(args)\n        assert p.returncode == expected_rc\n        for n in stderr_needles:\n>           assert n in p.stderr\nE           AssertionError\n\neval/tests/test_args_parsing.py:66: AssertionError",
-        "text_original_chars": 910,
         "time": 0.16
       },
       "name": "eval.tests.test_args_parsing.test_missing_required_option_values[args0-2-stderr_needles0]",
@@ -5795,8 +5586,6 @@
       "branch": "cfb7237a9672",
       "extra": {
         "message": "AssertionError: (2, '', \"error: unexpected argument '-fp' found\\n\\n  tip: to pass '-fp' as a value, use '-- -fp'\\n\\nUsage: executable [OPTIONS] [FILE]\\n\\nFor more information, try '--help'.\\n\")",
-        "text": "args = ['-fp']\n\n    @pytest.mark.parametrize(\n        \"args\",\n        [\n            [\"-fp\"],\n            [\"-pf\"],\n            [\"--follow\", \"--print\"],\n            [\"--print\", \"--follow\"],\n        ],\n    )\n    def test_combined_short_flags_and_equivalents_parse(args):\n        # No file provided; should not error at argument parsing time.\n        p = run(args)\n>       assert p.returncode == 0, (p.returncode, p.stdout, p.stderr)\nE       AssertionError: (2, '', \"error: unexpected argument '-fp' found\\n\\n  tip: to pass '-fp' as a value, use '-- -fp'\\n\\nUsage: executable [OPTIONS] [FILE]\\n\\nFor more information, try '--help'.\\n\")\n\neval/tests/test_args_parsing.py:94: AssertionError",
-        "text_original_chars": 683,
         "time": 0.165
       },
       "name": "eval.tests.test_args_parsing.test_combined_short_flags_and_equivalents_parse[args0]",
@@ -5806,8 +5595,6 @@
       "branch": "cfb7237a9672",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['--highlight'], expected_rc = 2\nstderr_needles = [\"a value is required for '--highlight <COLOR_WORD>'\"]\n\n    @pytest.mark.parametrize(\n        \"args, expected_rc, stderr_needles\",\n        [\n            ([\"-e\"], 2, [\"a value is required for '--exec <EXEC>'\"]),\n            ([\"--pager\"], 2, [\"a value is required for '--pager <PAGER>'\"]),\n            ([\"--config-path\"], 2, [\"a value is required for '--config-path <CONFIG_PATH>'\"]),\n            ([\"--enable\"], 2, [\"a value is required for '--enable <ENABLED_HIGHLIGHTERS>'\"]),\n            ([\"--highlight\"], 2, [\"a value is required for '--highlight <COLOR_WORD>'\"]),\n        ],\n    )\n    def test_missing_required_option_values(args, expected_rc, stderr_needles):\n        p = run(args)\n        assert p.returncode == expected_rc\n        for n in stderr_needles:\n>           assert n in p.stderr\nE           AssertionError\n\neval/tests/test_args_parsing.py:66: AssertionError",
-        "text_original_chars": 930,
         "time": 0.146
       },
       "name": "eval.tests.test_args_parsing.test_missing_required_option_values[args4-2-stderr_needles4]",
@@ -5817,8 +5604,6 @@
       "branch": "cfb7237a9672",
       "extra": {
         "message": "AssertionError",
-        "text": "args = ['--enable'], expected_rc = 2\nstderr_needles = [\"a value is required for '--enable <ENABLED_HIGHLIGHTERS>'\"]\n\n    @pytest.mark.parametrize(\n        \"args, expected_rc, stderr_needles\",\n        [\n            ([\"-e\"], 2, [\"a value is required for '--exec <EXEC>'\"]),\n            ([\"--pager\"], 2, [\"a value is required for '--pager <PAGER>'\"]),\n            ([\"--config-path\"], 2, [\"a value is required for '--config-path <CONFIG_PATH>'\"]),\n            ([\"--enable\"], 2, [\"a value is required for '--enable <ENABLED_HIGHLIGHTERS>'\"]),\n            ([\"--highlight\"], 2, [\"a value is required for '--highlight <COLOR_WORD>'\"]),\n        ],\n    )\n    def test_missing_required_option_values(args, expected_rc, stderr_needles):\n        p = run(args)\n        assert p.returncode == expected_rc\n        for n in stderr_needles:\n>           assert n in p.stderr\nE           AssertionError\n\neval/tests/test_args_parsing.py:66: AssertionError",
-        "text_original_chars": 934,
         "time": 0.157
       },
       "name": "eval.tests.test_args_parsing.test_missing_required_option_values[args3-2-stderr_needles3]",
@@ -5828,8 +5613,6 @@
       "branch": "cfb7237a9672",
       "extra": {
         "message": "AssertionError: error: unexpected argument '--follow=true' found\n\n  tip: to pass '--follow=true' as a value, use '-- --follow=true'\n\nUsage: executable [OPTIONS] [FILE]\n\nFor more information, try '--help'.",
-        "text": "args = ['--follow=true'], needle = \"unexpected value 'true' for '--follow'\"\n\n    @pytest.mark.parametrize(\n        \"args, needle\",\n        [\n            ([\"--follow=true\"], \"unexpected value 'true' for '--follow'\"),\n            ([\"--follow=false\"], \"unexpected value 'false' for '--follow'\"),\n            ([\"--print=true\"], \"unexpected value 'true' for '--print'\"),\n        ],\n    )\n    def test_boolean_flags_do_not_accept_values(args, needle):\n        p = run(args)\n>       assert_argparse_error(p, needle)\n\neval/tests/test_args_parsing.py:79: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\np = CompletedProcess(args=['/workspace/executable', '--follow=true'], returncode=2, stdout='', stderr=\"error: unexpected a...ue' as a value, use '-- --follow=true'\\n\\nUsage: executable [OPTIONS] [FILE]\\n\\nFor more information, try '--help'.\\n\")\nneedles = (\"unexpected value 'true' for '--follow'\",)\nn = \"unexpected value 'true' for '--follow'\"\n\n    def assert_argparse_error(p: subprocess.CompletedProcess, *needles: str):\n        # clap-style parsing errors use exit code 2\n        assert p.returncode == 2, (p.returncode, p.stdout, p.stderr)\n        for n in needles:\n>           assert n in p.stderr, p.stderr\nE           AssertionError: error: unexpected argument '--follow=true' found\nE           \nE             tip: to pass '--follow=true' as a value, use '-- --follow=true'\nE           \nE           Usage: executable [OPTIONS] [FILE]\nE           \nE           For more information, try '--help'.\n\neval/tests/test_args_parsing.py:27: AssertionError",
-        "text_original_chars": 1582,
         "time": 0.164
       },
       "name": "eval.tests.test_args_parsing.test_boolean_flags_do_not_accept_values[args0-unexpected value 'true' for '--follow']",
@@ -5839,8 +5622,6 @@
       "branch": "cfb7237a9672",
       "extra": {
         "message": "AssertionError: (2, '', \"error: unexpected argument '-pf' found\\n\\n  tip: to pass '-pf' as a value, use '-- -pf'\\n\\nUsage: executable [OPTIONS] [FILE]\\n\\nFor more information, try '--help'.\\n\")",
-        "text": "args = ['-pf']\n\n    @pytest.mark.parametrize(\n        \"args\",\n        [\n            [\"-fp\"],\n            [\"-pf\"],\n            [\"--follow\", \"--print\"],\n            [\"--print\", \"--follow\"],\n        ],\n    )\n    def test_combined_short_flags_and_equivalents_parse(args):\n        # No file provided; should not error at argument parsing time.\n        p = run(args)\n>       assert p.returncode == 0, (p.returncode, p.stdout, p.stderr)\nE       AssertionError: (2, '', \"error: unexpected argument '-pf' found\\n\\n  tip: to pass '-pf' as a value, use '-- -pf'\\n\\nUsage: executable [OPTIONS] [FILE]\\n\\nFor more information, try '--help'.\\n\")\n\neval/tests/test_args_parsing.py:94: AssertionError",
-        "text_original_chars": 683,
         "time": 0.168
       },
       "name": "eval.tests.test_args_parsing.test_combined_short_flags_and_equivalents_parse[args1]",
@@ -5858,8 +5639,6 @@
       "branch": "cfb7237a9672",
       "extra": {
         "message": "AssertionError: error: unexpected argument '--follow=false' found\n\n  tip: to pass '--follow=false' as a value, use '-- --follow=false'\n\nUsage: executable [OPTIONS] [FILE]\n\nFor more information, try '--help'.",
-        "text": "args = ['--follow=false'], needle = \"unexpected value 'false' for '--follow'\"\n\n    @pytest.mark.parametrize(\n        \"args, needle\",\n        [\n            ([\"--follow=true\"], \"unexpected value 'true' for '--follow'\"),\n            ([\"--follow=false\"], \"unexpected value 'false' for '--follow'\"),\n            ([\"--print=true\"], \"unexpected value 'true' for '--print'\"),\n        ],\n    )\n    def test_boolean_flags_do_not_accept_values(args, needle):\n        p = run(args)\n>       assert_argparse_error(p, needle)\n\neval/tests/test_args_parsing.py:79: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\np = CompletedProcess(args=['/workspace/executable', '--follow=false'], returncode=2, stdout='', stderr=\"error: unexpected ...e' as a value, use '-- --follow=false'\\n\\nUsage: executable [OPTIONS] [FILE]\\n\\nFor more information, try '--help'.\\n\")\nneedles = (\"unexpected value 'false' for '--follow'\",)\nn = \"unexpected value 'false' for '--follow'\"\n\n    def assert_argparse_error(p: subprocess.CompletedProcess, *needles: str):\n        # clap-style parsing errors use exit code 2\n        assert p.returncode == 2, (p.returncode, p.stdout, p.stderr)\n        for n in needles:\n>           assert n in p.stderr, p.stderr\nE           AssertionError: error: unexpected argument '--follow=false' found\nE           \nE             tip: to pass '--follow=false' as a value, use '-- --follow=false'\nE           \nE           Usage: executable [OPTIONS] [FILE]\nE           \nE           For more information, try '--help'.\n\neval/tests/test_args_parsing.py:27: AssertionError",
-        "text_original_chars": 1589,
         "time": 0.17
       },
       "name": "eval.tests.test_args_parsing.test_boolean_flags_do_not_accept_values[args1-unexpected value 'false' for '--follow']",
@@ -5885,8 +5664,6 @@
       "branch": "cfb7237a9672",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_enable_invalid_choice_lists_possible_values_and_suggestion():\n        p = run([\"--enable\", \"nope\"])\n        assert_argparse_error(p, \"invalid value 'nope' for '--enable <ENABLED_HIGHLIGHTERS>'\")\n        assert \"[possible values:\" in p.stderr\n>       assert \"a similar value exists\" in p.stderr\nE       AssertionError\n\neval/tests/test_args_parsing.py:155: AssertionError",
-        "text_original_chars": 378,
         "time": 0.132
       },
       "name": "eval.tests.test_args_parsing.test_enable_invalid_choice_lists_possible_values_and_suggestion",
@@ -5992,8 +5769,6 @@
       "branch": "468c183c591f",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_cli_pager_overrides_tailspin_pager_env_var():\n        with tempfile.TemporaryDirectory() as d:\n            f = Path(d) / \"a.log\"\n            f.write_text(\"hello 123\\n\")\n            env = {\"TAILSPIN_PAGER\": \"cat [FILE]\"}\n            res = run_cmd(\"--pager\", \"cat -n [FILE]\", str(f), env=env)\n            assert res.returncode == 0\n            # cat -n prefixes line numbers; plain cat would not\n>           assert b\"\\t\" in res.stdout and b\"1\" in res.stdout.splitlines()[0]\nE           AssertionError\n\neval/tests/test_config_env.py:83: AssertionError",
-        "text_original_chars": 557,
         "time": 0.169
       },
       "name": "eval.tests.test_config_env.test_cli_pager_overrides_tailspin_pager_env_var",
@@ -6459,8 +6234,6 @@
       "branch": "c32b4141af52",
       "extra": {
         "message": "AssertionError",
-        "text": "tmux = <test_tui_basic.TmuxTestHarness object at 0x7b6eb49d2290>\nfixtures_dir = '/workspace/eval/tests/../fixtures'\n\n    def test_tui_shows_bottom_indicator_at_end(tmux, fixtures_dir):\n        \"\"\"Test that the TUI shows (END) indicator when at the end of file.\"\"\"\n        log_file = os.path.join(fixtures_dir, 'simple.log')\n        tmux.send_keys(f'./executable {log_file}', enter=True)\n        time.sleep(0.5)\n    \n        # Go to end with G\n        tmux.send_keys('G', enter=False)\n        time.sleep(0.3)\n    \n        screen = tmux.capture_screen()\n>       assert '(END)' in screen\nE       AssertionError\n\neval/tests/test_tui_basic.py:117: AssertionError",
-        "text_original_chars": 657,
         "time": 2.578
       },
       "name": "eval.tests.test_tui_basic.test_tui_shows_bottom_indicator_at_end",
@@ -6470,8 +6243,6 @@
       "branch": "c32b4141af52",
       "extra": {
         "message": "AssertionError",
-        "text": "tmux = <test_tui_basic.TmuxTestHarness object at 0x7b6eb49ad7b0>\nfixtures_dir = '/workspace/eval/tests/../fixtures'\n\n    def test_tui_handles_empty_file(tmux, fixtures_dir):\n        \"\"\"Test that the TUI handles empty log files gracefully.\"\"\"\n        log_file = os.path.join(fixtures_dir, 'empty.log')\n        tmux.send_keys(f'./executable {log_file}', enter=True)\n        time.sleep(0.5)\n    \n        screen = tmux.capture_screen()\n        # Should show END immediately for empty file\n>       assert '(END)' in screen or screen.strip() == ''\nE       AssertionError\n\neval/tests/test_tui_basic.py:128: AssertionError",
-        "text_original_chars": 614,
         "time": 1.647
       },
       "name": "eval.tests.test_tui_basic.test_tui_handles_empty_file",
@@ -6577,8 +6348,6 @@
       "branch": "c32b4141af52",
       "extra": {
         "message": "AssertionError",
-        "text": "tmux = <test_tui_basic.TmuxTestHarness object at 0x7b6eb4b729b0>\nfixtures_dir = '/workspace/eval/tests/../fixtures'\n\n    def test_navigation_at_bottom_boundary(tmux, fixtures_dir):\n        \"\"\"Test that navigation down at the bottom doesn't crash.\"\"\"\n        log_file = os.path.join(fixtures_dir, 'simple.log')\n        tmux.send_keys(f'./executable {log_file}', enter=True)\n        time.sleep(0.5)\n    \n        # Go to end\n        tmux.send_keys('G', enter=False)\n        time.sleep(0.3)\n    \n        # Try going down at the end\n        for _ in range(5):\n            tmux.send_keys('j', enter=False)\n            time.sleep(0.1)\n    \n        screen = tmux.capture_screen()\n>       assert '(END)' in screen\nE       AssertionError\n\neval/tests/test_tui_edge_cases.py:42: AssertionError",
-        "text_original_chars": 781,
         "time": 4.148
       },
       "name": "eval.tests.test_tui_edge_cases.test_navigation_at_bottom_boundary",
@@ -6684,8 +6453,6 @@
       "branch": "c32b4141af52",
       "extra": {
         "message": "AssertionError",
-        "text": "tmux = <test_tui_basic.TmuxTestHarness object at 0x7b6eb4b4e6b0>\nfixtures_dir = '/workspace/eval/tests/../fixtures'\n\n    def test_navigation_page_down(tmux, fixtures_dir):\n        \"\"\"Test page down navigation.\"\"\"\n        log_file = os.path.join(fixtures_dir, 'multiline.log')\n        tmux.send_keys(f'./executable {log_file}', enter=True)\n        time.sleep(0.5)\n    \n        initial_screen = tmux.capture_screen()\n    \n        # Page down with space or 'f'\n        tmux.send_keys('Space', enter=False)\n        time.sleep(0.2)\n    \n        after_page = tmux.capture_screen()\n        # Content should change significantly\n>       assert initial_screen != after_page or '(END)' in after_page\nE       AssertionError\n\neval/tests/test_tui_navigation.py:98: AssertionError",
-        "text_original_chars": 766,
         "time": 2.283
       },
       "name": "eval.tests.test_tui_navigation.test_navigation_page_down",
@@ -6703,8 +6470,6 @@
       "branch": "c32b4141af52",
       "extra": {
         "message": "AssertionError",
-        "text": "tmux = <test_tui_basic.TmuxTestHarness object at 0x7b6eb49d0220>\nfixtures_dir = '/workspace/eval/tests/../fixtures'\n\n    def test_navigation_goto_end_with_G(tmux, fixtures_dir):\n        \"\"\"Test jumping to end with 'G' key.\"\"\"\n        log_file = os.path.join(fixtures_dir, 'multiline.log')\n        tmux.send_keys(f'./executable {log_file}', enter=True)\n        time.sleep(0.5)\n    \n        # Jump to end\n        tmux.send_keys('G', enter=False)\n        time.sleep(0.3)\n    \n        screen = tmux.capture_screen()\n        # Should see (END) marker and last lines\n>       assert '(END)' in screen\nE       AssertionError\n\neval/tests/test_tui_navigation.py:131: AssertionError",
-        "text_original_chars": 671,
         "time": 2.571
       },
       "name": "eval.tests.test_tui_navigation.test_navigation_goto_end_with_G",
@@ -6730,8 +6495,6 @@
       "branch": "c32b4141af52",
       "extra": {
         "message": "AssertionError",
-        "text": "tmux = <test_tui_basic.TmuxTestHarness object at 0x7b6eb3fafdc0>\nfixtures_dir = '/workspace/eval/tests/../fixtures'\n\n    def test_navigation_at_boundaries(tmux, fixtures_dir):\n        \"\"\"Test navigation at file boundaries.\"\"\"\n        log_file = os.path.join(fixtures_dir, 'simple.log')\n        tmux.send_keys(f'./executable {log_file}', enter=True)\n        time.sleep(0.5)\n    \n        # Try to go up at beginning (should not crash)\n        tmux.send_keys('k', enter=False)\n        time.sleep(0.2)\n        tmux.send_keys('k', enter=False)\n        time.sleep(0.2)\n    \n        screen = tmux.capture_screen()\n        assert len(screen.strip()) > 0\n    \n        # Go to end\n        tmux.send_keys('G', enter=False)\n        time.sleep(0.3)\n    \n        # Try to go down at end (should not crash)\n        tmux.send_keys('j', enter=False)\n        time.sleep(0.2)\n        tmux.send_keys('j', enter=False)\n        time.sleep(0.2)\n    \n        screen = tmux.capture_screen()\n>       assert '(END)' in screen\nE       AssertionError\n\neval/tests/test_tui_navigation.py:203: AssertionError",
-        "text_original_chars": 1076,
         "time": 5.054
       },
       "name": "eval.tests.test_tui_navigation.test_navigation_at_boundaries",
@@ -6925,8 +6688,6 @@
       "branch": "855287dc3911",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw3/test_custom_config_date_color2')\n\n    def test_custom_config_date_color(tmp_path):\n        config_path = tmp_path / \"theme.toml\"\n        config_path.write_text(\"\"\"\n    [dates]\n    date = { fg = \"green\" }\n    \"\"\")\n    \n        input_str = \"2023-10-27\"\n        out = run_tspin(['--print', '--config-path', str(config_path)], input_data=input_str)\n>       assert \"\\033[32m2023\\033[0m\" in out\nE       AssertionError\n\neval/tests/test_config.py:28: AssertionError",
-        "text_original_chars": 518,
         "time": 0.152
       },
       "name": "eval.tests.test_config.test_custom_config_date_color",
@@ -7064,8 +6825,6 @@
       "branch": "855287dc3911",
       "extra": {
         "message": "AssertionError",
-        "text": "tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/popen-gw3/test_custom_regex_highlighter2')\n\n    def test_custom_regex_highlighter(tmp_path):\n        config_path = tmp_path / \"theme.toml\"\n        # Match 'Started ...' and highlight the capture group in red\n        config_path.write_text(\"\"\"\n    [[regexes]]\n    regex = 'Started (.*)\\\\.'\n    style = { fg = \"red\" }\n    \"\"\")\n    \n        input_str = \"Started the service.\"\n        out = run_tspin(['--print', '--config-path', str(config_path)], input_data=input_str)\n        # The capture group 'the service' should be highlighted in red (\\033[31m)\n>       assert \"\\033[31mthe service\\033[0m\" in out\nE       AssertionError\n\neval/tests/test_config.py:42: AssertionError",
-        "text_original_chars": 719,
         "time": 0.144
       },
       "name": "eval.tests.test_config.test_custom_regex_highlighter",
@@ -7075,8 +6834,6 @@
       "branch": "855287dc3911",
       "extra": {
         "message": "AssertionError",
-        "text": "tmux = <test_interactive.TmuxTestHarness object at 0x6ffd9bc5f8b0>\n\n    def test_follow_mode(tmux):\n        # Create a dummy file\n        log_file = \"follow.log\"\n        with open(log_file, \"w\") as f:\n            f.write(\"INITIAL_LINE\\n\")\n            f.flush()\n    \n        try:\n            # Run with --follow\n            tmux.pane.send_keys(f\"./executable --follow {log_file}\", enter=True)\n    \n            assert tmux.wait_for(\"INITIAL_LINE\")\n    \n            # Append to file\n            with open(log_file, \"a\") as f:\n                f.write(\"APPENDED_LINE\\n\")\n                f.flush()\n    \n>           assert tmux.wait_for(\"APPENDED_LINE\")\nE           AssertionError\n\neval/tests/test_interactive.py:81: AssertionError",
-        "text_original_chars": 724,
         "time": 15.386
       },
       "name": "eval.tests.test_interactive.test_follow_mode",
@@ -7190,8 +6947,6 @@
       "branch": "a5874d2f6b06",
       "extra": {
         "message": "AssertionError",
-        "text": "def test_help_exact():\n        # Exact matching helps ensure full CLI surface stays identical.\n        # Force a stable terminal width for clap help wrapping.\n        p = run([\"--help\"], env={\"COLUMNS\": \"120\"})\n        assert p.returncode == 0\n        help_path = Path(__file__).with_name(\"help_golden.txt\")\n>       assert p.stdout.decode(\"utf-8\") == help_path.read_text(encoding=\"utf-8\")\nE       AssertionError\n\neval/tests/test_cli_basics.py:26: AssertionError",
-        "text_original_chars": 461,
         "time": 0.142
       },
       "name": "eval.tests.test_cli_basics.test_help_exact",
@@ -7513,8 +7268,6 @@
       "branch": "ae3c6e3d6566",
       "extra": {
         "message": "subprocess.CalledProcessError: Command '['/workspace/executable', '--print']' died with <Signals.SIGTERM: 15>.",
-        "text": "self = <test_tailspin.TestEdgeCases object at 0x728b84a4e3b0>\n\n    def test_very_long_line(self):\n        \"\"\"Test handling of very long lines.\"\"\"\n        long_line = \"a\" * 10000\n>       result = run_executable([\"--print\"], input_text=long_line)\n\neval/tests/test_tailspin.py:263: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nargs = ['--print']\ninput_text = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'\ncheck = True\n\n    def run_executable(args, input_text=None, check=True):\n        \"\"\"Run the executable with given arguments and optional stdin input.\"\"\"\n        cmd = [EXECUTABLE] + args\n        result = subprocess.run(\n            cmd,\n            input=input_text,\n            capture_output=True,\n            text=True,\n            check=False\n        )\n        if check and result.returncode != 0:\n>           raise subprocess.CalledProcessError(result.returncode, cmd, result.stdout, result.stderr)\nE           subprocess.CalledProcessError: Command '['/workspace/executable', '--print']' died with <Signals.SIGTERM: 15>.\n\neval/tests/test_tailspin.py:27: CalledProcessError",
-        "text_original_chars": 1313,
         "time": 279.054
       },
       "name": "eval.tests.test_tailspin.TestEdgeCases.test_very_long_line",
