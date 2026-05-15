@@ -1470,11 +1470,15 @@ def render_html(data: dict, extended: bool = False) -> str:
     """
     title = f"Extended Results · {SITE_NAME}" if extended else SITE_NAME
     question = (
-        "Codex /goal scaffold results by model, mode, task, cost, calls, and latency."
-        if extended
-        else "Can Codex <code>/goal</code> rebuild programs from scratch?"
+        "GoalBench extended results" if extended else "Can Codex <code>/goal</code> rebuild programs from scratch?"
     )
-    heading = "Extended Results" if extended else "Long-running Codex on ProgramBench."
+    heading = "Extended Results" if extended else "GoalBench: Codex Goal Mode on ProgramBench."
+    hero_copy = (
+        "Explore Codex <code>/goal</code> results by model, mode, task, cost, calls, and latency. "
+        "Each row is a separate scaffold run evaluated with ProgramBench's behavioral tests."
+        if extended
+        else "GoalBench measures Codex <code>/goal</code> on ProgramBench tasks. Given only a compiled binary and its documentation, Codex must architect and implement a replacement codebase that reproduces the original CLI's behavior, then we score it with ProgramBench's behavioral tests."
+    )
     body = render_results_sections(data, instances) if extended else render_home_results(data, instances)
     base = '<base href="../">\n  ' if extended else ""
     return f"""<!doctype html>
@@ -1755,7 +1759,7 @@ def render_html(data: dict, extended: bool = False) -> str:
       <div>
         <p class="question">{question}</p>
         <h1>{heading}</h1>
-        <p class="hero-copy">Given only a compiled binary and its documentation, Codex <code>/goal</code> agents must architect and implement a complete codebase that reproduces the original program's behavior.</p>
+        <p class="hero-copy">{hero_copy}</p>
         <p class="hero-disclosure"><strong>Scaffold measurement:</strong> separate Codex <code>/goal</code> runs, not official mini-SWE-agent leaderboard submissions.</p>
       </div>
     </div>
