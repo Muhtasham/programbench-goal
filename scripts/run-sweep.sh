@@ -15,6 +15,7 @@ INCREMENTAL_FINALIZE=0
 REFRESH_REPORT=1
 REFRESH_TARGET_SET=1
 MAX_PARALLEL="${MAX_PARALLEL:-}"
+SITE_RESULTS_SCOPE="${SITE_RESULTS_SCOPE:-}"
 
 usage() {
   cat <<'EOF'
@@ -35,6 +36,8 @@ Options:
   --allow-partial            Allow finalize/report publish before every target is evaluated
   --incremental-finalize      Evaluate/report after each watch tick instead of waiting for all tasks
   --max-parallel N           Override config max_parallel for Codex task concurrency
+  --site-results-scope SCOPE  Results included in docs: all or current
+                             (default: current for published watch runs, else all)
   --offline-report           Do not refresh OpenAI pricing or ProgramBench baseline rows
   --no-target-refresh        Do not regenerate target_sets/all_tasks.txt
   -h, --help                 Show this help
@@ -100,6 +103,10 @@ while [[ $# -gt 0 ]]; do
       MAX_PARALLEL="$2"
       shift 2
       ;;
+    --site-results-scope)
+      SITE_RESULTS_SCOPE="$2"
+      shift 2
+      ;;
     --offline-report)
       REFRESH_REPORT=0
       shift
@@ -123,6 +130,17 @@ done
 if [[ ! -f "$CONFIG" ]]; then
   echo "config not found: $CONFIG" >&2
   exit 1
+fi
+
+if [[ -z "$SITE_RESULTS_SCOPE" ]]; then
+  SITE_RESULTS_SCOPE="all"
+  if [[ "$PUBLISH" -eq 1 && "$WATCH" -eq 1 ]]; then
+    SITE_RESULTS_SCOPE="current"
+  fi
+fi
+if [[ "$SITE_RESULTS_SCOPE" != "all" && "$SITE_RESULTS_SCOPE" != "current" ]]; then
+  echo "invalid --site-results-scope: $SITE_RESULTS_SCOPE" >&2
+  exit 2
 fi
 
 if [[ -z "$RUN_VERSION" ]]; then
@@ -177,6 +195,19 @@ PY
 }
 
 collect_results_csvs() {
+  if [[ "$SITE_RESULTS_SCOPE" == "current" ]]; then
+    uv run python - "$CONFIG" "$RUN_VERSION" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+config = json.loads(Path(sys.argv[1]).read_text())
+path = Path("local_state/batches") / config["batch_name"] / sys.argv[2] / "results.csv"
+if path.is_file():
+    print(path)
+PY
+    return
+  fi
   {
     find local_state -maxdepth 1 -type f -name '*results.csv'
     find local_state/batches -mindepth 2 -maxdepth 3 -type f -name 'results.csv' 2>/dev/null || true
