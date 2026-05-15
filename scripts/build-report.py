@@ -21,6 +21,7 @@ SITE_NAME = "GoalBench"
 PROGRAMBENCH_TASKS = 200
 PROGRAMBENCH_EXTENDED = "https://programbench.com/extended/"
 PROGRAMBENCH_HOME = "https://programbench.com/"
+GOALBENCH_GITHUB = "https://github.com/Muhtasham/goalbench"
 ROW_RE = re.compile(r"<tr class=\"clickable-row\".*?</tr>", re.S)
 CELL_RE = re.compile(r"<td[^>]*>(.*?)</td>", re.S)
 TAG_RE = re.compile(r"<[^>]+>")
@@ -1305,6 +1306,7 @@ def render_task_details_page() -> str:
       <a href="task-details.html">Task Details</a>
       <a href="paper-compliance.md">Compliance</a>
       <a href="runbook.md">Runbook</a>
+      <a href="{GOALBENCH_GITHUB}">GitHub</a>
       <a href="{PROGRAMBENCH_HOME}">ProgramBench</a>
     </nav>
     <h1>Task Details</h1>
@@ -1398,6 +1400,7 @@ def render_html(data: dict) -> str:
       <a href="#run-order">Run Order</a>
       <a href="paper-compliance.md">Compliance</a>
       <a href="runbook.md">Runbook</a>
+      <a href="{GOALBENCH_GITHUB}">GitHub</a>
       <a href="{PROGRAMBENCH_EXTENDED}">ProgramBench Extended</a>
     </nav>
     """
