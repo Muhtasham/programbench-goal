@@ -8,11 +8,11 @@ from pathlib import Path
 
 
 def patterns() -> list[str]:
-    home = str(Path.home())
+    home = str(Path.home()) + "/"
     candidates = [
         home,
-        str(Path.home().parent),
-        str(Path.home() / "Documents"),
+        str(Path.home().parent) + "/",
+        str(Path.home() / "Documents") + "/",
         "Documents/" + "ProgramBench",
     ]
     return [pattern for pattern in candidates if pattern and pattern != Path(pattern).anchor]
