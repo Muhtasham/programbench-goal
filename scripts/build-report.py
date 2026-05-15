@@ -17,7 +17,7 @@ from statistics import mean, stdev
 from urllib.request import Request, urlopen
 
 AGENT_NAME = "Codex /goal"
-SITE_NAME = "ProgramBench Goal"
+SITE_NAME = "GoalBench"
 PROGRAMBENCH_TASKS = 200
 PROGRAMBENCH_EXTENDED = "https://programbench.com/extended/"
 ROW_RE = re.compile(r"<tr class=\"clickable-row\".*?</tr>", re.S)
@@ -80,7 +80,7 @@ def slug_text(value: str) -> str:
 
 
 def fetch(url: str) -> str:
-    with urlopen(Request(url, headers={"User-Agent": "programbench-goal/0.1"}), timeout=30) as response:
+    with urlopen(Request(url, headers={"User-Agent": "goalbench/0.1"}), timeout=30) as response:
         return response.read().decode("utf-8", "replace")
 
 
@@ -913,7 +913,7 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{cell(str(group["model"]))} ProgramBench /goal Run</title>
+  <title>{cell(str(group["model"]))} GoalBench Run</title>
   <style>
     body {{ font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #182026; }}
     a {{ color: #075985; }}
@@ -1504,7 +1504,7 @@ def build(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build the static ProgramBench /goal report site")
+    parser = argparse.ArgumentParser(description="Build the static GoalBench report site")
     parser.add_argument("results_csv", nargs="*")
     parser.add_argument("--output-dir", default="docs")
     parser.add_argument("--target-set", default="target_sets/all_tasks.txt")

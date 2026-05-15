@@ -3,7 +3,7 @@ set -euo pipefail
 
 TARGET_USER="${1:-$(id -un)}"
 WRAPPER="/usr/local/bin/pb-target-exec"
-SUDOERS_NAME="programbench-goal-${TARGET_USER//[^a-zA-Z0-9_-]/_}"
+SUDOERS_NAME="goalbench-${TARGET_USER//[^a-zA-Z0-9_-]/_}"
 SUDOERS_PATH="/etc/sudoers.d/$SUDOERS_NAME"
 
 usage() {

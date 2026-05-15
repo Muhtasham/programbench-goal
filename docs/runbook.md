@@ -1,6 +1,6 @@
 # Detailed Runbook
 
-This is the long-form operator runbook for ProgramBench Goal. Start with the
+This is the long-form operator runbook for GoalBench. Start with the
 root `README.md` if you only need the default path.
 
 Small harness for running Codex GPT-5.5 `/goal` against ProgramBench tasks.
@@ -69,8 +69,8 @@ Use a real Ubuntu `amd64` VM for Noam-facing results. Recommended minimum:
 On the VM:
 
 ```bash
-git clone git@github.com:Muhtasham/programbench-goal.git
-cd programbench-goal
+git clone git@github.com:Muhtasham/goalbench.git
+cd goalbench
 scripts/bootstrap-linux-vm.sh
 ```
 
@@ -758,7 +758,7 @@ Summarize leaderboard-style metrics after evaluation:
 
 ```bash
 uv run --project /path/to/ProgramBench \
-  python /path/to/programbench-goal/scripts/summarize-results.py ~/pb-goal-runs/gpt55-goal-open-jq \
+  python /path/to/goalbench/scripts/summarize-results.py ~/pb-goal-runs/gpt55-goal-open-jq \
   --programbench-repo /path/to/ProgramBench \
   --output results.csv
 ```

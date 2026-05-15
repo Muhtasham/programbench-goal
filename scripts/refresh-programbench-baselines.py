@@ -16,7 +16,7 @@ TAG_RE = re.compile(r"<[^>]+>")
 
 
 def fetch(url: str) -> str:
-    with urlopen(Request(url, headers={"User-Agent": "programbench-goal/0.1"}), timeout=30) as response:
+    with urlopen(Request(url, headers={"User-Agent": "goalbench/0.1"}), timeout=30) as response:
         return response.read().decode("utf-8", "replace")
 
 

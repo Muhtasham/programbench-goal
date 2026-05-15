@@ -310,12 +310,12 @@ run_site() {
 run_publish() {
   run git add docs
   if [[ "$DRY_RUN" -eq 1 ]]; then
-    print_cmd git commit -m "Update ProgramBench goal report"
+    print_cmd git commit -m "Update GoalBench report"
     print_cmd git push
   elif git diff --cached --quiet -- docs; then
     echo "no docs changes to publish"
   else
-    run git commit -m "Update ProgramBench goal report"
+    run git commit -m "Update GoalBench report"
     run git push
   fi
 }

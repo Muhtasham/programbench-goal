@@ -22,7 +22,7 @@ Options:
   --skip-codex-fast-config  Do not set Codex fast mode as the VM default
   -h, --help                Show this help
 
-Run this on a fresh Ubuntu x86_64 VM from the programbench-goal repo root.
+Run this on a fresh Ubuntu x86_64 VM from the goalbench repo root.
 After it finishes, log out/in if the script added your user to the docker group.
 EOF
 }
@@ -148,7 +148,7 @@ fast_mode = true
 [projects."$USER_HOME"]
 trust_level = "trusted"
 
-[projects."$USER_HOME/programbench-goal"]
+[projects."$USER_HOME/goalbench"]
 trust_level = "trusted"
 
 [projects."$USER_HOME/pb-goal-runs"]

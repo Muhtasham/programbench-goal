@@ -1,6 +1,6 @@
-# ProgramBench Goal
+# GoalBench
 
-Codex `/goal` runner for ProgramBench tasks.
+Codex `/goal` benchmark runner for ProgramBench tasks.
 
 This repo runs GPT-5.5 Codex CLI goal mode against ProgramBench cleanroom task
 images, packages the generated code as `submission.tar.gz`, evaluates with
@@ -58,8 +58,8 @@ Use a Linux `amd64` VM for serious runs. ProgramBench publishes task images for
 `linux/amd64`; Mac/ARM runs are only smoke tests.
 
 ```bash
-git clone git@github.com:Muhtasham/programbench-goal.git
-cd programbench-goal
+git clone git@github.com:Muhtasham/goalbench.git
+cd goalbench
 scripts/bootstrap-linux-vm.sh
 codex login
 scripts/doctor.sh configs/linux-smoke-nointernet-xhigh.json
@@ -197,4 +197,4 @@ uv run pre-commit run --all-files
 
 - [Detailed runbook](docs/runbook.md)
 - [Paper/compliance notes](docs/paper-compliance.md)
-- [Public report](https://muhtasham.github.io/programbench-goal/)
+- [Public report](https://muhtasham.github.io/goalbench/)
