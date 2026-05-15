@@ -205,7 +205,7 @@ Packaging is exposed as a `package-submission` command in `guard-bin`, so Codex
 does not need to invoke or inspect parent-directory helper scripts.
 This is still not a replacement for a VM/container/user-level egress policy.
 
-See `paper-compliance.md` for the paper/FAQ compliance matrix.
+See the [paper compliance page](paper-compliance.html) for the paper/FAQ compliance matrix.
 
 ## Inference Modes
 
@@ -247,8 +247,8 @@ binary-analysis/tracing tools, and root-level target inspection through the
 target container. This is intentionally non-compliant with ProgramBench
 cleanroom rules and must be reported separately.
 
-Later TODO: split this ablation into two clearer tracks if the first full runs
-show it is worth the extra matrix cost:
+Future split: split this ablation into two clearer tracks if the first full
+runs show it is worth the extra matrix cost:
 
 - `no-internet-local-tools-base`: no internet/source/package lookup, binary
   analysis and tracing allowed, but only with tools already present on the base
@@ -594,9 +594,9 @@ ablation separately:
 uv run python scripts/run-config.py watch configs/full-localtools-xhigh.json
 ```
 
-TODO: if this ablation becomes important, split it into `base VM tools only`
-and `preinstalled reverse-engineering toolbox` variants. Keep both clearly
-non-compliant and separate from the primary no-internet result.
+Future split: if this ablation becomes important, split it into `base VM tools
+only` and `preinstalled reverse-engineering toolbox` variants. Keep both
+clearly non-compliant and separate from the primary no-internet result.
 
 For the closest ProgramBench-cleanroom run, use a Linux `amd64` host with the
 wrapper boundary and preflight first:

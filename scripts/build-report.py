@@ -22,6 +22,8 @@ PROGRAMBENCH_TASKS = 200
 PROGRAMBENCH_EXTENDED = "https://programbench.com/extended/"
 PROGRAMBENCH_HOME = "https://programbench.com/"
 GOALBENCH_GITHUB = "https://github.com/Muhtasham/goalbench"
+COMPLIANCE_PAGE = "paper-compliance.html"
+RUNBOOK_PAGE = "runbook.html"
 ROW_RE = re.compile(r"<tr class=\"clickable-row\".*?</tr>", re.S)
 CELL_RE = re.compile(r"<td[^>]*>(.*?)</td>", re.S)
 BRAND_SLASH_PATHS = """
@@ -167,6 +169,187 @@ def write_support_files(output_dir: Path) -> None:
     )
     (output_dir / "assets").mkdir(exist_ok=True)
     shutil.copyfile(Path("assets/codex-logo.png"), output_dir / "assets" / "codex-logo.png")
+
+
+def inline_markdown(text: str) -> str:
+    escaped = cell(text)
+    escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
+    return re.sub(
+        r"\[([^\]]+)\]\(([^)]+)\)", lambda match: f'<a href="{cell(match.group(2))}">{match.group(1)}</a>', escaped
+    )
+
+
+def render_markdown_blocks(markdown: str) -> str:
+    blocks = []
+    paragraph = []
+    list_items = []
+    table_rows = []
+    in_code = False
+    code_lines = []
+
+    def flush_paragraph() -> None:
+        if paragraph:
+            blocks.append(f"<p>{inline_markdown(' '.join(paragraph))}</p>")
+            paragraph.clear()
+
+    def flush_list() -> None:
+        if list_items:
+            blocks.append("<ul>" + "".join(f"<li>{inline_markdown(item)}</li>" for item in list_items) + "</ul>")
+            list_items.clear()
+
+    def flush_table() -> None:
+        if table_rows:
+            head, *body = table_rows
+            blocks.append(
+                '<div class="doc-table"><table><thead><tr>'
+                + "".join(f"<th>{inline_markdown(cell_text)}</th>" for cell_text in head)
+                + "</tr></thead><tbody>"
+                + "".join(
+                    "<tr>" + "".join(f"<td>{inline_markdown(cell_text)}</td>" for cell_text in row) + "</tr>"
+                    for row in body
+                )
+                + "</tbody></table></div>"
+            )
+            table_rows.clear()
+
+    def flush_code() -> None:
+        if code_lines:
+            blocks.append(f"<pre><code>{cell(chr(10).join(code_lines))}</code></pre>")
+            code_lines.clear()
+
+    lines = markdown.splitlines()
+    index = 0
+    while index < len(lines):
+        line = lines[index].rstrip()
+        if line.startswith("```"):
+            if in_code:
+                flush_code()
+                in_code = False
+            else:
+                flush_paragraph()
+                flush_list()
+                flush_table()
+                in_code = True
+            index += 1
+            continue
+        if in_code:
+            code_lines.append(line)
+            index += 1
+            continue
+        if not line.strip():
+            flush_paragraph()
+            flush_list()
+            flush_table()
+            index += 1
+            continue
+        if line.startswith("#"):
+            flush_paragraph()
+            flush_list()
+            flush_table()
+            level = min(len(line) - len(line.lstrip("#")), 3)
+            blocks.append(f"<h{level}>{inline_markdown(line.lstrip('#').strip())}</h{level}>")
+            index += 1
+            continue
+        if (
+            line.startswith("|")
+            and index + 1 < len(lines)
+            and set(lines[index + 1].replace("|", "").strip()) <= {"-", ":", " "}
+        ):
+            flush_paragraph()
+            flush_list()
+            table_rows.append([part.strip() for part in line.strip("|").split("|")])
+            index += 2
+            while index < len(lines) and lines[index].startswith("|"):
+                table_rows.append([part.strip() for part in lines[index].strip("|").split("|")])
+                index += 1
+            continue
+        if line.startswith("- "):
+            flush_paragraph()
+            flush_table()
+            list_items.append(line[2:].strip())
+            index += 1
+            continue
+        numbered = re.match(r"\d+\.\s+(.*)", line)
+        if numbered:
+            flush_paragraph()
+            flush_table()
+            list_items.append(numbered.group(1).strip())
+            index += 1
+            continue
+        paragraph.append(line.strip())
+        index += 1
+    flush_paragraph()
+    flush_list()
+    flush_table()
+    flush_code()
+    return "\n".join(blocks)
+
+
+def render_doc_page(markdown_path: Path, title: str) -> str:
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{cell(title)} · {SITE_NAME}</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    :root {{ --ink: #182026; --muted: #5b6b78; --line: #d9e0e6; --soft: #f4f8f6; --accent: #0f766e; --accent-strong: #0b5f59; }}
+    * {{ box-sizing: border-box; }}
+    body {{ margin: 0; color: var(--ink); background: linear-gradient(180deg, #fbfcfb 0%, #f6f9f7 300px, #ffffff 301px); font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }}
+    a {{ color: #075985; text-decoration-thickness: 1px; text-underline-offset: 2px; }}
+    header, main {{ max-width: 980px; margin: 0 auto; padding: 22px 28px; }}
+    .topbar {{ display: flex; align-items: center; justify-content: space-between; gap: 20px; }}
+    .nav-brand {{ display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 850; text-decoration: none; }}
+    .brand-mark {{ width: 30px; height: 30px; display: block; flex: 0 0 auto; }}
+    .nav-links {{ display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }}
+    .nav-links a {{ color: #40515c; text-decoration: none; border-radius: 6px; padding: 7px 9px; font-size: 14px; }}
+    .nav-links a:hover {{ color: #075985; background: #eef6f3; }}
+    .doc-hero {{ padding: 34px 0 28px; border-bottom: 1px solid var(--line); }}
+    .doc-eyebrow {{ color: var(--accent-strong); font-size: 13px; font-weight: 850; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.08em; }}
+    h1 {{ margin: 0; font-size: clamp(38px, 7vw, 72px); line-height: 0.98; letter-spacing: 0; }}
+    main {{ padding-top: 34px; }}
+    main h1 {{ display: none; }}
+    h2 {{ margin: 34px 0 10px; font-size: 24px; }}
+    h3 {{ margin: 24px 0 8px; font-size: 18px; }}
+    p, li {{ color: var(--muted); line-height: 1.58; }}
+    ul {{ padding-left: 22px; }}
+    code {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; }}
+    pre {{ overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: #10201d; color: #effff9; }}
+    pre code {{ color: inherit; }}
+    .doc-table {{ border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; background: #ffffff; margin: 16px 0; }}
+    table {{ width: 100%; border-collapse: collapse; min-width: 720px; }}
+    th, td {{ border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; font-size: 14px; }}
+    th {{ background: var(--soft); color: #33424d; font-weight: 800; }}
+    tr:last-child td {{ border-bottom: 0; }}
+    @media (max-width: 760px) {{ header, main {{ padding-left: 16px; padding-right: 16px; }} .topbar {{ align-items: flex-start; flex-direction: column; }} .nav-links {{ justify-content: flex-start; }} }}
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="topbar" aria-label="Primary">
+      <a class="nav-brand" href="./">{brand_slash_svg()}<span>{SITE_NAME}</span></a>
+      <div class="nav-links">
+        <a href="./">Leaderboard</a>
+        <a href="extended/">Extended</a>
+        <a href="task-details.html">Tasks</a>
+        <a href="{COMPLIANCE_PAGE}">Compliance</a>
+        <a href="{RUNBOOK_PAGE}">Runbook</a>
+        <a href="{GOALBENCH_GITHUB}">GitHub</a>
+        <a href="{PROGRAMBENCH_HOME}">ProgramBench</a>
+      </div>
+    </nav>
+    <section class="doc-hero">
+      <p class="doc-eyebrow">GoalBench documentation</p>
+      <h1>{cell(title)}</h1>
+    </section>
+  </header>
+  <main>
+    {render_markdown_blocks(markdown_path.read_text())}
+  </main>
+</body>
+</html>
+"""
 
 
 def load_task_baselines(output_dir: Path) -> dict:
@@ -1145,8 +1328,8 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
         <a href="../../">Leaderboard</a>
         <a href="../../extended/">Extended</a>
         <a href="../../task-details.html">Tasks</a>
-        <a href="../../paper-compliance.md">Compliance</a>
-        <a href="../../runbook.md">Runbook</a>
+        <a href="../../paper-compliance.html">Compliance</a>
+        <a href="../../runbook.html">Runbook</a>
         <a href="{GOALBENCH_GITHUB}">GitHub</a>
         <a href="{PROGRAMBENCH_EXTENDED}">ProgramBench</a>
       </div>
@@ -1394,8 +1577,8 @@ def render_task_detail(instance_id: str, rows: list[ResultRow], official_tasks: 
         <a href="../../">Leaderboard</a>
         <a href="../../extended/">Extended</a>
         <a href="../../task-details.html">Tasks</a>
-        <a href="../../paper-compliance.md">Compliance</a>
-        <a href="../../runbook.md">Runbook</a>
+        <a href="../../paper-compliance.html">Compliance</a>
+        <a href="../../runbook.html">Runbook</a>
         <a href="{GOALBENCH_GITHUB}">GitHub</a>
         <a href="{PROGRAMBENCH_EXTENDED}">ProgramBench</a>
       </div>
@@ -1636,8 +1819,8 @@ def render_task_details_page() -> str:
         <a href="./">Leaderboard</a>
         <a href="extended/">Extended</a>
         <a href="task-details.html">Tasks</a>
-        <a href="paper-compliance.md">Compliance</a>
-        <a href="runbook.md">Runbook</a>
+        <a href="paper-compliance.html">Compliance</a>
+        <a href="runbook.html">Runbook</a>
         <a href="{GOALBENCH_GITHUB}">GitHub</a>
         <a href="{PROGRAMBENCH_HOME}">ProgramBench</a>
       </div>
@@ -1768,8 +1951,8 @@ def render_html(data: dict, extended: bool = False) -> str:
         <a href="./">Leaderboard</a>
         <a href="extended/">Extended</a>
         <a href="task-details.html">Tasks</a>
-        <a href="paper-compliance.md">Compliance</a>
-        <a href="runbook.md">Runbook</a>
+        <a href="paper-compliance.html">Compliance</a>
+        <a href="runbook.html">Runbook</a>
         <a href="{GOALBENCH_GITHUB}">GitHub</a>
         <a href="{PROGRAMBENCH_EXTENDED}">ProgramBench</a>
       </div>
@@ -2118,7 +2301,7 @@ def render_html(data: dict, extended: bool = False) -> str:
     </section>
 
     <section class="section compact">
-      <p class="note">Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in no-internet mode. Paper/cleanroom rows are ProgramBench-style Codex scaffold runs, not official mini-SWE-agent paper baseline reproductions. Open-internet and local-tools runs are intentionally non-compliant and reported separately. See <a href="task-details.html">Task Details</a>, the <a href="runbook.md">runbook</a>, and <a href="paper-compliance.md">compliance notes</a> for setup and mode details.</p>
+      <p class="note">Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in no-internet mode. Paper/cleanroom rows are ProgramBench-style Codex scaffold runs, not official mini-SWE-agent paper baseline reproductions. Open-internet and local-tools runs are intentionally non-compliant and reported separately. See <a href="task-details.html">Task Details</a>, the <a href="runbook.html">runbook</a>, and <a href="paper-compliance.html">compliance notes</a> for setup and mode details.</p>
     </section>
 
     <section class="section">
@@ -2188,6 +2371,8 @@ def build(args: argparse.Namespace) -> None:
     (output_dir / "extended").mkdir(parents=True, exist_ok=True)
     write_html(output_dir / "extended" / "index.html", render_html(data, extended=True))
     write_html(output_dir / "task-details.html", render_task_details_page())
+    write_html(output_dir / COMPLIANCE_PAGE, render_doc_page(Path("docs/paper-compliance.md"), "Compliance"))
+    write_html(output_dir / RUNBOOK_PAGE, render_doc_page(Path("docs/runbook.md"), "Runbook"))
     for group in data["groups"]:
         run_dir = output_dir / "run" / str(group["slug"])
         run_dir.mkdir(parents=True, exist_ok=True)

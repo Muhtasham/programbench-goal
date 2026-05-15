@@ -55,7 +55,7 @@ No-internet-local-tools mode:
 - Is specifically for measuring the “not tool-starved, but still no internet” ablation.
 - Must be reported separately from both paper/cleanroom and no-internet black-box rows.
 
-Later TODO: if this ablation matters after the primary runs, split it into:
+Future split: if this ablation matters after the primary runs, split it into:
 
 - `no-internet-local-tools-base`: use only local tools already available on the base VM.
 - `no-internet-local-tools-re`: use a disclosed, preinstalled reverse-engineering toolbox.
