@@ -6,48 +6,148 @@
   <title>y2z__monolith.8702e66 ProgramBench Task</title>
   <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
   <style>
-    body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #182026; }
-    a { color: #075985; }
-    table { border-collapse: collapse; width: 100%; margin-top: 16px; }
-    th, td { border-bottom: 1px solid #d9e0e6; padding: 9px 10px; text-align: left; font-size: 13px; }
-    th { background: #f5f7f8; }
+    :root {
+      --ink: #182026;
+      --muted: #5b6b78;
+      --line: #d9e0e6;
+      --soft: #f4f8f6;
+      --accent: #0f766e;
+      --accent-strong: #0b5f59;
+      --warn: #b45309;
+      --bad: #be123c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fbfcfb 0%, #f6f9f7 330px, #ffffff 331px);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: #075985; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    header, main { max-width: 1180px; margin: 0 auto; padding: 22px 28px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .nav-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand-mark { width: 30px; height: 30px; display: block; flex: 0 0 auto; }
+    .nav-links { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+    .nav-links a { color: #40515c; text-decoration: none; border-radius: 6px; padding: 7px 9px; font-size: 14px; }
+    .nav-links a:hover { color: #075985; background: #eef6f3; }
+    .task-hero { padding: 34px 0 28px; border-bottom: 1px solid var(--line); }
+    .task-eyebrow { color: var(--accent-strong); font-size: 13px; font-weight: 850; margin: 0 0 10px; }
+    h1 { margin: 0; max-width: 920px; color: var(--ink); font-size: clamp(30px, 5vw, 54px); line-height: 1.02; letter-spacing: 0; overflow-wrap: anywhere; }
+    h2 { margin: 34px 0 8px; font-size: 22px; }
+    p { color: var(--muted); line-height: 1.5; }
+    .task-summary { max-width: 840px; margin: 14px 0 0; font-size: 17px; }
+    .task-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      padding: 8px 12px;
+      color: #263640;
+      background: #ffffff;
+      font-size: 13px;
+      font-weight: 750;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .button:hover { border-color: #9fb4ad; background: #f5faf8; }
+    .button.primary { border-color: var(--accent); background: var(--accent); color: #ffffff; }
+    .button.primary:hover { background: #115e59; }
     code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
-    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; max-width: 780px; margin: 16px 0; }
-    .metric { border: 1px solid #d9e0e6; border-radius: 8px; padding: 14px; }
-    .metric strong { display: block; font-size: 24px; }
-    .metric span { color: #61707d; font-size: 13px; }
+    h1 code { font-size: clamp(18px, 3vw, 30px); white-space: normal; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 24px 0 10px; }
+    .metric { min-height: 102px; border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: #ffffff; }
+    .metric strong { display: block; margin-bottom: 8px; font-size: clamp(24px, 3vw, 32px); line-height: 1; }
+    .metric span { color: var(--muted); font-size: 13px; }
+    .table-wrap { border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; background: #ffffff; }
+    table { border-collapse: collapse; width: 100%; min-width: 860px; }
+    th, td { border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; font-size: 13px; vertical-align: middle; white-space: nowrap; }
+    td:last-child { min-width: 220px; white-space: normal; }
+    th { background: var(--soft); color: #33424d; font-weight: 750; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover td { background: #fbfdfc; }
     .evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; margin: 16px 0; }
-    .evidence-card { border: 1px solid #d9e0e6; border-radius: 8px; padding: 14px; }
+    .evidence-card { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #ffffff; }
     .evidence-card h3 { margin: 0 0 8px; font-size: 16px; }
     .evidence-card ul { margin: 8px 0 0; padding-left: 18px; }
     .evidence-card li { margin: 5px 0; font-size: 13px; }
-    .muted { color: #61707d; }
+    .status {
+      display: inline-block;
+      min-width: 64px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-weight: 750;
+      font-size: 12px;
+      text-align: center;
+      background: var(--soft);
+    }
+    .status.resolved { color: #065f46; background: #d1fae5; }
+    .status.almost { color: var(--warn); background: #fef3c7; }
+    .status.open { color: var(--bad); background: #ffe4e6; }
+    .muted { color: var(--muted); }
+    @media (max-width: 760px) {
+      header, main { padding-left: 16px; padding-right: 16px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .nav-links { justify-content: flex-start; }
+      .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .metric { min-height: 96px; }
+    }
   </style>
 </head>
 <body>
-  <p><a href="../../">← Back to summary</a> · <a href="https://programbench.com/task/y2z__monolith.8702e66/">Official ProgramBench task page</a></p>
-  <h1><code>y2z__monolith.8702e66</code></h1>
-  <p class="muted">Task-level results for this Codex <code>/goal</code> scaffold. ProgramBench baseline context is cached from the official task page; Codex scored tests are after active-branch and ignored-test filtering.</p>
-  <div class="metric-grid">
-    <div class="metric"><strong>713</strong><span>generated behavioral tests</span></div>
-    <div class="metric"><strong>67.7%</strong><span>official best score</span></div>
-    <div class="metric"><strong>pending</strong><span>Codex best score</span></div>
-    <div class="metric"><strong>0</strong><span>Codex result rows</span></div>
-  </div>
-  <h2>Codex Results by Model</h2>
-  <table>
-    <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Mode</th><th>Score</th><th>Eval</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Evidence</th></tr></thead>
-    <tbody>
+  <header>
+    <nav class="topbar" aria-label="Primary">
+      <a class="nav-brand" href="../../"><svg class="brand-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#10201d"/>
+  <path d="M40.5 10.5h9.75L24.25 53.5H14.5L40.5 10.5Z" fill="#effff9"/>
+  <path d="M48.25 10.5h4.25L26.5 53.5h-4.25L48.25 10.5Z" fill="#14b8a6"/>
+  <path d="M37.5 43.5h13v8.25h-13z" fill="#f6c453"/></svg><span>GoalBench</span></a>
+      <div class="nav-links">
+        <a href="../../">Leaderboard</a>
+        <a href="../../extended/">Extended</a>
+        <a href="../../task-details.html">Tasks</a>
+        <a href="../../paper-compliance.md">Compliance</a>
+        <a href="../../runbook.md">Runbook</a>
+        <a href="https://github.com/Muhtasham/goalbench">GitHub</a>
+        <a href="https://programbench.com/extended/">ProgramBench</a>
+      </div>
+    </nav>
+    <section class="task-hero">
+      <p class="task-eyebrow">ProgramBench task detail</p>
+      <h1><code>y2z__monolith.8702e66</code></h1>
+      <p class="task-summary">Task-level results for this Codex <code>/goal</code> scaffold. ProgramBench baseline context is cached from the official task page; Codex scored tests are after active-branch and ignored-test filtering.</p>
+      <div class="task-actions">
+        <a class="button primary" href="../../">Back to leaderboard</a>
+        <a class="button" href="https://programbench.com/task/y2z__monolith.8702e66/">Official ProgramBench task</a>
+      </div>
+    </section>
+  </header>
+  <main>
+    <div class="metric-grid">
+      <div class="metric"><strong>713</strong><span>generated behavioral tests</span></div>
+      <div class="metric"><strong>67.7%</strong><span>official best score</span></div>
+      <div class="metric"><strong>pending</strong><span>Codex best score</span></div>
+      <div class="metric"><strong>0</strong><span>Codex result rows</span></div>
+    </div>
+    <h2>Codex Results by Model</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Mode</th><th>Score</th><th>Eval</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Evidence</th></tr></thead>
+        <tbody>
         <tr>
           <td colspan="11">No Codex results published for this task yet.</td>
         </tr>
         </tbody>
-  </table>
+      </table>
+    </div>
 
-  <h2>Official ProgramBench Results by Model</h2>
-  <table>
-    <thead><tr><th>#</th><th>Model</th><th>Provider</th><th>Score</th><th>Cost</th><th>Calls</th></tr></thead>
-    <tbody>
+    <h2>Official ProgramBench Results by Model</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Model</th><th>Provider</th><th>Score</th><th>Cost</th><th>Calls</th></tr></thead>
+        <tbody>
         <tr>
           <td>1</td>
           <td>GPT 5.5 (xhigh)</td>
@@ -177,6 +277,8 @@
           <td>16</td>
         </tr>
         </tbody>
-  </table>
+      </table>
+    </div>
+  </main>
 </body>
 </html>

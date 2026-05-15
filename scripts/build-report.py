@@ -299,7 +299,7 @@ def result_groups(rows: list[ResultRow]) -> list[dict]:
     grouped = ((key, list(group_rows)) for key, group_rows in groupby(sorted(rows, key=group_key), key=group_key))
     groups = [
         {
-            "slug": slug_text("-".join(key)),
+            "slug": run_slug(key),
             "model": key[0],
             "agent": key[1],
             "mode": key[2],
@@ -316,6 +316,16 @@ def result_groups(rows: list[ResultRow]) -> list[dict]:
         key=lambda item: (item["resolved_rate"], item["almost_resolved_rate"], item["average_pass_rate"]),
         reverse=True,
     )
+
+
+def run_slug(key: tuple[str, str, str, str, str]) -> str:
+    model, _agent, mode, compliance, version = key
+    parts = [model, mode]
+    if version:
+        parts.append(version)
+    if mode == "Paper-mode prompt" or compliance == "Local smoke: host/resources differ":
+        parts.append(compliance)
+    return slug_text("-".join(parts))
 
 
 def repeatability_groups(rows: list[ResultRow]) -> list[dict]:
@@ -675,7 +685,7 @@ def render_summary_cards(label: str, summary: dict) -> str:
     return f"""
       <section class="summary-card">
         <div class="summary-title">{cell(label)}</div>
-        <div class="summary-meta">{cell(str(summary["compliance"]))} · run {cell(version_label(str(summary.get("run_version", ""))))}</div>
+        <div class="summary-meta">{cell(summary_meta(summary))}</div>
         <div class="metric-grid">
           <div><strong>{summary["instances"]}</strong><span>instances</span></div>
           <div><strong>{percent(summary["resolved_rate"])}</strong><span>resolved</span></div>
@@ -690,23 +700,41 @@ def render_summary_cards(label: str, summary: dict) -> str:
     """
 
 
+def summary_title(group: dict) -> str:
+    version = str(group.get("run_version", ""))
+    return f"{group['model']} · {group['mode']}" + (f" · {version}" if version else "")
+
+
+def summary_meta(summary: dict) -> str:
+    version = str(summary.get("run_version", ""))
+    return " · ".join(
+        [
+            str(summary["compliance"]),
+            str(summary["host_profile"]),
+            f"version {version}" if version else "version not recorded",
+        ]
+    )
+
+
 def result_count(summary: dict, key: str) -> str:
     return f"{percent(summary[key + '_rate'])} ({summary[key]}/{summary['instances']})"
 
 
 def run_metric_cards(group: dict) -> str:
     return f"""
-    <div class="metric-grid">
-      <div><strong>{percent(group["resolved_rate"])}</strong><span>resolved</span></div>
-      <div><strong>{percent(group["almost_resolved_rate"])}</strong><span>almost resolved</span></div>
-      <div><strong>{whole_money(group["total_cost_usd"])}</strong><span>total est. cost</span></div>
-      <div><strong>{integer(group["total_calls"])}</strong><span>total calls</span></div>
+    <div class="run-kpis" aria-label="Run metrics">
+      <div class="run-kpi primary"><span>Resolved</span><strong>{group["resolved"]} / {group["instances"]}</strong><em>{percent(group["resolved_rate"])}</em></div>
+      <div class="run-kpi"><span>Almost resolved</span><strong>{group["almost_resolved"]} / {group["instances"]}</strong><em>{percent(group["almost_resolved_rate"])}</em></div>
+      <div class="run-kpi"><span>Average pass rate</span><strong>{percent(group["average_pass_rate"])}</strong><em>behavioral tests</em></div>
+      <div class="run-kpi"><span>Total est. cost</span><strong>{whole_money(group["total_cost_usd"])}</strong><em>{money(group["average_cost_usd"])} / task</em></div>
+      <div class="run-kpi"><span>Total calls</span><strong>{integer(group["total_calls"])}</strong><em>{group["average_calls"]:.1f} / task</em></div>
+      <div class="run-kpi"><span>Wall clock</span><strong>{group["total_wall_clock_hours"]:.2f}h</strong><em>{group["instances"]} published task{"s" if group["instances"] != 1 else ""}</em></div>
     </div>
     """
 
 
 def version_label(version: str) -> str:
-    return version or "unversioned"
+    return version or "not recorded"
 
 
 def render_leaderboard(groups: list[dict]) -> str:
@@ -910,6 +938,28 @@ def heat_color(score: float) -> str:
     return "#e5e7eb"
 
 
+def run_version_chip(group: dict) -> str:
+    version = str(group.get("run_version", ""))
+    return f"version {cell(version)}" if version else "version not recorded"
+
+
+def run_chips(group: dict) -> str:
+    return "".join(
+        f'<span class="run-chip">{value}</span>'
+        for value in [
+            cell(str(group["mode"])),
+            cell(str(group["compliance"])),
+            cell(str(group["host_profile"])),
+            cell(run_version_chip(group)),
+        ]
+    )
+
+
+def official_run_button(group: dict) -> str:
+    url = official_run_url(str(group["model"]))
+    return f'<a class="button" href="{cell(url)}">Official ProgramBench baseline</a>' if url else ""
+
+
 def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
     matching = [
         row
@@ -937,6 +987,7 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
         """
         for row in sorted(matching, key=lambda item: item.score, reverse=True)
     )
+    official_button = official_run_button(group)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -945,35 +996,186 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
   <title>{cell(str(group["model"]))} GoalBench Run</title>
   <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
   <style>
-    body {{ font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #182026; }}
-    a {{ color: #075985; }}
-    table {{ border-collapse: collapse; width: 100%; margin-top: 16px; }}
-    th, td {{ border-bottom: 1px solid #d9e0e6; padding: 9px 10px; text-align: left; font-size: 13px; }}
-    th {{ background: #f5f7f8; }}
-    code {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }}
-    .heatmap {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(14px, 1fr)); gap: 3px; max-width: 780px; margin: 16px 0; }}
-    .heat-cell {{ display: block; aspect-ratio: 1; border-radius: 3px; }}
+    :root {{
+      --ink: #182026;
+      --muted: #5b6b78;
+      --line: #d9e0e6;
+      --soft: #f4f8f6;
+      --accent: #0f766e;
+      --accent-strong: #0b5f59;
+      --warn: #b45309;
+      --bad: #be123c;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fbfcfb 0%, #f6f9f7 360px, #ffffff 361px);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }}
+    a {{ color: #075985; text-decoration-thickness: 1px; text-underline-offset: 2px; }}
+    header, main {{ max-width: 1180px; margin: 0 auto; padding: 22px 28px; }}
+    .topbar {{ display: flex; align-items: center; justify-content: space-between; gap: 20px; }}
+    .nav-brand {{ display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 850; text-decoration: none; }}
+    .brand-mark {{ width: 30px; height: 30px; display: block; flex: 0 0 auto; }}
+    .nav-links {{ display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }}
+    .nav-links a {{ color: #40515c; text-decoration: none; border-radius: 6px; padding: 7px 9px; font-size: 14px; }}
+    .nav-links a:hover {{ color: #075985; background: #eef6f3; }}
+    .run-hero {{
+      padding: 34px 0 28px;
+      border-bottom: 1px solid var(--line);
+    }}
+    .run-eyebrow {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent-strong);
+      font-size: 13px;
+      font-weight: 850;
+      margin: 0 0 10px;
+    }}
+    h1 {{
+      margin: 0;
+      max-width: 820px;
+      color: var(--ink);
+      font-size: clamp(38px, 7vw, 76px);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }}
+    h2 {{ margin: 34px 0 8px; font-size: 20px; }}
+    p {{ color: var(--muted); line-height: 1.5; }}
+    .run-summary {{ max-width: 760px; margin: 14px 0 0; font-size: 17px; }}
+    .run-actions {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }}
+    .button {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      padding: 8px 12px;
+      color: #263640;
+      background: #ffffff;
+      font-size: 13px;
+      font-weight: 750;
+      text-decoration: none;
+      white-space: nowrap;
+    }}
+    .button:hover {{ border-color: #9fb4ad; background: #f5faf8; }}
+    .button.primary {{ border-color: var(--accent); background: var(--accent); color: #ffffff; }}
+    .button.primary:hover {{ background: #115e59; }}
+    .run-chips {{ display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }}
+    .run-chip {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border: 1px solid #cbd8d3;
+      border-radius: 999px;
+      padding: 5px 10px;
+      color: #31434d;
+      background: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+    }}
+    .run-kpis {{
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin: 24px 0 10px;
+    }}
+    .run-kpi {{
+      min-height: 112px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #ffffff;
+    }}
+    .run-kpi.primary {{ border-color: #b7d8cf; background: #f1fbf7; }}
+    .run-kpi span {{ display: block; color: #4e606c; font-size: 12px; font-weight: 800; text-transform: uppercase; }}
+    .run-kpi strong {{ display: block; margin-top: 14px; color: var(--ink); font-size: clamp(22px, 3vw, 30px); line-height: 1; }}
+    .run-kpi em {{ display: block; margin-top: 8px; color: var(--muted); font-size: 12px; font-style: normal; }}
     .plot-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 14px 0 18px; }}
-    .plot-card {{ border: 1px solid #d9e0e6; border-radius: 8px; padding: 12px; }}
+    .plot-card {{ border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: #ffffff; }}
     .plot {{ width: 100%; height: auto; display: block; }}
-    .plot line {{ stroke: #d9e0e6; stroke-width: 1.5; }}
-    .plot text {{ fill: #61707d; font-size: 11px; }}
-    .muted {{ color: #61707d; }}
+    .plot line {{ stroke: var(--line); stroke-width: 1.5; }}
+    .plot text {{ fill: var(--muted); font-size: 11px; }}
+    .heatmap-wrap {{ border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: #ffffff; }}
+    .heatmap {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(16px, 1fr)); gap: 4px; max-width: 860px; }}
+    .heat-cell {{ display: block; aspect-ratio: 1; border-radius: 4px; outline: 1px solid rgba(24, 32, 38, 0.06); }}
+    .table-wrap {{ border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; background: #ffffff; }}
+    table {{ border-collapse: collapse; width: 100%; min-width: 860px; }}
+    th, td {{ border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; font-size: 13px; vertical-align: middle; white-space: nowrap; }}
+    td:last-child {{ min-width: 220px; white-space: normal; }}
+    th {{ background: var(--soft); color: #33424d; font-weight: 750; }}
+    tr:last-child td {{ border-bottom: 0; }}
+    tbody tr:hover td {{ background: #fbfdfc; }}
+    code {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }}
+    .status {{
+      display: inline-block;
+      min-width: 64px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-weight: 750;
+      font-size: 12px;
+      text-align: center;
+      background: var(--soft);
+    }}
+    .status.resolved {{ color: #065f46; background: #d1fae5; }}
+    .status.almost {{ color: var(--warn); background: #fef3c7; }}
+    .status.open {{ color: var(--bad); background: #ffe4e6; }}
+    .muted {{ color: var(--muted); }}
+    @media (max-width: 900px) {{
+      .run-kpis {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
+    }}
+    @media (max-width: 680px) {{
+      header, main {{ padding-left: 16px; padding-right: 16px; }}
+      .topbar {{ align-items: flex-start; flex-direction: column; }}
+      .nav-links {{ justify-content: flex-start; }}
+      .run-kpis {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+      .run-kpi {{ min-height: 104px; padding: 12px; }}
+      h1 {{ font-size: clamp(34px, 11vw, 48px); }}
+    }}
   </style>
 </head>
 <body>
-  <p><a href="../../">← Back to summary</a></p>
-  <h1>{cell(str(group["model"]))}</h1>
-  <p class="muted">{cell(str(group["agent"]))} · run {cell(version_label(str(group.get("run_version", ""))))} · {cell(str(group["mode"]))} · {cell(str(group["compliance"]))}</p>
-  {run_metric_cards(group)}
-  <p>Avg. pass {percent(group["average_pass_rate"])} · Avg. est. cost / task {money(group["average_cost_usd"])} · Avg. calls / task {group["average_calls"]:.1f}</p>
-  {render_score_distribution(matching)}
-  <h2>Score by Task</h2>
-  <div class="heatmap">{heatmap}</div>
-  <table>
-    <thead><tr><th>Instance</th><th>Score</th><th>Resolved</th><th>Almost</th><th>Eval</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Evidence</th></tr></thead>
-    <tbody>{table}</tbody>
-  </table>
+  <header>
+    <nav class="topbar" aria-label="Primary">
+      <a class="nav-brand" href="../../">{brand_slash_svg()}<span>{SITE_NAME}</span></a>
+      <div class="nav-links">
+        <a href="../../">Leaderboard</a>
+        <a href="../../extended/">Extended</a>
+        <a href="../../task-details.html">Tasks</a>
+        <a href="../../paper-compliance.md">Compliance</a>
+        <a href="../../runbook.md">Runbook</a>
+        <a href="{GOALBENCH_GITHUB}">GitHub</a>
+        <a href="{PROGRAMBENCH_EXTENDED}">ProgramBench</a>
+      </div>
+    </nav>
+    <section class="run-hero">
+      <p class="run-eyebrow">Codex <code>/goal</code> run detail</p>
+      <h1>{cell(str(group["model"]))}</h1>
+      <p class="run-summary">A GoalBench scaffold run against ProgramBench tasks. This page shows the run's measured outcomes, task scores, and public evidence links; it is not an official mini-SWE-agent leaderboard submission.</p>
+      <div class="run-chips">{run_chips(group)}</div>
+      <div class="run-actions">
+        <a class="button primary" href="../../">Back to leaderboard</a>
+        {official_button}
+      </div>
+    </section>
+  </header>
+  <main>
+    {run_metric_cards(group)}
+    {render_score_distribution(matching)}
+    <h2>Score by Task</h2>
+    <p class="muted">Each cell is one evaluated task instance. Dark green means fully resolved, amber means almost resolved, and muted cells are partial or open.</p>
+    <div class="heatmap-wrap"><div class="heatmap">{heatmap}</div></div>
+    <h2>Per-Instance Results</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Instance</th><th>Score</th><th>Resolved</th><th>Almost</th><th>Eval</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Evidence</th></tr></thead>
+        <tbody>{table}</tbody>
+      </table>
+    </div>
+  </main>
 </body>
 </html>
 """
@@ -1093,45 +1295,144 @@ def render_task_detail(instance_id: str, rows: list[ResultRow], official_tasks: 
   <title>{cell(instance_id)} ProgramBench Task</title>
   <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
   <style>
-    body {{ font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #182026; }}
-    a {{ color: #075985; }}
-    table {{ border-collapse: collapse; width: 100%; margin-top: 16px; }}
-    th, td {{ border-bottom: 1px solid #d9e0e6; padding: 9px 10px; text-align: left; font-size: 13px; }}
-    th {{ background: #f5f7f8; }}
+    :root {{
+      --ink: #182026;
+      --muted: #5b6b78;
+      --line: #d9e0e6;
+      --soft: #f4f8f6;
+      --accent: #0f766e;
+      --accent-strong: #0b5f59;
+      --warn: #b45309;
+      --bad: #be123c;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fbfcfb 0%, #f6f9f7 330px, #ffffff 331px);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }}
+    a {{ color: #075985; text-decoration-thickness: 1px; text-underline-offset: 2px; }}
+    header, main {{ max-width: 1180px; margin: 0 auto; padding: 22px 28px; }}
+    .topbar {{ display: flex; align-items: center; justify-content: space-between; gap: 20px; }}
+    .nav-brand {{ display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 850; text-decoration: none; }}
+    .brand-mark {{ width: 30px; height: 30px; display: block; flex: 0 0 auto; }}
+    .nav-links {{ display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }}
+    .nav-links a {{ color: #40515c; text-decoration: none; border-radius: 6px; padding: 7px 9px; font-size: 14px; }}
+    .nav-links a:hover {{ color: #075985; background: #eef6f3; }}
+    .task-hero {{ padding: 34px 0 28px; border-bottom: 1px solid var(--line); }}
+    .task-eyebrow {{ color: var(--accent-strong); font-size: 13px; font-weight: 850; margin: 0 0 10px; }}
+    h1 {{ margin: 0; max-width: 920px; color: var(--ink); font-size: clamp(30px, 5vw, 54px); line-height: 1.02; letter-spacing: 0; overflow-wrap: anywhere; }}
+    h2 {{ margin: 34px 0 8px; font-size: 22px; }}
+    p {{ color: var(--muted); line-height: 1.5; }}
+    .task-summary {{ max-width: 840px; margin: 14px 0 0; font-size: 17px; }}
+    .task-actions {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }}
+    .button {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      padding: 8px 12px;
+      color: #263640;
+      background: #ffffff;
+      font-size: 13px;
+      font-weight: 750;
+      text-decoration: none;
+      white-space: nowrap;
+    }}
+    .button:hover {{ border-color: #9fb4ad; background: #f5faf8; }}
+    .button.primary {{ border-color: var(--accent); background: var(--accent); color: #ffffff; }}
+    .button.primary:hover {{ background: #115e59; }}
     code {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }}
-    .metric-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; max-width: 780px; margin: 16px 0; }}
-    .metric {{ border: 1px solid #d9e0e6; border-radius: 8px; padding: 14px; }}
-    .metric strong {{ display: block; font-size: 24px; }}
-    .metric span {{ color: #61707d; font-size: 13px; }}
+    h1 code {{ font-size: clamp(18px, 3vw, 30px); white-space: normal; }}
+    .metric-grid {{ display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 24px 0 10px; }}
+    .metric {{ min-height: 102px; border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: #ffffff; }}
+    .metric strong {{ display: block; margin-bottom: 8px; font-size: clamp(24px, 3vw, 32px); line-height: 1; }}
+    .metric span {{ color: var(--muted); font-size: 13px; }}
+    .table-wrap {{ border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; background: #ffffff; }}
+    table {{ border-collapse: collapse; width: 100%; min-width: 860px; }}
+    th, td {{ border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; font-size: 13px; vertical-align: middle; white-space: nowrap; }}
+    td:last-child {{ min-width: 220px; white-space: normal; }}
+    th {{ background: var(--soft); color: #33424d; font-weight: 750; }}
+    tr:last-child td {{ border-bottom: 0; }}
+    tbody tr:hover td {{ background: #fbfdfc; }}
     .evidence-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; margin: 16px 0; }}
-    .evidence-card {{ border: 1px solid #d9e0e6; border-radius: 8px; padding: 14px; }}
+    .evidence-card {{ border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #ffffff; }}
     .evidence-card h3 {{ margin: 0 0 8px; font-size: 16px; }}
     .evidence-card ul {{ margin: 8px 0 0; padding-left: 18px; }}
     .evidence-card li {{ margin: 5px 0; font-size: 13px; }}
-    .muted {{ color: #61707d; }}
+    .status {{
+      display: inline-block;
+      min-width: 64px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-weight: 750;
+      font-size: 12px;
+      text-align: center;
+      background: var(--soft);
+    }}
+    .status.resolved {{ color: #065f46; background: #d1fae5; }}
+    .status.almost {{ color: var(--warn); background: #fef3c7; }}
+    .status.open {{ color: var(--bad); background: #ffe4e6; }}
+    .muted {{ color: var(--muted); }}
+    @media (max-width: 760px) {{
+      header, main {{ padding-left: 16px; padding-right: 16px; }}
+      .topbar {{ align-items: flex-start; flex-direction: column; }}
+      .nav-links {{ justify-content: flex-start; }}
+      .metric-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+      .metric {{ min-height: 96px; }}
+    }}
   </style>
 </head>
 <body>
-  <p><a href="../../">← Back to summary</a> · <a href="{cell(official_task_url)}">Official ProgramBench task page</a></p>
-  <h1><code>{cell(instance_id)}</code></h1>
-  <p class="muted">Task-level results for this Codex <code>/goal</code> scaffold. ProgramBench baseline context is cached from the official task page; Codex scored tests are after active-branch and ignored-test filtering.</p>
-  <div class="metric-grid">
-    <div class="metric"><strong>{official_task.get("generated_tests", scored_tests if scored_tests is not None else "pending")}</strong><span>generated behavioral tests</span></div>
-    <div class="metric"><strong>{percent(float(official_task["best_score"])) if official_task.get("best_score") is not None else "pending"}</strong><span>official best score</span></div>
-    <div class="metric"><strong>{percent(best_score) if best_score is not None else "pending"}</strong><span>Codex best score</span></div>
-    <div class="metric"><strong>{len(matching)}</strong><span>Codex result rows</span></div>
-  </div>
-  <h2>Codex Results by Model</h2>
-  <table>
-    <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Mode</th><th>Score</th><th>Eval</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Evidence</th></tr></thead>
-    <tbody>{result_rows}</tbody>
-  </table>
-  {render_evidence_highlights(matching)}
-  <h2>Official ProgramBench Results by Model</h2>
-  <table>
-    <thead><tr><th>#</th><th>Model</th><th>Provider</th><th>Score</th><th>Cost</th><th>Calls</th></tr></thead>
-    <tbody>{official_task_result_rows(official_task) or '<tr><td colspan="6">Official task rows not cached yet.</td></tr>'}</tbody>
-  </table>
+  <header>
+    <nav class="topbar" aria-label="Primary">
+      <a class="nav-brand" href="../../">{brand_slash_svg()}<span>{SITE_NAME}</span></a>
+      <div class="nav-links">
+        <a href="../../">Leaderboard</a>
+        <a href="../../extended/">Extended</a>
+        <a href="../../task-details.html">Tasks</a>
+        <a href="../../paper-compliance.md">Compliance</a>
+        <a href="../../runbook.md">Runbook</a>
+        <a href="{GOALBENCH_GITHUB}">GitHub</a>
+        <a href="{PROGRAMBENCH_EXTENDED}">ProgramBench</a>
+      </div>
+    </nav>
+    <section class="task-hero">
+      <p class="task-eyebrow">ProgramBench task detail</p>
+      <h1><code>{cell(instance_id)}</code></h1>
+      <p class="task-summary">Task-level results for this Codex <code>/goal</code> scaffold. ProgramBench baseline context is cached from the official task page; Codex scored tests are after active-branch and ignored-test filtering.</p>
+      <div class="task-actions">
+        <a class="button primary" href="../../">Back to leaderboard</a>
+        <a class="button" href="{cell(official_task_url)}">Official ProgramBench task</a>
+      </div>
+    </section>
+  </header>
+  <main>
+    <div class="metric-grid">
+      <div class="metric"><strong>{official_task.get("generated_tests", scored_tests if scored_tests is not None else "pending")}</strong><span>generated behavioral tests</span></div>
+      <div class="metric"><strong>{percent(float(official_task["best_score"])) if official_task.get("best_score") is not None else "pending"}</strong><span>official best score</span></div>
+      <div class="metric"><strong>{percent(best_score) if best_score is not None else "pending"}</strong><span>Codex best score</span></div>
+      <div class="metric"><strong>{len(matching)}</strong><span>Codex result rows</span></div>
+    </div>
+    <h2>Codex Results by Model</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Mode</th><th>Score</th><th>Eval</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Evidence</th></tr></thead>
+        <tbody>{result_rows}</tbody>
+      </table>
+    </div>
+    {render_evidence_highlights(matching)}
+    <h2>Official ProgramBench Results by Model</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Model</th><th>Provider</th><th>Score</th><th>Cost</th><th>Calls</th></tr></thead>
+        <tbody>{official_task_result_rows(official_task) or '<tr><td colspan="6">Official task rows not cached yet.</td></tr>'}</tbody>
+      </table>
+    </div>
+  </main>
 </body>
 </html>
 """
@@ -1374,7 +1675,7 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
     """
     return f"""
     <div class="cards">
-      {"".join(render_summary_cards(f"{group['model']} / {group['mode']} / {version_label(str(group.get('run_version', '')))}", group) for group in data["groups"])}
+      {"".join(render_summary_cards(summary_title(group), group) for group in data["groups"])}
     </div>
 
     <h2>Score by Model × Task</h2>
@@ -1449,7 +1750,7 @@ def render_home_results(data: dict, instances: list[ResultRow]) -> str:
     <section class="section">
       <div class="section-eyebrow">Run summary</div>
       <div class="cards">
-        {"".join(render_summary_cards(f"{group['model']} / {group['mode']} / {version_label(str(group.get('run_version', '')))}", group) for group in data["groups"])}
+        {"".join(render_summary_cards(summary_title(group), group) for group in data["groups"])}
       </div>
     </section>
     """
