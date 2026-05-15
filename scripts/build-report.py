@@ -150,9 +150,9 @@ def write_support_files(output_dir: Path) -> None:
     (output_dir / "favicon.svg").write_text(
         """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="12" fill="#10201d"/>
-  <path d="M14 18h24c8.3 0 14 5.7 14 14s-5.7 14-14 14H24V34h13c1.6 0 2.7-.8 2.7-2s-1.1-2-2.7-2H14V18Z" fill="#d8fff4"/>
-  <path d="M14 34h10v12H14V34Z" fill="#14b8a6"/>
-  <path d="M33 32l9-9 8 8-8 8-9-7Z" fill="#f6c453"/>
+  <path d="M39 11h10L25 53H15L39 11Z" fill="#d8fff4"/>
+  <path d="M45 11h4L25 53h-4L45 11Z" fill="#14b8a6" opacity=".75"/>
+  <path d="M38 42h12v9H38z" fill="#f6c453"/>
 </svg>
 """,
     )
@@ -1479,7 +1479,7 @@ def render_html(data: dict, extended: bool = False) -> str:
     h3 {{ margin: 0 0 10px; font-size: 14px; letter-spacing: 0; }}
     p {{ color: var(--muted); line-height: 1.5; max-width: 900px; }}
     .brand {{ display: flex; gap: 10px; align-items: center; margin-bottom: 16px; font-weight: 800; letter-spacing: 0; }}
-    .brand-mark {{ width: 30px; height: 30px; border-radius: 7px; display: inline-grid; place-items: center; background: #10201d; color: #d8fff4; font-weight: 900; }}
+    .brand-mark {{ width: 30px; height: 30px; border-radius: 7px; display: inline-grid; place-items: center; background: #10201d; color: #d8fff4; font-weight: 900; font-size: 22px; line-height: 1; }}
     .hero {{
       display: grid;
       grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
@@ -1642,7 +1642,7 @@ def render_html(data: dict, extended: bool = False) -> str:
 <body>
   <header>
     {nav}
-    <div class="brand"><span class="brand-mark">G</span><span>{SITE_NAME}</span></div>
+    <div class="brand"><span class="brand-mark">/</span><span>{SITE_NAME}</span></div>
     <div class="hero">
       <div>
         <p class="question">{question}</p>
