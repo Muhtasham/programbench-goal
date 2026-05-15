@@ -337,10 +337,12 @@ def is_inside(path: str, root: Path) -> bool:
     return candidate == root or root in candidate.parents
 
 
-def find_session_logs(instance_dir: Path, sessions_root: Path) -> list[Path]:
+def find_session_logs(instance_dir: Path, sessions_roots: list[Path]) -> list[Path]:
     solution_dir = str(instance_dir / "solution")
     return [
         path
+        for sessions_root in sessions_roots
+        if sessions_root.is_dir()
         for path in sorted(sessions_root.glob("**/*.jsonl"))
         if (session_meta(path) or {}).get("cwd") == solution_dir
     ]
@@ -509,7 +511,7 @@ def audit(args: argparse.Namespace) -> None:
     findings.extend(audit_submission_archive(instance_dir))
     findings.extend(audit_paper_settings(run, instance_dir))
 
-    logs = find_session_logs(instance_dir, Path(args.codex_sessions).expanduser())
+    logs = find_session_logs(instance_dir, [Path(path).expanduser() for path in args.codex_sessions])
     if not logs:
         findings.append(Finding(str(instance_dir), "no Codex JSONL session logs found for solution cwd"))
     blocked_attempts = 0
@@ -551,7 +553,7 @@ def failure_text(finding: Finding) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Audit a Codex /goal ProgramBench run for cleanroom gaps")
     parser.add_argument("instance_dir")
-    parser.add_argument("--codex-sessions", default=str(Path.home() / ".codex" / "sessions"))
+    parser.add_argument("--codex-sessions", nargs="+", default=[str(Path.home() / ".codex" / "sessions")])
     parser.add_argument(
         "--strict-paper",
         action="store_true",

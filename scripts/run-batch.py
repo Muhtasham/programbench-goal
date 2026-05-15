@@ -283,6 +283,14 @@ def cleanup_finished(state: dict) -> None:
             cleanup_codex_session(record)
 
 
+def codex_session_roots(*records: dict) -> list[Path]:
+    roots = []
+    for user in sorted({record.get("codex_user", "") for record in records if record.get("codex_user")}):
+        home = Path(pwd.getpwnam(user).pw_dir)
+        roots.extend([home / ".codex" / "sessions", home / ".codex" / "archived_sessions"])
+    return roots
+
+
 def summarize_state(state: dict) -> dict[str, int]:
     return dict(Counter(record["status"] for record in state["items"].values()))
 
@@ -352,7 +360,16 @@ def finalize_one(args: argparse.Namespace, record: dict) -> dict:
         audit_cmd = [sys.executable, str(REPO / "scripts" / "audit-run.py")]
         if args.strict_paper:
             audit_cmd.append("--strict-paper")
-        audit_cmd.append(str(instance_dir))
+        audit_cmd.extend(
+            [
+                *(
+                    ["--codex-sessions", *[str(path) for path in codex_session_roots(record)]]
+                    if record.get("codex_user")
+                    else []
+                ),
+                str(instance_dir),
+            ]
+        )
         run(audit_cmd)
         if args.programbench_repo:
             eval_cmd = [str(instance_dir / "eval-submission.sh"), str(Path(args.programbench_repo).expanduser())]
@@ -420,6 +437,11 @@ def summarize_and_collect(args: argparse.Namespace, state: dict, records: list[d
             str(run_root),
             "--programbench-repo",
             str(Path(args.programbench_repo).expanduser()),
+            *(
+                ["--codex-sessions", *[str(path) for path in codex_session_roots(*state["items"].values())]]
+                if codex_session_roots(*state["items"].values())
+                else []
+            ),
             "--output",
             str(output),
         ]
