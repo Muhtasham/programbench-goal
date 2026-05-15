@@ -155,8 +155,15 @@ def was_rejected(output: str) -> bool:
 
 
 def uses_tool(command: str, tool: str) -> bool:
-    path = r"(?:/(?:bin|usr/bin|usr/local/bin|opt/homebrew/bin)/)?"
-    return bool(re.search(rf"(^|[\s;&|()]){path}{re.escape(tool)}([\s;&|()]|$)", command))
+    try:
+        lexer = shlex.shlex(command, posix=True, punctuation_chars=True)
+        lexer.whitespace_split = True
+        lexer.commenters = ""
+        tokens = list(lexer)
+    except ValueError:
+        path = r"(?:/(?:bin|usr/bin|usr/local/bin|opt/homebrew/bin)/)?"
+        return bool(re.search(rf"(^|[\s;&|()]){path}{re.escape(tool)}([\s;&|()]|$)", command))
+    return any(Path(token).name == tool for token in tokens if "=" not in token)
 
 
 def uses_binary_analysis_on_target(command: str, tool: str) -> bool:
