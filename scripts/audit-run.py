@@ -353,6 +353,7 @@ def is_small_text_file(path: Path) -> bool:
     if not (
         path.is_file()
         and ".goal" not in path.parts
+        and "probes" not in path.parts
         and path.name != "AGENT_RULES.md"
         and path.stat().st_size < 2_000_000
     ):

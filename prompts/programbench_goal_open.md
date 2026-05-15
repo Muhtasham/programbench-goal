@@ -27,7 +27,9 @@ Required behavior-discovery loop:
 - Maintain `.goal/BEHAVIOR_AUDIT.md` in the solution directory. Keep it updated
   with the feature inventory, probe commands, target-vs-local comparison
   results, discrepancies found, fixes made, remaining known gaps, and the final
-  stopping rationale. The harness excludes `.goal/` from the submitted archive.
+  stopping rationale. The harness excludes `.goal/` and `probes/` from the
+  submitted archive. Put generated target probes and scratch comparison
+  fixtures under `probes/`.
 - After the first implementation works, continue running target-vs-local
   comparison probes and fix mismatches. Use generated probes/fuzzers where they
   help.

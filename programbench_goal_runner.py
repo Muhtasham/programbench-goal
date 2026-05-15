@@ -608,6 +608,7 @@ test -f {shlex.quote(str(solution_dir / "compile.sh"))} || {{
 COPYFILE_DISABLE=1 tar -C {shlex.quote(str(solution_dir))} \\
   --exclude './AGENT_RULES.md' \\
   --exclude './.goal' \\
+  --exclude './probes' \\
   --exclude './.DS_Store' \\
   --exclude './._*' \\
   -czf {shlex.quote(str(instance_dir / "submission.tar.gz"))} .
