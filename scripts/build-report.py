@@ -30,6 +30,12 @@ BRAND_SLASH_PATHS = """
   <path d="M48.25 10.5h4.25L26.5 53.5h-4.25L48.25 10.5Z" fill="#14b8a6"/>
   <path d="M37.5 43.5h13v8.25h-13z" fill="#f6c453"/>
 """.strip()
+CODEX_MARK_PATHS = """
+  <circle cx="32" cy="32" r="28" fill="#111820"/>
+  <path d="M28.2 13.8c3.5-2 8-.8 10 2.7l2.8 4.9 5.6.1c4 0 7.3 3.3 7.3 7.3 0 2.6-1.4 5-3.6 6.3l-4.8 2.8-2.7 4.9c-2 3.5-6.5 4.7-10 2.7l-4.9-2.8-5.6-.1c-4 0-7.3-3.3-7.3-7.3 0-2.6 1.4-5 3.6-6.3l4.8-2.8 2.7-4.9c.6-1.1 1.5-2 2.1-2.5Z" fill="none" stroke="#f7fbf9" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M23.6 26.2 32 21.3l8.7 5v10.1L32 41.5l-8.7-5V26.4" fill="none" stroke="#f7fbf9" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32 21.3v9.9l8.7 5.2M32 31.2l-8.7 5.2" fill="none" stroke="#f7fbf9" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+""".strip()
 TAG_RE = re.compile(r"<[^>]+>")
 
 
@@ -157,9 +163,17 @@ def brand_slash_svg(class_name: str = "brand-mark") -> str:
     return f'<svg{class_attr} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true">{BRAND_SLASH_PATHS}</svg>'
 
 
+def codex_logo_img(class_name: str = "codex-mark") -> str:
+    return f'<img class="{class_name}" src="assets/codex-logo.svg" alt="" aria-hidden="true">'
+
+
 def write_support_files(output_dir: Path) -> None:
     (output_dir / "favicon.svg").write_text(
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">{BRAND_SLASH_PATHS}</svg>\n',
+    )
+    (output_dir / "assets").mkdir(exist_ok=True)
+    (output_dir / "assets" / "codex-logo.svg").write_text(
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">{CODEX_MARK_PATHS}</svg>\n',
     )
 
 
@@ -1547,9 +1561,21 @@ def render_html(data: dict, extended: bool = False) -> str:
     h3 {{ margin: 0 0 10px; font-size: 14px; letter-spacing: 0; }}
     p {{ color: var(--muted); line-height: 1.5; max-width: 900px; }}
     .brand-mark {{ width: 30px; height: 30px; display: block; flex: 0 0 auto; }}
+    .codex-mark {{ width: 28px; height: 28px; display: block; flex: 0 0 auto; }}
     .hero {{
       max-width: 880px;
     }}
+    .hero-lockup {{
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 22px;
+      color: #21313b;
+      font-size: 14px;
+      font-weight: 820;
+    }}
+    .hero-lockup span {{ display: inline-flex; align-items: center; gap: 8px; }}
+    .hero-lockup .lockup-x {{ color: #7a8993; font-weight: 650; }}
     .hero-copy {{ font-size: 18px; max-width: 770px; margin-bottom: 0; }}
     .question {{ color: var(--accent-strong); margin: 0 0 12px; font-weight: 800; }}
     .hero-disclosure {{
@@ -1749,6 +1775,7 @@ def render_html(data: dict, extended: bool = False) -> str:
       .section-head {{ align-items: flex-start; flex-direction: column; }}
       .metric-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
       header, main {{ padding-left: 16px; padding-right: 16px; }}
+      .hero-lockup {{ margin-bottom: 18px; }}
     }}
   </style>
 </head>
@@ -1757,6 +1784,11 @@ def render_html(data: dict, extended: bool = False) -> str:
     {nav}
     <div class="hero">
       <div>
+        <div class="hero-lockup" aria-label="GoalBench powered by Codex">
+          <span>{brand_slash_svg("brand-mark")}GoalBench</span>
+          <span class="lockup-x">×</span>
+          <span>{codex_logo_img()}Codex</span>
+        </div>
         <p class="question">{question}</p>
         <h1>{heading}</h1>
         <p class="hero-copy">{hero_copy}</p>
