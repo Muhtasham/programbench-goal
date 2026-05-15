@@ -389,13 +389,13 @@ def prepare(args: argparse.Namespace) -> None:
         )
     )
     objective = (
-        f"Solve ProgramBench instance {args.instance_id} in the cleanroom container by reimplementing the "
-        "target CLI from black-box behavior only. Treat hidden tests as adversarial edge-case tests. Keep "
-        "iterating on target-vs-local behavioral probes, including generated/fuzzed combinations, until no "
-        "documented or discovered behavior class remains unexplored. Do not mark the goal complete just because "
-        "packaging works or representative probes pass; complete only after solution/compile.sh builds "
-        "./executable, package-submission succeeds, and .goal/BEHAVIOR_AUDIT.md documents adversarial probe "
-        "coverage, comparisons, mismatches fixed, known gaps, and stopping rationale. "
+        f"Complete ProgramBench instance {args.instance_id} in the cleanroom container by reimplementing the "
+        "target CLI from black-box behavior only, without stopping until solution/compile.sh builds ./executable, "
+        "package-submission succeeds, and .goal/BEHAVIOR_AUDIT.md documents adversarial target-vs-local probe "
+        "coverage, comparisons, mismatches fixed, known gaps, and stopping rationale. Treat hidden tests as "
+        "adversarial edge-case tests. Keep iterating with generated/fuzzed probes until no documented or "
+        "discovered behavior class remains unexplored. Do not mark the goal complete just because packaging works "
+        "or representative probes pass. "
         "Do not inspect parent directories or files outside the solution directory."
     )
 
