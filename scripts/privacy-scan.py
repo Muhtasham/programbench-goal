@@ -9,12 +9,13 @@ from pathlib import Path
 
 def patterns() -> list[str]:
     home = str(Path.home())
-    return [
+    candidates = [
         home,
         str(Path.home().parent),
         str(Path.home() / "Documents"),
         "Documents/" + "ProgramBench",
     ]
+    return [pattern for pattern in candidates if pattern and pattern != Path(pattern).anchor]
 
 
 def main() -> None:
@@ -24,7 +25,7 @@ def main() -> None:
 
     results = [
         subprocess.run(
-            ["rg", "-n", pattern, args.root, "--glob", "!local_state/**"],
+            ["rg", "-n", "-F", pattern, args.root, "--glob", "!local_state/**"],
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
