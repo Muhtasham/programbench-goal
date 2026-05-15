@@ -439,7 +439,6 @@ def mode_label(row: ResultRow) -> str:
     return {
         "no-internet": "No internet",
         "no-internet-local-tools": "No internet + local tools",
-        "open-internet": "Open internet",
     }.get(row.inference_mode, row.inference_mode or "Unknown")
 
 
@@ -463,8 +462,6 @@ def host_profile(row: ResultRow) -> str:
 
 
 def compliance_label(row: ResultRow) -> str:
-    if row.inference_mode == "open-internet":
-        return "Non-compliant: internet allowed"
     if row.inference_mode == "no-internet":
         return "Codex no-internet ablation"
     if row.inference_mode == "no-internet-local-tools":
@@ -1729,10 +1726,6 @@ def render_empty_state() -> str:
           <strong>Tool-starvation ablation</strong>
           <p><code>configs/full-localtools-xhigh.json</code> keeps internet/source lookup blocked but allows local binary-analysis/tracing tools. It is intentionally non-compliant.</p>
         </div>
-        <div class="mode-card">
-          <strong>Open-internet ceiling</strong>
-          <p><code>configs/full-open-xhigh.json</code> allows internet/package tooling and is only a non-compliant ceiling experiment.</p>
-        </div>
       </div>
     </section>
     """
@@ -1751,8 +1744,7 @@ def render_run_plan() -> str:
             <tr><td>1</td><td>Primary</td><td><code>cpx62-nointernet-xhigh</code></td><td>GPT-5.5 xhigh with Codex <code>/goal</code> on ProgramBench without internet/source lookup, with strict host egress, sized for the current 16 CPU / 30g runner.</td><td>Codex no-internet ablation</td></tr>
             <tr><td>2</td><td>Prompt variant</td><td><code>cpx62-paper-xhigh</code></td><td>ProgramBench-style prompt/scaffold restrictions on the same smaller runner, with strict host egress. Not paper-sized.</td><td>Codex cleanroom-style ablation</td></tr>
             <tr><td>3</td><td>Criticism ablation</td><td><code>cpx62-localtools-xhigh</code></td><td>Tests the tool-starvation critique: still no internet/source lookup and strict host egress, but local binary-analysis/tracing tools are allowed.</td><td>Non-compliant: local/binary tools allowed</td></tr>
-            <tr><td>4</td><td>Ceiling</td><td><code>cpx62-open-xhigh</code></td><td>Measures the full Codex harness with internet/package tooling allowed.</td><td>Non-compliant: internet allowed</td></tr>
-            <tr><td>5</td><td>Later</td><td><code>full-*</code> / <code>*-high</code></td><td>Use paper-sized configs or high-effort comparisons only after xhigh says the extra run is worthwhile.</td><td>Depends on mode and host preflight</td></tr>
+            <tr><td>4</td><td>Later</td><td><code>full-*</code> / <code>*-high</code></td><td>Use paper-sized configs or high-effort comparisons only after xhigh says the extra run is worthwhile.</td><td>Depends on mode and host preflight</td></tr>
           </tbody>
         </table>
       </div>
@@ -2318,15 +2310,11 @@ def render_html(data: dict, extended: bool = False) -> str:
           <strong>No internet + local tools</strong>
           <p>Non-compliant ablation for the tool-starvation critique: external internet/source lookup remains blocked, but local binary-analysis/tracing tools are allowed.</p>
         </div>
-        <div class="mode-card">
-          <strong>Open internet</strong>
-          <p>Full Codex harness. Internet and package tooling are allowed. Not ProgramBench-compliant.</p>
-        </div>
       </div>
     </section>
 
     <section class="section compact">
-      <p class="note">Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in no-internet mode. Paper/cleanroom rows are ProgramBench-style Codex scaffold runs, not official mini-SWE-agent paper baseline reproductions. Open-internet and local-tools runs are intentionally non-compliant and reported separately. See <a href="task-details.html">Task Details</a>, the <a href="runbook.html">runbook</a>, and <a href="paper-compliance.html">compliance notes</a> for setup and mode details.</p>
+      <p class="note">Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in no-internet mode. Paper/cleanroom rows are ProgramBench-style Codex scaffold runs, not official mini-SWE-agent paper baseline reproductions. Local-tools runs are intentionally non-compliant and reported separately. See <a href="task-details.html">Task Details</a>, the <a href="runbook.html">runbook</a>, and <a href="paper-compliance.html">compliance notes</a> for setup and mode details.</p>
     </section>
 
     <section class="section">

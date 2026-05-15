@@ -14,8 +14,7 @@ The harness keeps the solving workspace separate from the ProgramBench evaluator
 repo. It gives Codex a clean writable solution directory and produces the
 `submission.tar.gz` layout that `programbench eval` expects. The default mode is
 the no-internet Codex `/goal` harness; use `--inference-mode paper` for the
-closest ProgramBench-cleanroom run and `--inference-mode open-internet` only for
-the explicitly non-compliant open-web ablation.
+closest ProgramBench-cleanroom run.
 
 ProgramBench is a free-form reimplementation benchmark. The agent should choose
 the language, architecture, source layout, abstractions, and build script from
@@ -257,19 +256,7 @@ runs show it is worth the extra matrix cost:
   with a preinstalled reverse-engineering toolbox such as `binutils`, `file`,
   `strace`, `ltrace`, `gdb`, `hexdump`, and Python Capstone.
 
-For now we keep one local-tools ablation because the open-internet/yolo Codex
-harness is expected to install whatever it needs anyway, and the primary result
-should stay focused on the no-internet `/goal` run.
-
-Run `open-internet` only as a separate, explicitly non-compliant full Codex
-harness ablation:
-
-```bash
-uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
-  --inference-mode open-internet
-```
-
-No-internet, no-internet-local-tools, and open-internet runs still produce
+No-internet and no-internet-local-tools runs still produce
 `submission.tar.gz` and can be evaluated with ProgramBench, but report them
 separately as Codex `/goal` experiments. Do not mix them with cleanroom
 ProgramBench results.
@@ -323,10 +310,8 @@ PUBLISH=1 scripts/start-sweep-tmux.sh configs/full-nointernet-xhigh.json
 ```
 
 Strict egress is config-scoped, not global. The full `no-internet`, `paper`,
-and `no-internet-local-tools` configs set `"strict_egress": true`; the
-`open-internet` configs leave it off so that ablation remains intentionally
-unrestricted. The runner refuses to combine strict egress with `open-internet`
-mode and currently supports strict egress only for OpenAI/Codex model runs.
+and `no-internet-local-tools` configs set `"strict_egress": true`. The runner
+currently supports strict egress only for OpenAI/Codex model runs.
 
 By default the proxy allows:
 
@@ -577,16 +562,6 @@ That run is labeled `no-internet`: it blocks external lookup and target binary
 analysis, but still discloses that the scaffold is Codex `/goal`, not
 mini-SWE-agent.
 
-Run `open-internet` only as a separate ceiling experiment:
-
-```bash
-uv run python scripts/run-config.py watch configs/full-open-xhigh.json
-```
-
-Open-internet runs are intentionally non-compliant with ProgramBench cleanroom
-rules. They answer “how far does the full Codex harness get if normal external
-resources are allowed?” rather than “what is the official ProgramBench score?”
-
 For the banteg-style “tool-starved” criticism, run the no-internet local-tools
 ablation separately:
 
@@ -612,16 +587,15 @@ uv run python scripts/run-config.py watch configs/full-paper-xhigh.json
 
 The committed full-run configs all use `gpt-5.5`, 20 CPUs, 60GB RAM, and
 `max_parallel=10`. There are separate `high` and `xhigh` configs for
-`no-internet`, `open-internet`, `no-internet-local-tools`, and `paper`. Lower
+`no-internet`, `no-internet-local-tools`, and `paper`. Lower
 parallelism on smaller VMs with `scripts/run-sweep.sh --max-parallel N` or
 `MAX_PARALLEL=N scripts/start-sweep-tmux.sh ...`. Do not mix reasoning modes in
 one batch.
 
 The `cpx62-*` configs are the same xhigh mode matrix sized for the current
 Hetzner shared runner: 16 CPUs, 30GB RAM, and `max_parallel=10`. They still use
-strict egress for `no-internet`, `paper`, and `no-internet-local-tools` modes;
-the only non-strict cpx62 mode is the explicitly non-compliant open-internet
-ceiling. They are useful for the Codex `/goal` scaffold question, but not for
+strict egress for `no-internet`, `paper`, and `no-internet-local-tools` modes.
+They are useful for the Codex `/goal` scaffold question, but not for
 paper-sized cleanroom claims.
 
 Prepare with an official prompt template when one is available:
@@ -664,9 +638,10 @@ uv run python scripts/run-batch.py watch target_sets/first_batch_near_miss.txt \
 Use `--max-parallel 1` on a laptop or small smoke VM. Use higher concurrency
 only when both Codex usage limits and host capacity are comfortable. Use
 separate batch names for `high`, `xhigh`, `paper`, `no-internet`,
-`no-internet-local-tools`, and `open-internet` runs. The manager stores resumable state under `local_state/batches/`, starts
-new work only when active sessions are below the concurrency cap, and pauses new
-launches when a running pane shows rate-limit text.
+and `no-internet-local-tools` runs. The manager stores resumable state under
+`local_state/batches/`, starts new work only when active sessions are below the
+concurrency cap, and pauses new launches when a running pane shows rate-limit
+text.
 
 Check progress:
 
@@ -842,8 +817,8 @@ uv run python scripts/build-report.py \
 `build-report.py` fetches the latest ProgramBench public baseline rows by
 default before rendering. Use `--no-refresh-baselines` only for offline rebuilds.
 
-The report keeps `paper`, `no-internet`, `no-internet-local-tools`, and
-`open-internet` tracks separate, includes ProgramBench-style
+The report keeps `paper`, `no-internet`, and `no-internet-local-tools` tracks
+separate, includes ProgramBench-style
 resolved/almost/average-pass/estimated-cost/calls metrics, and commits only
 sanitized aggregate rows. Local Codex session-log paths stay in
 `local_state/` and are not published.

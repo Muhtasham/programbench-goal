@@ -515,22 +515,21 @@ def audit(args: argparse.Namespace) -> None:
     if not logs:
         findings.append(Finding(str(instance_dir), "no Codex JSONL session logs found for solution cwd"))
     blocked_attempts = 0
-    if run.get("inference_mode") != "open-internet":
-        calls = [(log, line, call, output) for log in logs for line, call, output in exec_calls(log)]
-        blocked_attempts = sum(was_blocked(output) for _, _, _, output in calls)
-        rejected_attempts = sum(was_rejected(output) for _, _, _, output in calls)
-        findings.extend(
-            finding
-            for log, line, call, output in calls
-            for finding in audit_command(
-                f"{log}:{line}",
-                call,
-                output,
-                solution_dir,
-                run["container_name"],
-                run.get("inference_mode") == "no-internet-local-tools",
-            )
+    calls = [(log, line, call, output) for log in logs for line, call, output in exec_calls(log)]
+    blocked_attempts = sum(was_blocked(output) for _, _, _, output in calls)
+    rejected_attempts = sum(was_rejected(output) for _, _, _, output in calls)
+    findings.extend(
+        finding
+        for log, line, call, output in calls
+        for finding in audit_command(
+            f"{log}:{line}",
+            call,
+            output,
+            solution_dir,
+            run["container_name"],
+            run.get("inference_mode") == "no-internet-local-tools",
         )
+    )
 
     findings = [finding for finding in findings if args.strict_paper or not finding.strict_only]
     if findings:
@@ -539,7 +538,7 @@ def audit(args: argparse.Namespace) -> None:
     print(f"OK audit passed for {instance_dir}")
     print(f"session_logs={';'.join(str(path) for path in logs)}")
     print(f"blocked_attempts={blocked_attempts}")
-    print(f"rejected_exec_attempts={rejected_attempts if run.get('inference_mode') != 'open-internet' else 0}")
+    print(f"rejected_exec_attempts={rejected_attempts}")
 
 
 def failure_text(finding: Finding) -> str:

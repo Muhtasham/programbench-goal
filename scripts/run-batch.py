@@ -551,7 +551,7 @@ def add_common_run_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--docker-memory", default="60g")
     parser.add_argument(
         "--inference-mode",
-        choices=["paper", "no-internet", "no-internet-local-tools", "open-internet"],
+        choices=["paper", "no-internet", "no-internet-local-tools"],
         default="no-internet",
     )
     parser.add_argument("--target-access", choices=["direct-docker", "wrapper"], default="direct-docker")

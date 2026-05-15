@@ -129,7 +129,6 @@ Use separate batches for each mode. Do not mix them in one result.
 | `no-internet` | `configs/full-nointernet-xhigh.json` | Primary Codex `/goal` scaffold. No external lookup, black-box target probing. |
 | `paper` | `configs/full-paper-xhigh.json` | Stricter ProgramBench-style cleanroom mode for Codex `/goal`; not official mini-SWE-agent. |
 | `no-internet-local-tools` | `configs/full-localtools-xhigh.json` | Non-compliant tool-starvation ablation. No internet/source lookup, but local binary-analysis/tracing tools are allowed. |
-| `open-internet` | `configs/full-open-xhigh.json` | Non-compliant ceiling run with normal Codex internet/package access. |
 
 Any mode with `no-internet` semantics (`no-internet`, `paper`, and
 `no-internet-local-tools`) must use strict host egress. The runner refuses those
@@ -148,7 +147,6 @@ On a paper-sized Linux host, use the `full-*` configs. On the current Hetzner
 2. `cpx62-nointernet-high`
 3. `cpx62-paper-xhigh`
 4. `cpx62-localtools-xhigh`
-5. `cpx62-open-xhigh`
 
 Run `high` after the xhigh primary run when you want a direct reasoning-effort
 comparison on the same VM/scaffold.

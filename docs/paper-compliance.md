@@ -6,12 +6,9 @@ mini-SWE-agent baseline. Report it as a separate scaffold.
 The default `no-internet` inference mode keeps
 internet/source/package access blocked but is reported as a Codex scaffold
 ablation rather than a paper-comparable run. The optional `paper` inference
-mode is the strict cleanroom mode. The optional `open-internet` inference mode
-is intentionally non-compliant and exists for full Codex-harness exploratory
-runs. The optional
-`no-internet-local-tools` mode also keeps external internet/source/package
-lookup blocked, but allows local binary-analysis/tracing tools and root-level
-target inspection.
+mode is the strict cleanroom mode. The optional `no-internet-local-tools` mode
+also keeps external internet/source/package lookup blocked, but allows local
+binary-analysis/tracing tools and root-level target inspection.
 
 | Paper / FAQ requirement | Runner status |
 | --- | --- |
@@ -31,14 +28,6 @@ target inspection.
 | Scoring | `scripts/summarize-results.py` imports ProgramBench scoring code, filters active branches/ignored tests the same way as `programbench info`, and reports resolved, almost-resolved, average pass rate, calls, tokens, and estimated cost. |
 | Usage audit | `usage-audit.json` records the Codex logs, token totals, pricing snapshot metadata/hash, freshness warnings, and warnings behind cost/call reporting. |
 | Evaluation | Uses ProgramBench's own `programbench eval` and `programbench info`; evaluation may fetch test blobs, which is evaluator-side, not inference-side. |
-
-Open-internet mode:
-
-- Allows normal host internet/package/source use.
-- Starts the target container with normal Docker bridge networking.
-- Uses a prompt that explicitly labels the run non-compliant.
-- Still forbids final wrappers around `/workspace/executable`.
-- Must be reported separately from cleanroom ProgramBench results.
 
 No-internet mode:
 
@@ -76,4 +65,4 @@ Minimum bar before public reporting:
 Report the same ProgramBench metrics as the leaderboard: resolved, almost
 resolved, average pass rate, cost, and calls. Add wall-clock time, scaffold,
 inference mode, host/network enforcement, and any paper deviations as disclosure
-fields. Keep ablation and open-internet runs in separate tables.
+fields. Keep local-tools ablation runs separate from no-internet and paper rows.

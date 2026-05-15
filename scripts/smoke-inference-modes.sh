@@ -15,7 +15,6 @@ MODES=(
   paper
   no-internet
   no-internet-local-tools
-  open-internet
 )
 
 run() {
@@ -39,9 +38,6 @@ check_package_helper() {
   local instance_dir="$2"
   local solution_dir="$instance_dir/solution"
   local bin_dir="$instance_dir/guard-bin"
-  if [[ "$mode" == "open-internet" ]]; then
-    bin_dir="$instance_dir/helper-bin"
-  fi
 
   (
     cd "$solution_dir"
@@ -59,7 +55,6 @@ check_guard_behavior() {
   local instance_dir="$2"
   local solution_dir="$instance_dir/solution"
   local guard_dir="$instance_dir/guard-bin"
-  local helper_dir="$instance_dir/helper-bin"
 
   case "$mode" in
     paper | no-internet)
@@ -86,12 +81,6 @@ check_guard_behavior() {
         fi
         grep -q "blocked curl" /tmp/pb-smoke-curl.err
         PATH="$guard_dir:$PATH" strings --version >/dev/null
-      )
-      ;;
-    open-internet)
-      (
-        cd "$solution_dir"
-        PATH="$helper_dir:$PATH" curl --version >/dev/null
       )
       ;;
   esac
