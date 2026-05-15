@@ -37,6 +37,19 @@ Required behavior-discovery loop:
   values, case variants where values are words, and combinations with
   help/version or other early-exit flags. Do not assume option parsing is
   case-sensitive or that earlier options are ignored before `-h`/`-V`.
+- Treat hidden tests as adversarial edge-case tests, not as typical usage tests.
+  Do not dismiss discovered differences as low-value or unlikely merely because
+  a representative probe set passes.
+- Build and run an adversarial comparison matrix before stopping. Include:
+  help/version combined with other flags, repeated flags, reordered flags,
+  missing option values, empty values, uppercase/mixed-case word values,
+  filesystem edge cases, stdin edge cases, environment/terminal/no-terminal
+  cases, invalid UTF-8 or unusual Unicode where relevant, and output
+  normalization traps such as whitespace, ordering, timestamps, and stderr vs
+  stdout.
+- After each implementation pass, add at least one new class of generated or
+  fuzzed target-vs-local probes that was not used in the previous pass, then fix
+  any mismatch it exposes.
 - Maintain `.goal/BEHAVIOR_AUDIT.md` in the solution directory. Keep it updated
   with the feature inventory, probe commands, target-vs-local comparison
   results, discrepancies found, fixes made, remaining known gaps, and the final
@@ -65,5 +78,8 @@ Complete the implementation in `{{solution_dir}}` so it is ready to package.
 
 Do not mark the goal complete until `compile.sh` exists, `./compile.sh`
 succeeds, `./executable` exists and runs, `{{package_command}}` succeeds, and
-`.goal/BEHAVIOR_AUDIT.md` documents broad target-vs-local behavioral coverage
-with no obvious high-impact gaps left to investigate.
+`.goal/BEHAVIOR_AUDIT.md` documents broad adversarial target-vs-local
+behavioral coverage. The audit must list the probe classes above, the exact
+commands or generators used, mismatches found, fixes made, and any remaining
+gaps. If a gap remains, say why it is impossible or intentionally deferred; do
+not call it low-value without evidence.

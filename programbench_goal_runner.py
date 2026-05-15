@@ -390,10 +390,12 @@ def prepare(args: argparse.Namespace) -> None:
     )
     objective = (
         f"Solve ProgramBench instance {args.instance_id} in the cleanroom container by reimplementing the "
-        "target CLI from black-box behavior only. Keep iterating on target-vs-local behavioral probes until no "
-        "obvious high-impact gaps remain. Do not mark the goal complete just because packaging works; complete "
-        "only after solution/compile.sh builds ./executable, package-submission succeeds, and "
-        ".goal/BEHAVIOR_AUDIT.md documents the probe coverage, comparisons, known gaps, and stopping rationale. "
+        "target CLI from black-box behavior only. Treat hidden tests as adversarial edge-case tests. Keep "
+        "iterating on target-vs-local behavioral probes, including generated/fuzzed combinations, until no "
+        "documented or discovered behavior class remains unexplored. Do not mark the goal complete just because "
+        "packaging works or representative probes pass; complete only after solution/compile.sh builds "
+        "./executable, package-submission succeeds, and .goal/BEHAVIOR_AUDIT.md documents adversarial probe "
+        "coverage, comparisons, mismatches fixed, known gaps, and stopping rationale. "
         "Do not inspect parent directories or files outside the solution directory."
     )
 
@@ -411,6 +413,8 @@ def prepare(args: argparse.Namespace) -> None:
             f"target executable at /workspace/executable with {target_command}. "
             "Use only documentation already present in the cleanroom container. For documented options that accept "
             "values, probe valid/invalid values, case variants for word values, and combinations with help/version. "
+            "Treat hidden tests as adversarial edge-case tests; do not call remaining gaps low-value without "
+            "evidence. Add generated/fuzzed target-vs-local probe classes after the first implementation works. "
             "Keep .goal/BEHAVIOR_AUDIT.md "
             "with the behavioral probe matrix, target-vs-local comparisons, known gaps, and stopping rationale. "
             "Do not mark the goal complete merely because package-submission succeeds.\n"
