@@ -520,7 +520,7 @@ def main() -> None:
     finalize_parser.add_argument("--programbench-repo", default="")
     finalize_parser.add_argument("--strict-paper", action="store_true")
     finalize_parser.add_argument("--allow-partial", action="store_true")
-    finalize_parser.add_argument("--eval-timeout-seconds", type=int, default=7200)
+    finalize_parser.add_argument("--eval-timeout-seconds", type=int, default=0)
     finalize_parser.add_argument("--limit", type=int, default=0)
     finalize_parser.add_argument("--retry-finalize-failed", action="store_true")
     finalize_parser.set_defaults(func=finalize)
