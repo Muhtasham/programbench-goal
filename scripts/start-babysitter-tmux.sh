@@ -81,6 +81,11 @@ mkdir -p "local_state/babysitter/$RUN_VERSION" local_state/logs
 prompt="local_state/babysitter/$RUN_VERSION/GLOBAL_GOAL_PROMPT.md"
 notes="local_state/babysitter/$RUN_VERSION/notes.md"
 log="local_state/logs/${SESSION}.log"
+coordinator_session="pb-goal-${batch_name}-watch"
+coordinator_log="local_state/logs/${coordinator_session}.log"
+if [[ ! -f "$coordinator_log" ]]; then
+  coordinator_log="local_state/logs/pb-goal-${batch_name}-${RUN_VERSION}.log"
+fi
 touch "$notes"
 
 uv run python - \
@@ -90,11 +95,12 @@ uv run python - \
   "$batch_name" \
   "$RUN_VERSION" \
   "$PROGRAMBENCH_REPO" \
-  "$run_root" <<'PY'
+  "$run_root" \
+  "$coordinator_log" <<'PY'
 import sys
 from pathlib import Path
 
-template, output, config, batch_name, run_version, programbench_repo, run_root = sys.argv[1:]
+template, output, config, batch_name, run_version, programbench_repo, run_root, coordinator_log = sys.argv[1:]
 text = Path(template).read_text()
 for key, value in {
     "CONFIG": config,
@@ -102,6 +108,7 @@ for key, value in {
     "RUN_VERSION": run_version,
     "PROGRAMBENCH_REPO": programbench_repo,
     "RUN_ROOT": run_root,
+    "COORDINATOR_LOG": coordinator_log,
 }.items():
     text = text.replace("{{" + key + "}}", value)
 Path(output).write_text(text)

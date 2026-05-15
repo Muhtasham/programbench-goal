@@ -14,7 +14,7 @@ scores.
 - ProgramBench repo: {{PROGRAMBENCH_REPO}}
 - State file: local_state/batches/{{BATCH_NAME}}/{{RUN_VERSION}}/state.json
 - Results CSV: local_state/batches/{{BATCH_NAME}}/{{RUN_VERSION}}/results.csv
-- Coordinator log: local_state/logs/pb-goal-{{BATCH_NAME}}-{{RUN_VERSION}}.log
+- Coordinator log: {{COORDINATOR_LOG}}
 - Run root: {{RUN_ROOT}}
 
 ## Operating Rules
@@ -42,7 +42,7 @@ jq -r '[.items[].status] | group_by(.) | map({status: .[0], count: length})' loc
 jq -r '.items[] | select(.status|test("failed")) | [.instance_id,.status,.last_error] | @tsv' local_state/batches/{{BATCH_NAME}}/{{RUN_VERSION}}/state.json
 ps -eo pid,ppid,etime,stat,pcpu,pmem,args | grep -E 'run-sweep|run-batch.py finalize|programbench eval|codex --enable goals' | grep -v grep
 docker ps --format '{{.ID}} {{.Names}} {{.Status}}'
-tail -n 120 local_state/logs/pb-goal-{{BATCH_NAME}}-{{RUN_VERSION}}.log
+tail -n 120 {{COORDINATOR_LOG}}
 ```
 
 Expected steady state:
