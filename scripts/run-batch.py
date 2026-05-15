@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
 import signal
@@ -312,6 +313,7 @@ def watch(args: argparse.Namespace) -> None:
     while True:
         refresh_state(state)
         cleanup_finished(state)
+        reconcile_results(state)
         launch_ready(args, state, run_root)
         save_state(state)
         print_status(state)
@@ -326,6 +328,7 @@ def status(args: argparse.Namespace) -> None:
     state = load_state(args.batch_name, args.run_version)
     refresh_state(state)
     cleanup_finished(state)
+    reconcile_results(state)
     save_state(state)
     print_status(state)
 
@@ -367,6 +370,28 @@ def results_output_path(state: dict) -> Path:
     )
 
 
+def evaluated_result_ids(state: dict) -> set[str]:
+    output = results_output_path(state)
+    if not output.is_file():
+        return set()
+    with output.open(newline="") as f:
+        return {row["instance_id"] for row in csv.DictReader(f) if row.get("instance_id")}
+
+
+def mark_evaluated_from_results(record: dict) -> dict:
+    updated = {**record, "status": "evaluated", "evaluated_at": record.get("evaluated_at") or now(), "last_error": ""}
+    updated.pop("failed_at", None)
+    updated.pop("finalize_failed_at", None)
+    return updated
+
+
+def reconcile_results(state: dict) -> None:
+    for instance_id in evaluated_result_ids(state):
+        record = state["items"].get(instance_id)
+        if record and record["status"] != "evaluated":
+            state["items"][instance_id] = mark_evaluated_from_results(record)
+
+
 def summarize_and_collect(args: argparse.Namespace, state: dict, records: list[dict] | None = None) -> None:
     if not args.programbench_repo:
         return
@@ -406,6 +431,7 @@ def finalize(args: argparse.Namespace) -> None:
     state = load_state(args.batch_name, args.run_version)
     refresh_state(state)
     cleanup_finished(state)
+    reconcile_results(state)
     finalized = 0
     for instance_id, record in list(state["items"].items()):
         if record["status"] in FINALIZE_READY or (args.retry_finalize_failed and record["status"] == "finalize_failed"):

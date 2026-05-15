@@ -152,10 +152,21 @@ def uses_tool(command: str, tool: str) -> bool:
 
 def uses_binary_analysis_on_target(command: str, tool: str) -> bool:
     tool_path = rf"(?:/(?:bin|usr/bin|usr/local/bin|opt/homebrew/bin)/)?{re.escape(tool)}"
-    return any(
-        re.search(rf"(^|[\s;&|()]){tool_path}([\s;&|()]|$)[^;&|]*?/workspace/executable", segment)
-        for segment in re.split(r"(?:;|\n|&&|\|\|)", command)
-    )
+    for segment in re.split(r"(?:;|\n|&&|\|\|)", command):
+        try:
+            tokens = shlex.split(segment)
+        except ValueError:
+            if re.search(rf"(^|[\s;&|()]){tool_path}([\s;&|()]|$)[^;&|]*?/workspace/executable", segment):
+                return True
+            continue
+        for index, token in enumerate(tokens):
+            if Path(token).name == tool and any("/workspace/executable" in later for later in tokens[index + 1 :]):
+                return True
+            if "/workspace/executable" in token and re.search(
+                rf"(^|[\s;&|()]){tool_path}([\s;&|()]|$)[^;&|]*?/workspace/executable", token
+            ):
+                return True
+    return False
 
 
 def uses_allowed_docker(command: str, container_name: str) -> bool:
