@@ -1723,6 +1723,23 @@ def render_empty_state() -> str:
     """
 
 
+def render_tweet_embed() -> str:
+    return """
+    <section class="section tweet-section" aria-labelledby="request-context">
+      <div class="tweet-layout">
+        <div>
+          <div class="section-eyebrow">Prompt</div>
+          <h2 id="request-context">Why This Run Exists</h2>
+          <p>GoalBench tracks Codex <code>/goal</code> on ProgramBench so the results can be read beside compute, latency, cost, and calls instead of only pass rate.</p>
+        </div>
+        <div class="tweet-card">
+          <blockquote class="twitter-tweet"><p lang="en" dir="ltr">Would love to see the performance of 5.5 with /goal on ProgramBench!</p>&mdash; Noam Brown (@polynoamial) <a href="https://twitter.com/polynoamial/status/2054258259280994341?ref_src=twsrc%5Etfw">May 12, 2026</a></blockquote>
+        </div>
+      </div>
+    </section>
+    """
+
+
 def render_run_plan() -> str:
     return """
     <div class="section">
@@ -2206,6 +2223,24 @@ def render_html(data: dict, extended: bool = False) -> str:
     }}
     .mode-card strong {{ display: block; margin-bottom: 6px; }}
     .mode-card p {{ margin: 0; font-size: 13px; }}
+    .tweet-section {{ overflow: hidden; }}
+    .tweet-layout {{
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(300px, 1.05fr);
+      gap: 18px;
+      align-items: center;
+    }}
+    .tweet-layout p {{ margin-bottom: 0; }}
+    .tweet-card {{
+      display: flex;
+      justify-content: center;
+      min-height: 190px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfc;
+      padding: 10px;
+    }}
+    .tweet-card .twitter-tweet {{ margin: 0 auto !important; }}
     .plot-grid {{
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -2248,6 +2283,7 @@ def render_html(data: dict, extended: bool = False) -> str:
       .nav-links {{ justify-content: flex-start; }}
       .section-head {{ align-items: flex-start; flex-direction: column; }}
       .metric-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+      .tweet-layout {{ grid-template-columns: 1fr; }}
       header, main {{ padding-left: 16px; padding-right: 16px; }}
     }}
   </style>
@@ -2271,6 +2307,7 @@ def render_html(data: dict, extended: bool = False) -> str:
     </div>
   </header>
   <main>
+    {render_tweet_embed()}
     {render_run_plan() if extended else ""}
     {body}
 
@@ -2320,6 +2357,7 @@ def render_html(data: dict, extended: bool = False) -> str:
     <p>Sources: <a href="https://programbench.com/extended/">ProgramBench extended results</a>, <a href="https://programbench.com/run/gpt-5-5-xhigh/">GPT 5.5 xhigh run detail</a>, and this repository's generated CSV summaries.</p>
     </section>
   </main>
+  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </body>
 </html>
 """
