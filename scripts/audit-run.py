@@ -494,7 +494,9 @@ def audit_command(
     findings = []
     if was_blocked(output) or was_rejected(output):
         return findings
-    command = call["cmd"]
+    command = call.get("cmd", "")
+    if not command:
+        return findings
     workdir = call.get("workdir", "")
     if workdir and not is_inside(resolve_exec_workdir(workdir, session_cwd, solution_dir), solution_dir):
         findings.append(Finding(line_source, f"exec workdir escapes solution dir: {workdir}", command))
