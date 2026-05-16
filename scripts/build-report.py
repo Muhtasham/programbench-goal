@@ -1712,7 +1712,7 @@ def render_empty_state() -> str:
       <div class="mode-grid">
         <div class="mode-card">
           <strong>Primary run</strong>
-          <p><code>configs/full-nointernet-xhigh.json</code> is the headline Noam/Jake run: GPT-5.5 xhigh with Codex <code>/goal</code>, no internet/source lookup, black-box target access.</p>
+          <p><code>configs/full-nointernet-xhigh.json</code> is the headline GoalBench run: GPT-5.5 xhigh with Codex <code>/goal</code>, no internet/source/package lookup, and black-box target access.</p>
         </div>
         <div class="mode-card">
           <strong>High comparison</strong>
@@ -1743,7 +1743,7 @@ def render_run_plan() -> str:
           <tbody>
             <tr><td>1</td><td>Primary</td><td><code>cpx62-nointernet-xhigh</code></td><td>GPT-5.5 xhigh with Codex <code>/goal</code> on ProgramBench without internet/source lookup, with strict host egress, sized for the current 16 CPU / 30g runner.</td><td>Codex no-internet ablation</td></tr>
             <tr><td>2</td><td>Prompt variant</td><td><code>cpx62-paper-xhigh</code></td><td>ProgramBench-style prompt/scaffold restrictions on the same smaller runner, with strict host egress. Not paper-sized.</td><td>Codex cleanroom-style ablation</td></tr>
-            <tr><td>3</td><td>Criticism ablation</td><td><code>cpx62-localtools-xhigh</code></td><td>Tests the tool-starvation critique: still no internet/source lookup and strict host egress, but local binary-analysis/tracing tools are allowed.</td><td>Non-compliant: local/binary tools allowed</td></tr>
+            <tr><td>3</td><td>Local-tools ablation</td><td><code>cpx62-localtools-xhigh</code></td><td>Keeps internet/source/package lookup blocked and strict host egress enabled, but allows local binary-analysis/tracing tools.</td><td>Non-compliant: local/binary tools allowed</td></tr>
             <tr><td>4</td><td>Later</td><td><code>full-*</code> / <code>*-high</code></td><td>Use paper-sized configs or high-effort comparisons only after xhigh says the extra run is worthwhile.</td><td>Depends on mode and host preflight</td></tr>
           </tbody>
         </table>
@@ -2300,15 +2300,15 @@ def render_html(data: dict, extended: bool = False) -> str:
       <div class="mode-grid">
         <div class="mode-card">
           <strong>No internet</strong>
-          <p>Primary Codex <code>/goal</code> scaffold for the Noam/Jake question: internet/source/package lookup blocked, target binary analysis banned, and target probing stays black-box.</p>
+          <p>Primary Codex <code>/goal</code> scaffold: internet/source/package lookup is blocked, target binary-analysis tools are blocked, and target probing stays black-box.</p>
         </div>
         <div class="mode-card">
           <strong>Paper / cleanroom</strong>
-          <p>Stricter ProgramBench-style cleanroom mode for Codex <code>/goal</code>. It is only ProgramBench-comparable on Linux amd64 with 20 CPU / 60g, strict egress, wrapper-only target access, and clean audit; it is not a mini-SWE-agent paper reproduction.</p>
+          <p>Same Codex <code>/goal</code> scaffold with stricter ProgramBench-style comparability checks: Linux amd64, 20 CPU / 60g, strict egress, wrapper-only target access, and clean audit. It is not a mini-SWE-agent paper reproduction.</p>
         </div>
         <div class="mode-card">
           <strong>No internet + local tools</strong>
-          <p>Non-compliant ablation for the tool-starvation critique: external internet/source lookup remains blocked, but local binary-analysis/tracing tools are allowed.</p>
+          <p>Non-compliant local-tools ablation: external internet/source/package lookup remains blocked, but local binary-analysis/tracing tools are allowed.</p>
         </div>
       </div>
     </section>

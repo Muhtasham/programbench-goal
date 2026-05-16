@@ -75,7 +75,7 @@ scripts/install-target-wrapper.sh</code></pre>
 <p>The bootstrap script clones or updates <code>../ProgramBench</code> and runs <code>uv sync --project</code> there. The wrapper installer grants the current user passwordless sudo for <code>/usr/local/bin/pb-target-exec</code> only, so Codex can probe target containers without direct Docker socket access. <code>scripts/run-sweep.sh</code> auto-detects the sibling ProgramBench checkout. If you keep ProgramBench somewhere else, set <code>PROGRAMBENCH_REPO=/path/to/ProgramBench</code> or pass <code>--programbench-repo /path/to/ProgramBench</code>.</p>
 <p>The ProgramBench images are published for <code>linux/amd64</code>. Docker Desktop on Apple Silicon can sometimes emulate them, but serious runs should happen on Linux <code>amd64</code>.</p>
 <h2>Fresh Linux VM Setup</h2>
-<p>Use a real Ubuntu <code>amd64</code> VM for Noam-facing results. Recommended minimum: 20 vCPU, 60GB RAM, and enough disk for Docker images/eval artifacts; 32 vCPU, 96-128GB RAM, and 500GB disk leaves more room.</p>
+<p>Use a real Ubuntu <code>amd64</code> VM for public comparable results. Recommended minimum: 20 vCPU, 60GB RAM, and enough disk for Docker images/eval artifacts; 32 vCPU, 96-128GB RAM, and 500GB disk leaves more room.</p>
 <p>On the VM:</p>
 <pre><code>git clone git@github.com:Muhtasham/goalbench.git
 cd goalbench
@@ -118,7 +118,7 @@ uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
 <p>For <code>paper</code> and <code>no-internet</code>, the generated Codex launcher prepends a <code>guard-bin</code> directory to <code>PATH</code>. It blocks common host-side internet, source/package lookup, and binary-analysis commands, restricts <code>docker</code> to the allowed <code>docker exec -u agent &lt;container&gt; ...</code> target-probing form, and points common tool caches at an empty per-run directory. Local build commands such as <code>go build</code> and <code>cargo build</code> are still allowed; source-acquisition commands such as <code>go get</code>, <code>cargo install</code>, and <code>pip install</code> are blocked. Agent-created black-box probes, fuzzers, generators, and comparison scripts are allowed when they interact with the target only through normal runtime behavior. This catches common mistakes. It also blocks common local file-inspection commands from reading parent directories, the run root, home paths, or the evaluator checkout. Packaging is exposed as a <code>package-submission</code> command in <code>guard-bin</code>, so Codex does not need to invoke or inspect parent-directory helper scripts. This is still not a replacement for a VM/container/user-level egress policy.</p>
 <p>See the <a href="paper-compliance.html">paper compliance page</a> for the paper/FAQ compliance matrix.</p>
 <h2>Inference Modes</h2>
-<p>Default mode is <code>no-internet</code>, the recommended Codex <code>/goal</code> scaffold for the Noam/Jake question. It keeps the target container offline and keeps the host-side internet/package/source guards enabled, but it is reported separately from <code>paper</code> so we can measure the Codex scaffold without claiming mini-SWE-agent parity:</p>
+<p>Default mode is <code>no-internet</code>, the primary Codex <code>/goal</code> scaffold. It keeps the target container offline and keeps the host-side internet/package/source guards enabled, but it is reported separately from <code>paper</code> so we can measure the Codex scaffold without claiming mini-SWE-agent parity:</p>
 <pre><code>uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763</code></pre>
 <p>For ProgramBench-style cleanroom reporting, opt into <code>paper</code>:</p>
 <pre><code>uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
@@ -189,7 +189,7 @@ PUBLISH=1 scripts/start-sweep-tmux.sh configs/full-nointernet-xhigh.json</code><
 uv run python scripts/validate-target-set.py target_sets/all_tasks.txt \
   --programbench-repo /path/to/ProgramBench</code></pre>
 <p>The validator expects 200 real tasks by default: all ProgramBench task metadata entries except the bundled <code>testorg__</code> fixture. <code>scripts/run-sweep.sh</code> runs this validation automatically whenever the config uses <code>target_sets/all_tasks.txt</code>.</p>
-<p>For the Noam/Jake question, the cleanest primary answer is the no-internet Codex <code>/goal</code> scaffold: same task set, longer/autonomous Codex goal loop, and no external lookup. It is not the official mini-SWE-agent baseline, but it avoids the biggest confound from normal Codex internet access:</p>
+<p>For the primary public run, use the no-internet Codex <code>/goal</code> scaffold: same task set, autonomous Codex goal loop, and no external lookup. It is not the official mini-SWE-agent baseline, but it avoids the biggest confound from normal Codex internet access:</p>
 <pre><code>scripts/run-sweep.sh --dry-run
 scripts/run-sweep.sh</code></pre>
 <p>On the smaller Hetzner <code>cpx62</code> runner, use the <code>cpx62-*</code> xhigh configs. They are explicitly non-paper-sized because they disclose 16 CPU / 30g instead of 20 CPU / 60g, but they still require strict egress for every no-internet-style mode:</p>

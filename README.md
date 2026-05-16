@@ -11,7 +11,7 @@ Codex `/goal` scaffold results.
 
 ## Start Here
 
-For the Noam/Jake question, the primary run is:
+The primary public run is:
 
 - `gpt-5.5`
 - reasoning effort `xhigh`
@@ -22,8 +22,8 @@ For the Noam/Jake question, the primary run is:
 
 That mode keeps the target container offline, blocks source/package lookup, and
 keeps target probing black-box. It is not a mini-SWE-agent reproduction, but it
-is the cleanest answer to “what happens if GPT-5.5 gets `/goal` and more wall
-clock time on ProgramBench?”
+is the cleanest GoalBench measurement of GPT-5.5 with Codex `/goal` on
+ProgramBench.
 
 ## How It Runs
 
@@ -222,9 +222,9 @@ Use separate batches for each mode. Do not mix them in one result.
 
 | Mode | Config | Meaning |
 | --- | --- | --- |
-| `no-internet` | `configs/full-nointernet-xhigh.json` | Primary Codex `/goal` scaffold. No external lookup, black-box target probing. |
-| `paper` | `configs/full-paper-xhigh.json` | Stricter ProgramBench-style cleanroom mode for Codex `/goal`; not official mini-SWE-agent. |
-| `no-internet-local-tools` | `configs/full-localtools-xhigh.json` | Non-compliant tool-starvation ablation. No internet/source lookup, but local binary-analysis/tracing tools are allowed. |
+| `no-internet` | `configs/full-nointernet-xhigh.json` | Primary Codex `/goal` scaffold. Internet/source/package lookup is blocked, target binary-analysis tools are blocked, and target probing stays black-box. |
+| `paper` | `configs/full-paper-xhigh.json` | Same Codex `/goal` scaffold with stricter ProgramBench-style cleanroom comparability checks: Linux amd64, 20 CPU / 60g, strict egress, wrapper-only target access, and clean audit. Not an official mini-SWE-agent reproduction. |
+| `no-internet-local-tools` | `configs/full-localtools-xhigh.json` | Non-compliant local-tools ablation. Internet/source/package lookup remains blocked, but local binary-analysis/tracing tools are allowed. |
 
 Any mode with `no-internet` semantics (`no-internet`, `paper`, and
 `no-internet-local-tools`) must use strict host egress. The runner refuses those

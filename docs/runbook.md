@@ -61,7 +61,7 @@ Silicon can sometimes emulate them, but serious runs should happen on Linux
 
 ## Fresh Linux VM Setup
 
-Use a real Ubuntu `amd64` VM for Noam-facing results. Recommended minimum:
+Use a real Ubuntu `amd64` VM for public comparable results. Recommended minimum:
 20 vCPU, 60GB RAM, and enough disk for Docker images/eval artifacts; 32 vCPU,
 96-128GB RAM, and 500GB disk leaves more room.
 
@@ -208,11 +208,10 @@ See the [paper compliance page](paper-compliance.html) for the paper/FAQ complia
 
 ## Inference Modes
 
-Default mode is `no-internet`, the recommended Codex `/goal` scaffold for the
-Noam/Jake question. It keeps the target container offline and keeps the
-host-side internet/package/source guards enabled, but it is reported separately
-from `paper` so we can measure the Codex scaffold without claiming
-mini-SWE-agent parity:
+Default mode is `no-internet`, the primary Codex `/goal` scaffold. It keeps the
+target container offline and keeps the host-side internet/package/source guards
+enabled, but it is reported separately from `paper` so we can measure the Codex
+scaffold without claiming mini-SWE-agent parity:
 
 ```bash
 uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763
@@ -448,10 +447,10 @@ The validator expects 200 real tasks by default: all ProgramBench task metadata
 entries except the bundled `testorg__` fixture. `scripts/run-sweep.sh` runs this
 validation automatically whenever the config uses `target_sets/all_tasks.txt`.
 
-For the Noam/Jake question, the cleanest primary answer is the no-internet
-Codex `/goal` scaffold: same task set, longer/autonomous Codex goal loop, and no
-external lookup. It is not the official mini-SWE-agent baseline, but it avoids
-the biggest confound from normal Codex internet access:
+For the primary public run, use the no-internet Codex `/goal` scaffold: same
+task set, autonomous Codex goal loop, and no external lookup. It is not the
+official mini-SWE-agent baseline, but it avoids the biggest confound from
+normal Codex internet access:
 
 ```bash
 scripts/run-sweep.sh --dry-run
