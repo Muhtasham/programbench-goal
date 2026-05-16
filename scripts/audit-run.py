@@ -168,22 +168,52 @@ def uses_tool(command: str, tool: str) -> bool:
 
 
 def uses_binary_analysis_on_target(command: str, tool: str) -> bool:
-    tool_path = rf"(?:/(?:bin|usr/bin|usr/local/bin|opt/homebrew/bin)/)?{re.escape(tool)}"
-    for segment in re.split(r"(?:;|\n|&&|\|\|)", command):
-        try:
-            tokens = shlex.split(segment)
-        except ValueError:
-            if re.search(rf"(^|[\s;&|()]){tool_path}([\s;&|()]|$)[^;&|]*?/workspace/executable", segment):
-                return True
-            continue
-        for index, token in enumerate(tokens):
-            if Path(token).name == tool and any("/workspace/executable" in later for later in tokens[index + 1 :]):
-                return True
-            if "/workspace/executable" in token and re.search(
-                rf"(^|[\s;&|()]){tool_path}([\s;&|()]|$)[^;&|]*?/workspace/executable", token
-            ):
-                return True
+    try:
+        tokens = shlex.split(command)
+    except ValueError:
+        tool_path = rf"(?:/(?:bin|usr/bin|usr/local/bin|opt/homebrew/bin)/)?{re.escape(tool)}"
+        return any(
+            bool(re.search(rf"(^|[\s;&|()]){tool_path}([\s;&|()]|$)[^;&|]*?/workspace/executable", segment))
+            for segment in re.split(r"(?:;|\n|&&|\|\|)", command)
+        )
+    for token in tokens:
+        if (
+            token != command
+            and ("\n" in token or ";" in token or "/workspace/executable" in token)
+            and any(
+                uses_binary_analysis_on_target(segment, tool)
+                for segment in re.split(r"(?:;|\n|&&|\|\|)", token)
+                if segment.strip()
+            )
+        ):
+            return True
+    index = command_token_index(tokens)
+    if (
+        index is not None
+        and Path(tokens[index]).name == tool
+        and any("/workspace/executable" in later for later in tokens[index + 1 :])
+    ):
+        return True
     return False
+
+
+def command_token_index(tokens: list[str]) -> int | None:
+    index = 0
+    while index < len(tokens) and "=" in tokens[index] and not tokens[index].startswith(("/", "./")):
+        index += 1
+    if index >= len(tokens):
+        return None
+    if Path(tokens[index]).name == "sudo":
+        index += 1
+        while index < len(tokens) and tokens[index].startswith("-"):
+            index += 1
+    if index >= len(tokens):
+        return None
+    if Path(tokens[index]).name == "env":
+        index += 1
+        while index < len(tokens) and "=" in tokens[index] and not tokens[index].startswith(("/", "./")):
+            index += 1
+    return index if index < len(tokens) else None
 
 
 def uses_allowed_docker(command: str, container_name: str) -> bool:
@@ -523,10 +553,7 @@ def audit(args: argparse.Namespace) -> None:
     if not logs:
         findings.append(Finding(str(instance_dir), "no Codex JSONL session logs found for solution cwd"))
     blocked_attempts = 0
-    log_cwds = {
-        log: Path((session_meta(log) or {}).get("cwd", "")).expanduser().resolve()
-        for log in logs
-    }
+    log_cwds = {log: Path((session_meta(log) or {}).get("cwd", "")).expanduser().resolve() for log in logs}
     calls = [(log, line, call, output) for log in logs for line, call, output in exec_calls(log)]
     blocked_attempts = sum(was_blocked(output) for _, _, _, output in calls)
     rejected_attempts = sum(was_rejected(output) for _, _, _, output in calls)
