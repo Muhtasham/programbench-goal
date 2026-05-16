@@ -630,6 +630,14 @@ def money(value: float) -> str:
     return f"${value:.2f}"
 
 
+def display_timestamp(value: str) -> str:
+    return datetime.fromisoformat(value).strftime("%Y-%m-%d %H:%M UTC")
+
+
+def evaluated_instances_label(count: int) -> str:
+    return f"{count} evaluated instances" if count else "Awaiting fresh evaluation results"
+
+
 def whole_money(value: float) -> str:
     return f"${value:,.0f}" if value >= 100 else money(value)
 
@@ -1703,22 +1711,24 @@ def render_repeatability(data: dict) -> str:
 def render_empty_state() -> str:
     return """
     <section class="empty-state">
-      <h2>Clean Slate</h2>
-      <p>No Codex <code>/goal</code> results are published in this reset yet. The next full run will populate the leaderboard, run-detail pages, task pages, plots, and downloadable JSON/CSV artifacts.</p>
+      <div class="section-eyebrow">Clean slate</div>
+      <h2>Current full-run evaluation is in progress</h2>
+      <p>No Codex <code>/goal</code> result rows are published in this reset yet. When the current run finishes, this page will populate the leaderboard, run details, task pages, plots, and downloadable JSON/CSV artifacts from the freshly evaluated data.</p>
       <div class="mode-grid">
         <div class="mode-card">
-          <strong>Primary run</strong>
-          <p><code>configs/full-nointernet-xhigh.json</code> is the headline GoalBench run: GPT-5.5 xhigh with Codex <code>/goal</code>, no internet/source/package lookup, and black-box target access.</p>
+          <strong>Headline track</strong>
+          <p>GPT-5.5 xhigh with Codex <code>/goal</code>, no internet/source/package lookup, target binary-analysis tools blocked, and black-box target access.</p>
         </div>
         <div class="mode-card">
-          <strong>High comparison</strong>
-          <p><code>configs/full-nointernet-high.json</code> keeps the same scaffold and mode, changing only reasoning effort for high-vs-xhigh comparison.</p>
+          <strong>Comparison track</strong>
+          <p>GPT-5.5 high uses the same no-internet scaffold, changing only reasoning effort for high-vs-xhigh comparison.</p>
         </div>
         <div class="mode-card">
-          <strong>No internet + local tools</strong>
-          <p><code>configs/full-localtools-xhigh.json</code> is coming soon. It keeps internet/source/package lookup blocked but allows local binary-analysis/tracing tools. It is intentionally non-compliant.</p>
+          <strong>Local-tools ablation</strong>
+          <p>Coming soon. External lookup remains blocked, but local binary-analysis/tracing tools are allowed. Reported separately as non-compliant.</p>
         </div>
       </div>
+      <p class="link-row"><a class="button primary" href="extended/">Open extended view</a><a class="button" href="task-details.html">How task pages work</a></p>
     </section>
     """
 
@@ -1898,12 +1908,7 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
 
 def render_home_results(data: dict, instances: list[ResultRow]) -> str:
     if not instances:
-        return f"""
-    <section class="section">
-      {render_empty_state()}
-      <p class="link-row"><a class="button primary" href="extended/">See extended results</a></p>
-    </section>
-        """
+        return render_empty_state()
     return f"""
     <section class="section leaderboard-section">
       <div class="section-eyebrow">Leaderboard</div>
@@ -2203,7 +2208,7 @@ def render_html(data: dict, extended: bool = False) -> str:
     .tweet-card {{
       display: flex;
       justify-content: center;
-      min-height: 160px;
+      min-height: 0;
     }}
     .tweet-card .twitter-tweet {{ margin: 0 auto !important; }}
     .plot-grid {{
@@ -2263,16 +2268,16 @@ def render_html(data: dict, extended: bool = False) -> str:
       </div>
     </div>
     <div class="pill-row">
-      <span class="pill">Generated {cell(data["generated_at"])}</span>
-      <span class="pill">{data["sample_instances"]} evaluated instances</span>
+      <span class="pill">Generated {cell(display_timestamp(data["generated_at"]))}</span>
+      <span class="pill">{evaluated_instances_label(data["sample_instances"])}</span>
       <span class="pill">{PROGRAMBENCH_TASKS} tasks in full ProgramBench</span>
       <span class="pill">Sorted Resolved → Almost → Avg. pass</span>
     </div>
   </header>
   <main>
-    {render_tweet_embed()}
     {render_run_plan() if extended else ""}
     {body}
+    {render_tweet_embed()}
 
     <section class="section">
       <div class="section-eyebrow">Modes</div>
