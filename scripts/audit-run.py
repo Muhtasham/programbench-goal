@@ -160,7 +160,7 @@ def uses_binary_analysis_on_target(command: str, tool: str) -> bool:
     except ValueError:
         tool_path = rf"(?:/(?:bin|usr/bin|usr/local/bin|opt/homebrew/bin)/)?{re.escape(tool)}"
         return any(
-            bool(re.search(rf"(^|[\s;&|()]){tool_path}([\s;&|()]|$)[^;&|]*?/workspace/executable", segment))
+            bool(re.search(rf"^\s*{tool_path}([\s;&|()]|$)[^;&|]*?/workspace/executable", segment))
             for segment in re.split(r"(?:;|\n|&&|\|\|)", command)
         )
     for token in tokens:
@@ -261,6 +261,8 @@ def source_lookup_patterns(command: str) -> list[str]:
     patterns = []
     for pattern in SOURCE_LOOKUP_PATTERNS:
         if not re.search(pattern, command):
+            continue
+        if pattern == r"\bgit\s+remote\b" and re.search(r"\bgit\s+remote\s+add\b", command):
             continue
         if pattern in GIT_SOURCE_LOOKUP_PATTERNS and git_command_uses_only_local_fixture(command):
             continue
