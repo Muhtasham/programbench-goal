@@ -203,7 +203,7 @@ import sys
 config = json.loads(open(sys.argv[1]).read())
 dry_run = sys.argv[2] == "1"
 mode = config.get("inference_mode")
-if mode in {"paper", "no-internet", "no-internet-local-tools"} and not config.get("strict_egress"):
+if mode in {"no-internet", "no-internet-local-tools"} and not config.get("strict_egress"):
     raise SystemExit(f"{mode} configs must set strict_egress=true")
 if dry_run:
     raise SystemExit(0)

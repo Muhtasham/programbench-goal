@@ -166,7 +166,7 @@ if [[ -f "$CONFIG" ]]; then
   strict_egress="$(config_bool strict_egress)"
   codex_user="$(config_optional codex_user)"
   egress_user="${codex_user:-$(id -un)}"
-  if [[ "$inference_mode" == "paper" || "$inference_mode" == "no-internet" || "$inference_mode" == "no-internet-local-tools" ]]; then
+  if [[ "$inference_mode" == "no-internet" || "$inference_mode" == "no-internet-local-tools" ]]; then
     if [[ "$strict_egress" != "true" ]]; then
       fail "$inference_mode requires strict_egress=true"
     elif [[ "$(id -u)" -eq 0 && -z "$codex_user" ]]; then
@@ -213,7 +213,7 @@ if [[ -f "$CONFIG" ]]; then
       cat /tmp/pb-doctor-wrapper.err >&2
     fi
   else
-    warn "target_access=$target_access; wrapper is preferred for reportable cleanroom runs"
+    warn "target_access=$target_access; wrapper is preferred for reportable no-internet runs"
   fi
 fi
 

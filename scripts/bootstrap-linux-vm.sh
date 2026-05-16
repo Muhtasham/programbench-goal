@@ -189,7 +189,6 @@ echo "Next checks:"
 echo "  docker run --rm hello-world"
 echo "  codex login"
 echo "  scripts/doctor.sh configs/linux-smoke-nointernet-xhigh.json"
-echo "  uv run python scripts/preflight-paper-host.py --codex-user $CODEX_USER --wrapper-command /usr/local/bin/pb-target-exec --allow-direct-docker"
 echo
 echo "Start smoke:"
 echo "  scripts/start-sweep-tmux.sh configs/linux-smoke-nointernet-xhigh.json"

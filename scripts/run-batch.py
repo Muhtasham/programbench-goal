@@ -397,8 +397,6 @@ def finalize_one(args: argparse.Namespace, record: dict) -> dict:
     try:
         run([str(instance_dir / "package-submission.sh")])
         audit_cmd = [sys.executable, str(REPO / "scripts" / "audit-run.py")]
-        if args.strict_paper:
-            audit_cmd.append("--strict-paper")
         audit_cmd.append(str(instance_dir))
         audit_cmd.extend(codex_session_args(record))
         run(audit_cmd)
@@ -551,7 +549,7 @@ def add_common_run_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--docker-memory", default="60g")
     parser.add_argument(
         "--inference-mode",
-        choices=["paper", "no-internet", "no-internet-local-tools"],
+        choices=["no-internet", "no-internet-local-tools"],
         default="no-internet",
     )
     parser.add_argument("--target-access", choices=["direct-docker", "wrapper"], default="direct-docker")
@@ -582,7 +580,6 @@ def main() -> None:
     finalize_parser.add_argument("--batch-name", required=True)
     finalize_parser.add_argument("--run-version", default="")
     finalize_parser.add_argument("--programbench-repo", default="")
-    finalize_parser.add_argument("--strict-paper", action="store_true")
     finalize_parser.add_argument("--allow-partial", action="store_true")
     finalize_parser.add_argument("--eval-timeout-seconds", type=int, default=0)
     finalize_parser.add_argument("--limit", type=int, default=0)

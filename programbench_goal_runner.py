@@ -21,9 +21,8 @@ OPEN_PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal_op
 DEFAULT_MODEL = "gpt-5.5"
 DEFAULT_REASONING_EFFORT = "xhigh"
 DEFAULT_INFERENCE_MODE = "no-internet"
-NO_INTERNET_MODES = {"paper", "no-internet", "no-internet-local-tools"}
+NO_INTERNET_MODES = {"no-internet", "no-internet-local-tools"}
 MODE_RUN_SEGMENTS = {
-    "paper": "paper",
     "no-internet": "nointernet",
     "no-internet-local-tools": "localtools",
     "open-internet": "open",
@@ -237,7 +236,7 @@ exit 126
         write_executable(
             guard_dir / tool,
             f"""#!/usr/bin/env bash
-echo "blocked {tool}: ProgramBench cleanroom runs forbid {blocked_reason}" >&2
+echo "blocked {tool}: ProgramBench no-internet runs forbid {blocked_reason}" >&2
 exit 126
 """,
         )
@@ -253,7 +252,7 @@ set -euo pipefail
 args=" $* "
 blocked_re={shlex.quote(pattern)}
 if [[ "$args" =~ $blocked_re ]]; then
-  echo "blocked {tool}: ProgramBench cleanroom runs allow local builds, not source/package acquisition" >&2
+  echo "blocked {tool}: ProgramBench no-internet runs allow local builds, not source/package acquisition" >&2
   exit 126
 fi
 {exec_line}
@@ -267,7 +266,7 @@ fi
         checks = "\n".join(
             [
                 f'if [[ "$args" == *{shlex.quote(pattern)}* ]]; then '
-                f'echo "blocked {tool}: ProgramBench cleanroom runs forbid host/evaluator path inspection" >&2; '
+                f'echo "blocked {tool}: ProgramBench no-internet runs forbid host/evaluator path inspection" >&2; '
                 "exit 126; fi"
                 for pattern in (*HOST_INSPECTION_PATTERNS, *PARENT_TRAVERSAL_PATTERNS)
             ]
@@ -310,7 +309,7 @@ exit 126
     write_executable(
         guard_dir / "sudo",
         """#!/usr/bin/env bash
-echo "blocked sudo command in ProgramBench cleanroom run" >&2
+echo "blocked sudo command in ProgramBench no-internet run" >&2
 exit 126
 """,
     )
@@ -366,21 +365,8 @@ def proxy_exports(enabled: bool) -> str:
     return " ".join(f"{key}={shlex.quote(value)}" for key in keys if (value := os.environ.get(key)))
 
 
-def strict_paper_compliant(args: argparse.Namespace) -> bool:
-    return (
-        args.inference_mode == "paper"
-        and args.target_access == "wrapper"
-        and platform.system() == "Linux"
-        and platform.machine() in {"x86_64", "AMD64"}
-        and str(args.docker_cpus) == "20"
-        and args.docker_memory == "60g"
-    )
-
-
 def prepare(args: argparse.Namespace) -> None:
     codex_user = args.codex_user.strip()
-    if args.inference_mode == "paper" and args.target_access != "wrapper":
-        raise SystemExit("paper mode requires --target-access wrapper; use no-internet for direct-docker ablations")
     if args.inference_mode in NO_INTERNET_MODES and not args.strict_egress:
         raise SystemExit(f"{args.inference_mode} mode requires --strict-egress")
     if args.strict_egress and args.inference_mode == "open-internet":
@@ -407,10 +393,9 @@ def prepare(args: argparse.Namespace) -> None:
     guard_dir = instance_dir / "guard-bin"
     helper_dir = instance_dir / "helper-bin"
     cache_dir = instance_dir / "tool-caches"
-    paper_mode = args.inference_mode == "paper"
-    cleanroom_mode = args.inference_mode in {"paper", "no-internet"}
+    cleanroom_mode = args.inference_mode == "no-internet"
     local_tools_mode = args.inference_mode == "no-internet-local-tools"
-    no_internet_mode = args.inference_mode in {"paper", "no-internet", "no-internet-local-tools"}
+    no_internet_mode = args.inference_mode in {"no-internet", "no-internet-local-tools"}
     tool_env = list(TOOL_CACHE_ENV) if cleanroom_mode else list(LOCAL_TOOLS_OFFLINE_ENV) if local_tools_mode else []
     container_name = f"pb-goal-{slug(prepared_run_name)}-{slug(args.instance_id)}"
     session_name = f"pb-goal-{slug(prepared_run_name)}-{slug(args.instance_id)}"
@@ -425,7 +410,7 @@ def prepare(args: argparse.Namespace) -> None:
         )
     )
     objective = (
-        f"Complete ProgramBench instance {args.instance_id} in the cleanroom container by reimplementing the "
+        f"Complete ProgramBench instance {args.instance_id} in the target container by reimplementing the "
         "target CLI from black-box behavior only, without stopping until solution/compile.sh builds ./executable, "
         "package-submission succeeds, and .goal/BEHAVIOR_AUDIT.md documents adversarial target-vs-local probe "
         "coverage, comparisons, mismatches fixed, known gaps, and stopping rationale. Treat hidden tests as "
@@ -447,7 +432,7 @@ def prepare(args: argparse.Namespace) -> None:
             "this solution directory, do not run commands against '..', and do not inspect parent directories. "
             "The harness helper is exposed only as the package-submission command. Probe the "
             f"target executable at /workspace/executable with {target_command}. "
-            "Use only documentation already present in the cleanroom container. For documented options that accept "
+            "Use only documentation already present in the target container. For documented options that accept "
             "values, probe valid/invalid values, case variants for word values, and combinations with help/version. "
             "Treat hidden tests as adversarial edge-case tests; do not call remaining gaps low-value without "
             "evidence. Add generated/fuzzed target-vs-local probe classes after the first implementation works. "
@@ -458,13 +443,13 @@ def prepare(args: argparse.Namespace) -> None:
         if cleanroom_mode
         else (
             "No-internet local-tools research mode: this is not ProgramBench-compliant and must not be reported as a "
-            "cleanroom benchmark result. Do not use internet, package registries, public source, external docs, or "
+            "no-internet benchmark result. Do not use internet, package registries, public source, external docs, or "
             "ProgramBench tests. Local installed tools, binary-analysis tools, tracing tools, and agent-created tools "
             f"are allowed. Probe the target executable at /workspace/executable with {target_command}.\n"
         )
         if local_tools_mode
         else (
-            "Open-internet research mode: this is not ProgramBench-compliant and must not be reported as a cleanroom "
+            "Open-internet research mode: this is not ProgramBench-comparable and must not be reported as a public "
             "benchmark result. You may use internet/package tooling to solve the task, but still write a packageable "
             f"solution and probe the target executable at /workspace/executable with {target_command}.\n"
         )
@@ -472,7 +457,6 @@ def prepare(args: argparse.Namespace) -> None:
     prompt_template = (
         args.prompt_template
         or {
-            "paper": PROMPT_TEMPLATE,
             "no-internet": NO_INTERNET_PROMPT_TEMPLATE,
             "no-internet-local-tools": LOCAL_TOOLS_PROMPT_TEMPLATE,
             "open-internet": OPEN_PROMPT_TEMPLATE,
@@ -518,8 +502,8 @@ def prepare(args: argparse.Namespace) -> None:
                 "docker_cpus": args.docker_cpus,
                 "docker_memory": args.docker_memory,
                 "inference_mode": args.inference_mode,
-                "paper_mode": paper_mode,
-                "paper_compliant": strict_paper_compliant(args),
+                "paper_mode": False,
+                "paper_compliant": False,
                 "model": args.model,
                 "reasoning_effort": args.reasoning_effort,
                 "created_at": datetime.now(timezone.utc).isoformat(),
@@ -534,7 +518,7 @@ def prepare(args: argparse.Namespace) -> None:
     network_check = (
         f'test "$(docker inspect {shlex.quote(container_name)} --format \'{{{{.HostConfig.NetworkMode}}}}\')" = "none"'
         if no_internet_mode
-        else "echo 'open-internet mode: target container network is intentionally not cleanroom-compliant'"
+        else "echo 'open-internet mode: target container network is intentionally not no-internet-compliant'"
     )
     network_arg = "--network none" if no_internet_mode else "--network bridge"
     write_executable(
@@ -750,7 +734,7 @@ def main() -> None:
     prepare_parser.add_argument("--docker-memory", default="60g")
     prepare_parser.add_argument(
         "--inference-mode",
-        choices=["paper", "no-internet", "no-internet-local-tools", "open-internet"],
+        choices=["no-internet", "no-internet-local-tools", "open-internet"],
         default=DEFAULT_INFERENCE_MODE,
     )
     prepare_parser.add_argument(
@@ -782,7 +766,7 @@ def main() -> None:
     batch_parser.add_argument("--docker-memory", default="60g")
     batch_parser.add_argument(
         "--inference-mode",
-        choices=["paper", "no-internet", "no-internet-local-tools", "open-internet"],
+        choices=["no-internet", "no-internet-local-tools", "open-internet"],
         default=DEFAULT_INFERENCE_MODE,
     )
     batch_parser.add_argument(

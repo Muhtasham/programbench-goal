@@ -12,23 +12,18 @@ not as mini-SWE-agent results.
 
 The harness keeps the solving workspace separate from the ProgramBench evaluator
 repo. It gives Codex a clean writable solution directory and produces the
-`submission.tar.gz` layout that `programbench eval` expects. The default mode is
-the no-internet Codex `/goal` harness; use `--inference-mode paper` for the
-closest ProgramBench-cleanroom run.
+`submission.tar.gz` layout that `programbench eval` expects. The default and
+primary public mode is the no-internet Codex `/goal` harness.
 
 ProgramBench is a free-form reimplementation benchmark. The agent should choose
 the language, architecture, source layout, abstractions, and build script from
 black-box observations of the executable plus documentation already present in
-the cleanroom container. It should not receive method signatures, skeletons,
+the target container. It should not receive method signatures, skeletons,
 product requirements, hidden hints, or task-specific harness tuning.
 
-If ProgramBench publishes the exact mini-SWE-agent baseline prompt, use it via
-`--prompt-template` and keep only the local runtime substitutions needed for the
-container name and solution path. The ProgramBench usage guide says their paper
-baselines used mini-SWE-agent with a framework similar to mini-SWE-agent's
-SWE-bench runner and that they expect to release that baseline system in
-mini-SWE-agent. Until that exists in public code, keep this runner labeled as a
-separate Codex `/goal` scaffold.
+If ProgramBench publishes the exact mini-SWE-agent baseline prompt, keep that
+as a separate internal comparison and do not mix it with GoalBench public rows.
+Public GoalBench rows should stay labeled as Codex `/goal` scaffold results.
 
 ## Requirements
 
@@ -106,12 +101,6 @@ tail -f local_state/logs/pb-goal-linux-smoke-nointernet-xhigh.log
 For smoke-only debugging, set `ALLOW_PARTIAL=1` if you want the report to
 rebuild before every target finishes. Do not use that for a public full run.
 
-For the stricter paper-mode smoke:
-
-```bash
-scripts/start-sweep-tmux.sh configs/linux-smoke-paper-xhigh.json
-```
-
 If you are using a smaller Hetzner shared `cpx62` smoke VM, use the labeled
 16 CPU / 30GB config instead. It still requires strict egress and must be run as
 a dedicated non-root user with the OpenAI-only egress guard active:
@@ -126,30 +115,30 @@ ProgramBench `.eval.json`, `results.csv`, and a clean audit.
 
 ## Isolation Model
 
-In `paper`, `no-internet`, and `no-internet-local-tools` modes, the target
-binary runs in a Docker container with `--network none`, so probes against the
-original program cannot reach the internet. The `paper` and `no-internet`
-prompts require probing through `docker exec -u agent ...`; this matters because
-the cleanroom executable is execute-only for the `agent` user, while root can
-bypass file permissions. The `no-internet-local-tools` mode intentionally allows
-root-level target inspection as a non-compliant ablation.
+In no-internet-style modes, the target binary runs in a Docker container with
+`--network none`, so probes against the original program cannot reach the
+internet. The primary `no-internet` prompt requires probing through
+`docker exec -u agent ...`; this matters because the target executable is
+execute-only for the `agent` user, while root can bypass file permissions. The
+`no-internet-local-tools` mode intentionally allows root-level target inspection
+as a non-compliant ablation.
 
-Codex itself runs on the host because it must reach OpenAI. The `paper` and
-`no-internet` prompts forbid internet use, package managers, upstream source
-lookup, decompilers, the ProgramBench evaluator repository, and external
-replacement docs for images with missing documentation. The launcher does not
-enable web search. If you need hard enforcement for host shell commands too, run
-this harness inside a VM or host environment with an egress policy that only
-permits Codex/OpenAI traffic.
+Codex itself runs on the host because it must reach OpenAI. The `no-internet`
+prompt forbids internet use, package managers, upstream source lookup,
+decompilers, the ProgramBench evaluator repository, and external replacement
+docs for images with missing documentation. The launcher does not enable web
+search. If you need hard enforcement for host shell commands too, run this
+harness inside a VM or host environment with an egress policy that only permits
+Codex/OpenAI traffic.
 
-For stricter cleanroom runs, avoid giving the Codex user direct Docker socket
-access. Install the narrow target wrapper and prepare `paper` runs with
-`--target-access wrapper`:
+For stricter no-internet runs, avoid giving the Codex user direct Docker socket
+access. Install the narrow target wrapper and prepare runs with
+`--target-access wrapper` when you want wrapper-only target probing:
 
 ```bash
 scripts/install-target-wrapper.sh
 uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
-  --inference-mode paper \
+  --inference-mode no-internet \
   --target-access wrapper
 ```
 
@@ -184,12 +173,12 @@ metrics CSV. Container and `tmux` session names include the run name, so high
 and xhigh runs for the same instance can coexist. Default run names include the
 inference mode plus non-default model or effort values.
 
-The generated target container defaults to the paper's resource setting of 20
-CPUs and 60GB RAM. For local smoke tests on smaller machines, pass
+The generated target container defaults to 20 CPUs and 60GB RAM. For local
+smoke tests on smaller machines, pass
 `--docker-cpus` and `--docker-memory` to `prepare` or `prepare-batch`; do not
-report those local smoke runs as paper-comparable results.
+report those local smoke runs as full-sized Linux results.
 
-For `paper` and `no-internet`, the generated Codex launcher prepends a
+For `no-internet`, the generated Codex launcher prepends a
 `guard-bin` directory to `PATH`. It blocks common host-side internet,
 source/package lookup, and binary-analysis commands, restricts `docker` to the
 allowed `docker exec -u agent <container> ...` target-probing form, and points
@@ -204,24 +193,14 @@ Packaging is exposed as a `package-submission` command in `guard-bin`, so Codex
 does not need to invoke or inspect parent-directory helper scripts.
 This is still not a replacement for a VM/container/user-level egress policy.
 
-See the [paper compliance page](paper-compliance.html) for the paper/FAQ compliance matrix.
-
 ## Inference Modes
 
 Default mode is `no-internet`, the primary Codex `/goal` scaffold. It keeps the
 target container offline and keeps the host-side internet/package/source guards
-enabled, but it is reported separately from `paper` so we can measure the Codex
-scaffold without claiming mini-SWE-agent parity:
+enabled:
 
 ```bash
 uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763
-```
-
-For ProgramBench-style cleanroom reporting, opt into `paper`:
-
-```bash
-uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
-  --inference-mode paper
 ```
 
 The explicit no-internet form is equivalent to the default:
@@ -231,8 +210,7 @@ uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
   --inference-mode no-internet
 ```
 
-There is a second no-internet ablation for the “tool-starved benchmark”
-criticism:
+The local-tools ablation is coming soon:
 
 ```bash
 uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
@@ -242,8 +220,8 @@ uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
 This keeps external internet/source/package lookup blocked and keeps the target
 container on `--network none`, but it allows local installed tools, local
 binary-analysis/tracing tools, and root-level target inspection through the
-target container. This is intentionally non-compliant with ProgramBench
-cleanroom rules and must be reported separately.
+target container. This is intentionally non-compliant and must be reported
+separately.
 
 Future split: split this ablation into two clearer tracks if the first full
 runs show it is worth the extra matrix cost:
@@ -256,9 +234,8 @@ runs show it is worth the extra matrix cost:
   `strace`, `ltrace`, `gdb`, `hexdump`, and Python Capstone.
 
 No-internet and no-internet-local-tools runs still produce
-`submission.tar.gz` and can be evaluated with ProgramBench, but report them
-separately as Codex `/goal` experiments. Do not mix them with cleanroom
-ProgramBench results.
+`submission.tar.gz` and can be evaluated with ProgramBench. Report them as
+Codex `/goal` scaffold results, not as official mini-SWE-agent results.
 
 ## Reporting
 
@@ -270,10 +247,9 @@ Resolved means the filtered behavioral test pass rate is exactly `1.0`; warning
 and evaluator-problem fields are disclosed separately. Label our cost column as
 estimated cost: Codex session logs expose token counts and call counts, but not
 authoritative billed dollars. Label the scaffold explicitly, for example:
-`GPT-5.5 xhigh / Codex goal`, and disclose wall-clock time, inference mode,
-host/network enforcement, and any paper deviations. Treat this as a scaffold
-comparison against mini-SWE-agent, not an apples-to-apples model-only
-comparison.
+`GPT-5.5 xhigh / Codex goal`, and disclose wall-clock time, inference mode, and
+host/network enforcement. Treat this as a scaffold comparison against
+mini-SWE-agent, not an apples-to-apples model-only comparison.
 
 Cost uses local Codex `token_count` events from both `~/.codex/sessions` and
 `~/.codex/archived_sessions`. The estimate prices uncached input, cached input,
@@ -308,8 +284,8 @@ export PB_CODEX_PROXY_URL=http://127.0.0.1:18080
 PUBLISH=1 scripts/start-sweep-tmux.sh configs/full-nointernet-xhigh.json
 ```
 
-Strict egress is config-scoped, not global. The full `no-internet`, `paper`,
-and `no-internet-local-tools` configs set `"strict_egress": true`. The runner
+Strict egress is config-scoped, not global. The full `no-internet` and
+`no-internet-local-tools` configs set `"strict_egress": true`. The runner
 currently supports strict egress only for OpenAI/Codex model runs.
 
 By default the proxy allows:
@@ -339,9 +315,9 @@ sudo scripts/linux-openai-egress-guard.sh delete codex-runner
 
 For strict compliance, do not give the Codex user broad Docker socket access.
 Raw Docker access is effectively root-equivalent and can bypass network
-controls. The `paper` and `no-internet` prompts require
-`docker exec -u agent ...`, but for a publishable run you should either
-supervise that boundary or expose only a narrow wrapper for target execution.
+controls. The primary `no-internet` prompt requires `docker exec -u agent ...`,
+but for a publishable run you should either supervise that boundary or expose
+only a narrow wrapper for target execution.
 
 ## Metrics
 
@@ -458,9 +434,8 @@ scripts/run-sweep.sh
 ```
 
 On the smaller Hetzner `cpx62` runner, use the `cpx62-*` xhigh configs. They
-are explicitly non-paper-sized because they disclose 16 CPU / 30g instead of
-20 CPU / 60g, but they still require strict egress for every no-internet-style
-mode:
+disclose 16 CPU / 30g instead of 20 CPU / 60g, and they still require strict
+egress for every no-internet-style mode:
 
 ```bash
 scripts/run-sweep.sh --config configs/cpx62-nointernet-xhigh.json --dry-run
@@ -572,30 +547,15 @@ Future split: if this ablation becomes important, split it into `base VM tools
 only` and `preinstalled reverse-engineering toolbox` variants. Keep both
 clearly non-compliant and separate from the primary no-internet result.
 
-For the closest ProgramBench-cleanroom run, use a Linux `amd64` host with the
-wrapper boundary and preflight first:
-
-```bash
-uv run python scripts/preflight-paper-host.py \
-  --codex-user codex-runner \
-  --check-egress-guard \
-  --instance-dir /path/to/prepared/paper/instance
-
-uv run python scripts/run-config.py watch configs/full-paper-xhigh.json
-```
-
 The committed full-run configs all use `gpt-5.5`, 20 CPUs, 60GB RAM, and
-`max_parallel=10`. There are separate `high` and `xhigh` configs for
-`no-internet`, `no-internet-local-tools`, and `paper`. Lower
-parallelism on smaller VMs with `scripts/run-sweep.sh --max-parallel N` or
-`MAX_PARALLEL=N scripts/start-sweep-tmux.sh ...`. Do not mix reasoning modes in
-one batch.
+`max_parallel=10`. There are separate `high` and `xhigh` configs for the public
+no-internet track. Lower parallelism on smaller VMs with
+`scripts/run-sweep.sh --max-parallel N` or `MAX_PARALLEL=N
+scripts/start-sweep-tmux.sh ...`. Do not mix reasoning modes in one batch.
 
 The `cpx62-*` configs are the same xhigh mode matrix sized for the current
 Hetzner shared runner: 16 CPUs, 30GB RAM, and `max_parallel=10`. They still use
-strict egress for `no-internet`, `paper`, and `no-internet-local-tools` modes.
-They are useful for the Codex `/goal` scaffold question, but not for
-paper-sized cleanroom claims.
+strict egress for no-internet-style modes.
 
 Prepare with an official prompt template when one is available:
 
@@ -619,7 +579,7 @@ Prepare the same batch with wrapper-mode target access:
 
 ```bash
 uv run python programbench_goal_runner.py prepare-batch target_sets/first_batch_near_miss.txt \
-  --inference-mode paper \
+  --inference-mode no-internet \
   --target-access wrapper
 ```
 
@@ -636,8 +596,8 @@ uv run python scripts/run-batch.py watch target_sets/first_batch_near_miss.txt \
 
 Use `--max-parallel 1` on a laptop or small smoke VM. Use higher concurrency
 only when both Codex usage limits and host capacity are comfortable. Use
-separate batch names for `high`, `xhigh`, `paper`, `no-internet`,
-and `no-internet-local-tools` runs. The manager stores resumable state under
+separate batch names for `high`, `xhigh`, `no-internet`, and
+`no-internet-local-tools` runs. The manager stores resumable state under
 `local_state/batches/`, starts new work only when active sessions are below the
 concurrency cap, and pauses new launches when a running pane shows rate-limit
 text.
@@ -685,19 +645,8 @@ Before running expensive inference, do a full evaluator preflight with a known
 bad stub on one small real task. The expected result is a clean evaluation with a
 low score, not a solved task. This verifies Docker image access, blob access,
 `submission.tar.gz` layout, eval JSON output, and the metrics summarizer.
-
-For a paper-comparable host, run the strict preflight before launching a batch:
-
-```bash
-uv run python scripts/preflight-paper-host.py \
-  --codex-user codex-runner \
-  --check-egress-guard \
-  --instance-dir ~/pb-goal-runs/gpt55-goal-paper-jq/jqlang__jq.b33a763
-```
-
-The preflight checks Linux `amd64`, Docker CPU/RAM capacity, dedicated-user
-existence, direct Docker-group exposure, OpenAI egress guard status, target
-container network mode, and generated guard wrappers.
+The normal doctor check covers Linux `amd64`, Docker CPU/RAM capacity, wrapper
+access, OpenAI egress guard status, target set, and Codex version.
 
 Launch Codex in `tmux` and inject `/goal`:
 
@@ -808,18 +757,16 @@ it from one or more summarized result CSVs:
 
 ```bash
 uv run python scripts/build-report.py \
-  local_state/open-sample-results.csv \
-  local_state/csview-paper-smoke-results.csv \
+  local_state/nointernet-sample-results.csv \
   --output-dir docs
 ```
 
 `build-report.py` fetches the latest ProgramBench public baseline rows by
 default before rendering. Use `--no-refresh-baselines` only for offline rebuilds.
 
-The report keeps `paper`, `no-internet`, and `no-internet-local-tools` tracks
-separate, includes ProgramBench-style
-resolved/almost/average-pass/estimated-cost/calls metrics, and commits only
-sanitized aggregate rows. Local Codex session-log paths stay in
+The report keeps `no-internet` and `no-internet-local-tools` tracks separate,
+includes ProgramBench-style resolved/almost/average-pass/estimated-cost/calls
+metrics, and commits only sanitized aggregate rows. Local Codex session-log paths stay in
 `local_state/` and are not published.
 The summary page also plots ProgramBench-style behavioral pass-rate
 distributions (histogram and cumulative), plus per-task pass rate against
@@ -856,8 +803,7 @@ paths, export sanitized evidence first:
 ```bash
 uv run python scripts/export-public-evidence.py
 uv run python scripts/build-report.py \
-  local_state/open-sample-results.csv \
-  local_state/csview-paper-smoke-results.csv \
+  local_state/nointernet-sample-results.csv \
   --output-dir docs
 ```
 

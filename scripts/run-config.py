@@ -14,7 +14,7 @@ from typing import Any
 
 REPO = Path(__file__).resolve().parents[1]
 RUN_BATCH = REPO / "scripts" / "run-batch.py"
-NO_INTERNET_MODES = {"paper", "no-internet", "no-internet-local-tools"}
+NO_INTERNET_MODES = {"no-internet", "no-internet-local-tools"}
 
 
 def load_config(path: Path) -> dict[str, Any]:
@@ -100,7 +100,6 @@ def command(config: dict[str, Any], args: argparse.Namespace) -> list[str]:
         *option_args("eval_timeout_seconds", config.get("eval_timeout_seconds")),
         *option_args("limit", args.limit),
         *chain.from_iterable(option_args("instance", instance) for instance in args.instance or []),
-        *flag_args("strict_paper", bool(config.get("strict_paper"))),
         *flag_args("allow_partial", args.allow_partial),
         *flag_args("retry_finalize_failed", args.retry_finalize_failed),
     ]

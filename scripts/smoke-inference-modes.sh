@@ -12,7 +12,6 @@ REASONING_EFFORT="${REASONING_EFFORT:-high}"
 KEEP_SMOKE="${KEEP_SMOKE:-0}"
 
 MODES=(
-  paper
   no-internet
   no-internet-local-tools
 )
@@ -57,7 +56,7 @@ check_guard_behavior() {
   local guard_dir="$instance_dir/guard-bin"
 
   case "$mode" in
-    paper | no-internet)
+    no-internet)
       (
         cd "$solution_dir"
         if PATH="$guard_dir:$PATH" rg --files -uu .. >/tmp/pb-smoke-rg.out 2>/tmp/pb-smoke-rg.err; then

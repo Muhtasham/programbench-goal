@@ -324,15 +324,8 @@ def usage_audit(rows: list[dict], pricing_file: Path, pricing_snapshot: dict, ma
     }
 
 
-def strict_paper_compliant(run: dict) -> bool:
-    return (
-        run.get("inference_mode") == "paper"
-        and run.get("target_access") == "wrapper"
-        and run.get("host_system") == "Linux"
-        and run.get("host_machine") in {"x86_64", "AMD64"}
-        and str(run.get("docker_cpus")) == "20"
-        and run.get("docker_memory") == "60g"
-    )
+def legacy_compliance_marker(_run: dict) -> bool:
+    return False
 
 
 def result_row(eval_json: Path, programbench: tuple, codex_sessions: list[Path], pricing: dict) -> dict:
@@ -348,7 +341,7 @@ def result_row(eval_json: Path, programbench: tuple, codex_sessions: list[Path],
         "model": model,
         "reasoning_effort": run.get("reasoning_effort", ""),
         "inference_mode": run.get("inference_mode", ""),
-        "paper_compliant": strict_paper_compliant(run),
+        "paper_compliant": legacy_compliance_marker(run),
         "host_system": run.get("host_system", ""),
         "host_machine": run.get("host_machine", ""),
         "docker_cpus": run.get("docker_cpus", ""),

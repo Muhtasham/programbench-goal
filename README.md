@@ -2,8 +2,8 @@
 
 Codex `/goal` benchmark runner for ProgramBench tasks.
 
-This repo runs GPT-5.5 Codex CLI goal mode against ProgramBench cleanroom task
-images, packages the generated code as `submission.tar.gz`, evaluates with
+This repo runs GPT-5.5 Codex CLI goal mode against ProgramBench task images,
+packages the generated code as `submission.tar.gz`, evaluates with
 ProgramBench's own evaluator, and builds a ProgramBench-style public report.
 
 This is not the official mini-SWE-agent baseline. Results should be labeled as
@@ -123,7 +123,7 @@ iptables owner rules
 
 The stricter proxy mode narrows this further: `codex_user` can only reach a
 local loopback proxy, and that proxy is responsible for OpenAI/Codex outbound
-traffic. In both modes, cleanroom enforcement also happens above the network
+traffic. In both modes, benchmark enforcement also happens above the network
 layer through `guard-bin/`, target wrapper commands, and the post-run audit.
 
 ### Sharded Evaluation
@@ -162,8 +162,8 @@ scripts/doctor.sh configs/linux-smoke-nointernet-xhigh.json
 ```
 
 The bootstrap installs Docker, `uv`, `tmux`, Codex CLI if missing, a sibling
-`../ProgramBench` checkout, and the narrow target wrapper used by paper-style
-runs.
+`../ProgramBench` checkout, and the narrow target wrapper used by clean
+no-internet runs.
 
 ## Smoke Run
 
@@ -223,26 +223,23 @@ Use separate batches for each mode. Do not mix them in one result.
 | Mode | Config | Meaning |
 | --- | --- | --- |
 | `no-internet` | `configs/full-nointernet-xhigh.json` | Primary Codex `/goal` scaffold. Internet/source/package lookup is blocked, target binary-analysis tools are blocked, and target probing stays black-box. |
-| `paper` | `configs/full-paper-xhigh.json` | Same Codex `/goal` scaffold with stricter ProgramBench-style cleanroom comparability checks: Linux amd64, 20 CPU / 60g, strict egress, wrapper-only target access, and clean audit. Not an official mini-SWE-agent reproduction. |
-| `no-internet-local-tools` | `configs/full-localtools-xhigh.json` | Non-compliant local-tools ablation. Internet/source/package lookup remains blocked, but local binary-analysis/tracing tools are allowed. |
+| `no-internet-local-tools` | `configs/full-localtools-xhigh.json` | Coming soon. Non-compliant local-tools ablation: internet/source/package lookup remains blocked, but local binary-analysis/tracing tools are allowed. |
 
-Any mode with `no-internet` semantics (`no-internet`, `paper`, and
-`no-internet-local-tools`) must use strict host egress. The runner refuses those
-configs unless `strict_egress=true`, and the launch doctor requires a
-dedicated non-root `codex_user` with the OpenAI-only egress guard active. The
-coordinator may run as root for Docker/eval access, but the generated Codex
-`/goal` tmux sessions run as that dedicated user.
+Any mode with `no-internet` semantics must use strict host egress. The runner
+refuses those configs unless `strict_egress=true`, and the launch doctor
+requires a dedicated non-root `codex_user` with the OpenAI-only egress guard
+active. The coordinator may run as root for Docker/eval access, but the
+generated Codex `/goal` tmux sessions run as that dedicated user.
 
 Recommended run order:
 
-On a paper-sized Linux host, use the `full-*` configs. On the current Hetzner
+On a larger Linux host, use the `full-*` configs. On the current Hetzner
 `cpx62` runner, use the matching `cpx62-*` configs; they disclose
-`16 CPU / 30g` instead of `20 CPU / 60g`.
+`16 CPU / 30g`.
 
 1. `cpx62-nointernet-xhigh`
 2. `cpx62-nointernet-high`
-3. `cpx62-paper-xhigh`
-4. `cpx62-localtools-xhigh`
+3. `cpx62-localtools-xhigh` (coming soon)
 
 Run `high` after the xhigh primary run when you want a direct reasoning-effort
 comparison on the same VM/scaffold.
@@ -332,5 +329,4 @@ uv run pre-commit run --all-files
 ## More Docs
 
 - [Detailed runbook](docs/runbook.md)
-- [Paper/compliance notes](docs/paper-compliance.md)
 - [Public report](https://muhtasham.github.io/goalbench/)

@@ -90,18 +90,6 @@ WRAPPER_PATTERNS = (
     r"\bos\.(?:system|popen|execv|execve|spawnv|spawnve)\([^)\n]*/workspace/executable",
     r"\bCommand::new\([^)]*/workspace/executable",
 )
-PAPER_CACHE_ENV = {
-    "CARGO_HOME",
-    "CARGO_NET_OFFLINE",
-    "GOMODCACHE",
-    "GOPATH",
-    "GOPROXY",
-    "GOSUMDB",
-    "NPM_CONFIG_CACHE",
-    "NPM_CONFIG_OFFLINE",
-    "PIP_CACHE_DIR",
-    "PIP_NO_INDEX",
-}
 SCRATCH_ARTIFACT_NAME = re.compile(r"(^|[_-])(probe|probes|compare|fuzz|fuzzer|fixture|fixtures)([_\.-]|$)")
 
 
@@ -110,7 +98,6 @@ class Finding:
     source: str
     message: str
     command: str = ""
-    strict_only: bool = False
 
 
 def session_meta(path: Path) -> dict | None:
@@ -449,39 +436,6 @@ def audit_submission_archive(instance_dir: Path) -> list[Finding]:
     ]
 
 
-def audit_paper_settings(run: dict, instance_dir: Path) -> list[Finding]:
-    findings = []
-    if run.get("inference_mode", "paper") != "paper" or not run.get("paper_compliant", True):
-        findings.append(
-            Finding(
-                str(instance_dir / "run.json"),
-                "run is not in ProgramBench paper-compliant inference mode",
-                strict_only=True,
-            )
-        )
-    if run.get("host_system") != "Linux":
-        findings.append(
-            Finding(str(instance_dir / "run.json"), "paper-comparable run should use Linux host", strict_only=True)
-        )
-    if run.get("host_machine") not in {"x86_64", "AMD64"}:
-        findings.append(
-            Finding(str(instance_dir / "run.json"), "paper-comparable run should use amd64 host", strict_only=True)
-        )
-    if run.get("docker_cpus") != 20:
-        findings.append(Finding(str(instance_dir / "run.json"), "paper uses 20 CPUs per run", strict_only=True))
-    if run.get("docker_memory") != "60g":
-        findings.append(Finding(str(instance_dir / "run.json"), "paper uses 60GB RAM per run", strict_only=True))
-    if not PAPER_CACHE_ENV.issubset(set(run.get("tool_cache_env", []))):
-        findings.append(
-            Finding(
-                str(instance_dir / "run.json"),
-                "paper-mode run should isolate package/tool caches",
-                strict_only=True,
-            )
-        )
-    return findings
-
-
 def audit_command(
     line_source: str,
     call: dict,
@@ -527,7 +481,7 @@ def audit_command(
     if fetch := fetches_external_url(command):
         findings.append(Finding(line_source, f"external URL fetch: {fetch}", command))
     findings.extend(
-        Finding(line_source, f"forbidden cleanroom host/tool command: {tool}", command)
+        Finding(line_source, f"forbidden no-internet host/tool command: {tool}", command)
         for tool in FORBIDDEN_TOOLS
         if tool not in BINARY_ANALYSIS_TOOLS and uses_tool(command, tool) and tool != "docker"
     )
@@ -549,7 +503,6 @@ def audit(args: argparse.Namespace) -> None:
     findings.extend(audit_behavior_audit_file(solution_dir))
     findings.extend(audit_solution_files(solution_dir))
     findings.extend(audit_submission_archive(instance_dir))
-    findings.extend(audit_paper_settings(run, instance_dir))
 
     logs = find_session_logs(instance_dir, [Path(path).expanduser() for path in args.codex_sessions])
     if not logs:
@@ -573,7 +526,6 @@ def audit(args: argparse.Namespace) -> None:
         )
     )
 
-    findings = [finding for finding in findings if args.strict_paper or not finding.strict_only]
     if findings:
         print("\n".join(failure_text(finding) for finding in findings))
         raise SystemExit(1)
@@ -592,14 +544,9 @@ def failure_text(finding: Finding) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Audit a Codex /goal ProgramBench run for cleanroom gaps")
+    parser = argparse.ArgumentParser(description="Audit a Codex /goal ProgramBench run for no-internet gaps")
     parser.add_argument("instance_dir")
     parser.add_argument("--codex-sessions", nargs="+", default=[str(Path.home() / ".codex" / "sessions")])
-    parser.add_argument(
-        "--strict-paper",
-        action="store_true",
-        help="fail on paper-comparability gaps such as host/resources",
-    )
     audit(parser.parse_args())
 
 

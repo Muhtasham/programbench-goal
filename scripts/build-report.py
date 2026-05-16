@@ -22,7 +22,6 @@ PROGRAMBENCH_TASKS = 200
 PROGRAMBENCH_EXTENDED = "https://programbench.com/extended/"
 PROGRAMBENCH_HOME = "https://programbench.com/"
 GOALBENCH_GITHUB = "https://github.com/Muhtasham/goalbench"
-COMPLIANCE_PAGE = "paper-compliance.html"
 RUNBOOK_PAGE = "runbook.html"
 ROW_RE = re.compile(r"<tr class=\"clickable-row\".*?</tr>", re.S)
 CELL_RE = re.compile(r"<td[^>]*>(.*?)</td>", re.S)
@@ -333,7 +332,6 @@ def render_doc_page(markdown_path: Path, title: str) -> str:
         <a href="./">Leaderboard</a>
         <a href="extended/">Extended</a>
         <a href="task-details.html">Tasks</a>
-        <a href="{COMPLIANCE_PAGE}">Compliance</a>
         <a href="{RUNBOOK_PAGE}">Runbook</a>
         <a href="{GOALBENCH_GITHUB}">GitHub</a>
         <a href="{PROGRAMBENCH_HOME}">ProgramBench</a>
@@ -435,7 +433,7 @@ def model_display(row: ResultRow) -> str:
 
 def mode_label(row: ResultRow) -> str:
     if row.inference_mode == "paper":
-        return "Paper / cleanroom" if is_programbench_comparable(row) else "Paper-mode prompt"
+        return "Legacy internal"
     return {
         "no-internet": "No internet",
         "no-internet-local-tools": "No internet + local tools",
@@ -457,7 +455,7 @@ def host_profile(row: ResultRow) -> str:
     if row.host_system != "Linux" or row.host_machine not in {"x86_64", "AMD64"}:
         return f"{row.host_system}/{row.host_machine} host"
     if row.docker_cpus == "20" and row.docker_memory == "60g":
-        return "paper-sized host"
+        return "20 CPU / 60g host"
     return f"smaller VM: {row.docker_cpus} CPU / {row.docker_memory}"
 
 
@@ -467,7 +465,7 @@ def compliance_label(row: ResultRow) -> str:
     if row.inference_mode == "no-internet-local-tools":
         return "Non-compliant: local/binary tools allowed"
     if is_programbench_comparable(row):
-        return "ProgramBench-style"
+        return "Legacy internal"
     return "Local smoke: host/resources differ"
 
 
@@ -503,7 +501,7 @@ def run_slug(key: tuple[str, str, str, str, str]) -> str:
     parts = [model, mode]
     if version:
         parts.append(version)
-    if mode == "Paper-mode prompt" or compliance == "Local smoke: host/resources differ":
+    if compliance == "Local smoke: host/resources differ":
         parts.append(compliance)
     return slug_text("-".join(parts))
 
@@ -1325,7 +1323,6 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
         <a href="../../">Leaderboard</a>
         <a href="../../extended/">Extended</a>
         <a href="../../task-details.html">Tasks</a>
-        <a href="../../paper-compliance.html">Compliance</a>
         <a href="../../runbook.html">Runbook</a>
         <a href="{GOALBENCH_GITHUB}">GitHub</a>
         <a href="{PROGRAMBENCH_EXTENDED}">ProgramBench</a>
@@ -1574,7 +1571,6 @@ def render_task_detail(instance_id: str, rows: list[ResultRow], official_tasks: 
         <a href="../../">Leaderboard</a>
         <a href="../../extended/">Extended</a>
         <a href="../../task-details.html">Tasks</a>
-        <a href="../../paper-compliance.html">Compliance</a>
         <a href="../../runbook.html">Runbook</a>
         <a href="{GOALBENCH_GITHUB}">GitHub</a>
         <a href="{PROGRAMBENCH_EXTENDED}">ProgramBench</a>
@@ -1719,12 +1715,8 @@ def render_empty_state() -> str:
           <p><code>configs/full-nointernet-high.json</code> keeps the same scaffold and mode, changing only reasoning effort for high-vs-xhigh comparison.</p>
         </div>
         <div class="mode-card">
-          <strong>Strict cleanroom variant</strong>
-          <p><code>configs/full-paper-xhigh.json</code> is ProgramBench-style cleanroom for Codex <code>/goal</code>, not a paper baseline reproduction. It needs Linux amd64, 20 CPU / 60g, strict egress, and wrapper-only target access.</p>
-        </div>
-        <div class="mode-card">
-          <strong>Tool-starvation ablation</strong>
-          <p><code>configs/full-localtools-xhigh.json</code> keeps internet/source lookup blocked but allows local binary-analysis/tracing tools. It is intentionally non-compliant.</p>
+          <strong>No internet + local tools</strong>
+          <p><code>configs/full-localtools-xhigh.json</code> is coming soon. It keeps internet/source/package lookup blocked but allows local binary-analysis/tracing tools. It is intentionally non-compliant.</p>
         </div>
       </div>
     </section>
@@ -1742,9 +1734,8 @@ def render_run_plan() -> str:
           <thead><tr><th>#</th><th>Track</th><th>Config</th><th>What it answers</th><th>Compliance label</th></tr></thead>
           <tbody>
             <tr><td>1</td><td>Primary</td><td><code>cpx62-nointernet-xhigh</code></td><td>GPT-5.5 xhigh with Codex <code>/goal</code> on ProgramBench without internet/source lookup, with strict host egress, sized for the current 16 CPU / 30g runner.</td><td>Codex no-internet ablation</td></tr>
-            <tr><td>2</td><td>Prompt variant</td><td><code>cpx62-paper-xhigh</code></td><td>ProgramBench-style prompt/scaffold restrictions on the same smaller runner, with strict host egress. Not paper-sized.</td><td>Codex cleanroom-style ablation</td></tr>
-            <tr><td>3</td><td>Local-tools ablation</td><td><code>cpx62-localtools-xhigh</code></td><td>Keeps internet/source/package lookup blocked and strict host egress enabled, but allows local binary-analysis/tracing tools.</td><td>Non-compliant: local/binary tools allowed</td></tr>
-            <tr><td>4</td><td>Later</td><td><code>full-*</code> / <code>*-high</code></td><td>Use paper-sized configs or high-effort comparisons only after xhigh says the extra run is worthwhile.</td><td>Depends on mode and host preflight</td></tr>
+            <tr><td>2</td><td>High comparison</td><td><code>cpx62-nointernet-high</code></td><td>Same no-internet scaffold, changing only reasoning effort from xhigh to high.</td><td>Codex no-internet ablation</td></tr>
+            <tr><td>3</td><td>Local-tools ablation</td><td><code>cpx62-localtools-xhigh</code></td><td>Coming soon. Keeps internet/source/package lookup blocked and strict host egress enabled, but allows local binary-analysis/tracing tools.</td><td>Non-compliant: local/binary tools allowed</td></tr>
           </tbody>
         </table>
       </div>
@@ -1811,7 +1802,6 @@ def render_task_details_page() -> str:
         <a href="./">Leaderboard</a>
         <a href="extended/">Extended</a>
         <a href="task-details.html">Tasks</a>
-        <a href="paper-compliance.html">Compliance</a>
         <a href="runbook.html">Runbook</a>
         <a href="{GOALBENCH_GITHUB}">GitHub</a>
         <a href="{PROGRAMBENCH_HOME}">ProgramBench</a>
@@ -1878,7 +1868,7 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
         <tbody>{render_disclosures(data["groups"])}</tbody>
       </table>
     </div>
-    <p>These disclosure fields are intentionally outside the mirrored metric table because ProgramBench's public leaderboard does not mix scaffold deviations into the metric columns. Rows labeled smaller VM are Codex <code>/goal</code> scaffold experiments, not paper-sized ProgramBench cleanroom runs.</p>
+    <p>These disclosure fields are intentionally outside the mirrored metric table because ProgramBench's public leaderboard does not mix scaffold deviations into the metric columns. Rows labeled smaller VM are Codex <code>/goal</code> scaffold experiments on the disclosed runner size.</p>
 
     {render_comparison(data["groups"])}
 
@@ -1943,7 +1933,6 @@ def render_html(data: dict, extended: bool = False) -> str:
         <a href="./">Leaderboard</a>
         <a href="extended/">Extended</a>
         <a href="task-details.html">Tasks</a>
-        <a href="paper-compliance.html">Compliance</a>
         <a href="runbook.html">Runbook</a>
         <a href="{GOALBENCH_GITHUB}">GitHub</a>
         <a href="{PROGRAMBENCH_EXTENDED}">ProgramBench</a>
@@ -2303,18 +2292,14 @@ def render_html(data: dict, extended: bool = False) -> str:
           <p>Primary Codex <code>/goal</code> scaffold: internet/source/package lookup is blocked, target binary-analysis tools are blocked, and target probing stays black-box.</p>
         </div>
         <div class="mode-card">
-          <strong>Paper / cleanroom</strong>
-          <p>Same Codex <code>/goal</code> scaffold with stricter ProgramBench-style comparability checks: Linux amd64, 20 CPU / 60g, strict egress, wrapper-only target access, and clean audit. It is not a mini-SWE-agent paper reproduction.</p>
-        </div>
-        <div class="mode-card">
-          <strong>No internet + local tools</strong>
+          <strong>No internet + local tools <span class="muted">(coming soon)</span></strong>
           <p>Non-compliant local-tools ablation: external internet/source/package lookup remains blocked, but local binary-analysis/tracing tools are allowed.</p>
         </div>
       </div>
     </section>
 
     <section class="section compact">
-      <p class="note">Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in no-internet mode. Paper/cleanroom rows are ProgramBench-style Codex scaffold runs, not official mini-SWE-agent paper baseline reproductions. Local-tools runs are intentionally non-compliant and reported separately. See <a href="task-details.html">Task Details</a>, the <a href="runbook.html">runbook</a>, and <a href="paper-compliance.html">compliance notes</a> for setup and mode details.</p>
+      <p class="note">Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in no-internet mode. Local-tools runs are intentionally non-compliant and reported separately once available. See <a href="task-details.html">Task Details</a> and the <a href="runbook.html">runbook</a> for setup and mode details.</p>
     </section>
 
     <section class="section">
@@ -2331,7 +2316,7 @@ def render_html(data: dict, extended: bool = False) -> str:
 
     <section class="section">
     <h2>Method Notes</h2>
-    <p>Metrics use ProgramBench's resolved, almost-resolved, average pass rate, cost, and calls shape. Scoring is computed through ProgramBench's own <code>EvaluationResult</code> and <code>InstanceEvalSummary</code> logic after active-branch and ignored-test filtering. Resolved means the ProgramBench behavioral test pass rate is exactly 100%; evaluator warnings/errors are disclosed separately in evidence artifacts. The current Hetzner <code>cpx62</code> runner is a smaller 16 CPU / 30g VM, so those rows answer the Codex <code>/goal</code> scaffold question but are not paper-sized ProgramBench cleanroom runs. All no-internet-style rows require strict host egress and wrapper-only target access; paper-sized rows also require Linux amd64 with 20 CPU / 60g and clean audit. Public evidence manifests include sanitized eval summaries and package contents. Raw Codex session logs and submission tarballs stay local by default. Estimated cost comes from Codex token logs and the locally refreshed OpenAI model pricing snapshot; it is not authoritative billing. The committed data omits local session-log paths.</p>
+    <p>Metrics use ProgramBench's resolved, almost-resolved, average pass rate, cost, and calls shape. Scoring is computed through ProgramBench's own <code>EvaluationResult</code> and <code>InstanceEvalSummary</code> logic after active-branch and ignored-test filtering. Resolved means the ProgramBench behavioral test pass rate is exactly 100%; evaluator warnings/errors are disclosed separately in evidence artifacts. The current Hetzner <code>cpx62</code> runner is a 16 CPU / 30g VM. All no-internet-style rows require strict host egress and wrapper-only target access. Public evidence manifests include sanitized eval summaries and package contents. Raw Codex session logs and submission tarballs stay local by default. Estimated cost comes from Codex token logs and the locally refreshed OpenAI model pricing snapshot; it is not authoritative billing. The committed data omits local session-log paths.</p>
     <p>Sources: <a href="https://programbench.com/extended/">ProgramBench extended results</a>, <a href="https://programbench.com/run/gpt-5-5-xhigh/">GPT 5.5 xhigh run detail</a>, and this repository's generated CSV summaries.</p>
     </section>
   </main>
@@ -2384,7 +2369,6 @@ def build(args: argparse.Namespace) -> None:
     (output_dir / "extended").mkdir(parents=True, exist_ok=True)
     write_html(output_dir / "extended" / "index.html", render_html(data, extended=True))
     write_html(output_dir / "task-details.html", render_task_details_page())
-    write_html(output_dir / COMPLIANCE_PAGE, render_doc_page(Path("docs/paper-compliance.md"), "Compliance"))
     write_html(output_dir / RUNBOOK_PAGE, render_doc_page(Path("docs/runbook.md"), "Runbook"))
     for group in data["groups"]:
         run_dir = output_dir / "run" / str(group["slug"])
