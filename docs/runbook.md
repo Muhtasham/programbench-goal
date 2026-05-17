@@ -12,8 +12,11 @@ not as mini-SWE-agent results.
 
 The harness keeps the solving workspace separate from the ProgramBench evaluator
 repo. It gives Codex a clean writable solution directory and produces the
-`submission.tar.gz` layout that `programbench eval` expects. The default and
-primary public mode is the no-internet Codex `/goal` harness.
+`submission.tar.gz` layout that `programbench eval` expects. The default mode
+is the no-internet Codex `/goal` harness. For closer mini-SWE-agent scaffold
+parity, use `mini-swe-compatible-nointernet`: it keeps the same no-internet and
+black-box enforcement, but uses a shorter prompt without GoalBench-specific
+audit-loop requirements.
 
 ProgramBench is a free-form reimplementation benchmark. The agent should choose
 the language, architecture, source layout, abstractions, and build script from
@@ -22,7 +25,7 @@ the target container. It should not receive method signatures, skeletons,
 product requirements, hidden hints, or task-specific harness tuning.
 
 If ProgramBench publishes the exact mini-SWE-agent baseline prompt, keep that
-as a separate internal comparison and do not mix it with GoalBench public rows.
+as a separate immutable template and do not mix it with older GoalBench rows.
 Public GoalBench rows should stay labeled as Codex `/goal` scaffold results.
 
 ## Requirements
@@ -83,7 +86,7 @@ Then authenticate Codex on the VM:
 ```bash
 codex login
 docker run --rm hello-world
-scripts/doctor.sh configs/linux-smoke-nointernet-xhigh.json
+scripts/doctor.sh configs/linux-smoke-miniswecompat-xhigh.json
 ```
 
 For Codex app remote connections, add the VM to your local `~/.ssh/config`,
@@ -93,9 +96,9 @@ config if needed, then open this repo as a remote project.
 Run the Linux smoke first:
 
 ```bash
-scripts/start-sweep-tmux.sh configs/linux-smoke-nointernet-xhigh.json
-uv run python scripts/run-config.py status configs/linux-smoke-nointernet-xhigh.json
-tail -f local_state/logs/pb-goal-linux-smoke-nointernet-xhigh.log
+scripts/start-sweep-tmux.sh configs/linux-smoke-miniswecompat-xhigh.json
+uv run python scripts/run-config.py status configs/linux-smoke-miniswecompat-xhigh.json
+tail -f local_state/logs/pb-goal-linux-smoke-miniswecompat-xhigh.log
 ```
 
 For smoke-only debugging, set `ALLOW_PARTIAL=1` if you want the report to
@@ -210,6 +213,17 @@ uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
   --inference-mode no-internet
 ```
 
+The mini-SWE-compatible no-internet mode is the preferred parity attempt when
+comparing Codex `/goal` against ProgramBench's mini-SWE-agent leaderboard. It
+uses the same target wrapper, strict egress, blocked source/package lookup, and
+black-box target access as `no-internet`, but removes the extra
+GoalBench-specific audit file and adversarial-probe prompt requirements:
+
+```bash
+uv run python programbench_goal_runner.py prepare jqlang__jq.b33a763 \
+  --inference-mode mini-swe-compatible-nointernet
+```
+
 The local-tools ablation is coming soon:
 
 ```bash
@@ -233,7 +247,7 @@ runs show it is worth the extra matrix cost:
   with a preinstalled reverse-engineering toolbox such as `binutils`, `file`,
   `strace`, `ltrace`, `gdb`, `hexdump`, and Python Capstone.
 
-No-internet and no-internet-local-tools runs still produce
+All inference modes still produce
 `submission.tar.gz` and can be evaluated with ProgramBench. Report them as
 Codex `/goal` scaffold results, not as official mini-SWE-agent results.
 
@@ -281,12 +295,12 @@ non-root user:
 
 ```bash
 export PB_CODEX_PROXY_URL=http://127.0.0.1:18080
-PUBLISH=1 scripts/start-sweep-tmux.sh configs/full-nointernet-xhigh.json
+PUBLISH=1 scripts/start-sweep-tmux.sh configs/full-miniswecompat-xhigh.json
 ```
 
-Strict egress is config-scoped, not global. The full `no-internet` and
-`no-internet-local-tools` configs set `"strict_egress": true`. The runner
-currently supports strict egress only for OpenAI/Codex model runs.
+Strict egress is config-scoped, not global. The full no-internet-style configs
+set `"strict_egress": true`. The runner currently supports strict egress only
+for OpenAI/Codex model runs.
 
 By default the proxy allows:
 
@@ -343,7 +357,7 @@ The generated report follows the same split.
 Before launching any expensive run, use the doctor script:
 
 ```bash
-scripts/doctor.sh configs/linux-smoke-nointernet-xhigh.json
+scripts/doctor.sh configs/linux-smoke-miniswecompat-xhigh.json
 ```
 
 It checks the selected config, required commands, host architecture, Docker
@@ -423,14 +437,15 @@ The validator expects 200 real tasks by default: all ProgramBench task metadata
 entries except the bundled `testorg__` fixture. `scripts/run-sweep.sh` runs this
 validation automatically whenever the config uses `target_sets/all_tasks.txt`.
 
-For the primary public run, use the no-internet Codex `/goal` scaffold: same
-task set, autonomous Codex goal loop, and no external lookup. It is not the
-official mini-SWE-agent baseline, but it avoids the biggest confound from
-normal Codex internet access:
+For the closest public comparison against the ProgramBench leaderboard, use the
+mini-SWE-compatible no-internet Codex `/goal` scaffold: same task set,
+autonomous Codex goal loop, no external lookup, and a minimal task prompt. It is
+not the official mini-SWE-agent baseline, but it avoids the biggest confound
+from normal Codex internet access:
 
 ```bash
-scripts/run-sweep.sh --dry-run
-scripts/run-sweep.sh
+scripts/run-sweep.sh --config configs/full-miniswecompat-xhigh.json --dry-run
+scripts/run-sweep.sh --config configs/full-miniswecompat-xhigh.json
 ```
 
 On the smaller Hetzner `cpx62` runner, use the `cpx62-*` xhigh configs. They
@@ -438,8 +453,8 @@ disclose 16 CPU / 30g instead of 20 CPU / 60g, and they still require strict
 egress for every no-internet-style mode:
 
 ```bash
-scripts/run-sweep.sh --config configs/cpx62-nointernet-xhigh.json --dry-run
-scripts/run-sweep.sh --config configs/cpx62-nointernet-xhigh.json --incremental-finalize --publish
+scripts/run-sweep.sh --config configs/cpx62-miniswecompat-xhigh.json --dry-run
+scripts/run-sweep.sh --config configs/cpx62-miniswecompat-xhigh.json --incremental-finalize --publish
 ```
 
 By default, `run-sweep.sh` uses `PROGRAMBENCH_REPO` if set, otherwise it
@@ -465,7 +480,7 @@ the whole batch:
 
 ```bash
 scripts/run-sweep.sh --incremental-finalize --publish
-INCREMENTAL_FINALIZE=1 PUBLISH=1 scripts/start-sweep-tmux.sh configs/full-nointernet-xhigh.json
+INCREMENTAL_FINALIZE=1 PUBLISH=1 scripts/start-sweep-tmux.sh configs/full-miniswecompat-xhigh.json
 ```
 
 The public site intentionally publishes sanitized manifests, eval summaries,
@@ -487,7 +502,7 @@ pushed `main` by default without silently mixing local edits into a benchmark
 run. Set `SYNC_REPO=0` only for an intentional local/debug run:
 
 ```bash
-SYNC_REPO=0 scripts/start-sweep-tmux.sh configs/linux-smoke-nointernet-xhigh.json
+SYNC_REPO=0 scripts/start-sweep-tmux.sh configs/linux-smoke-miniswecompat-xhigh.json
 ```
 
 Use `--offline-report` only when you intentionally want cached pricing and
@@ -496,14 +511,14 @@ cached ProgramBench baseline rows for a reproducible or offline rebuild.
 The equivalent lower-level commands are:
 
 ```bash
-uv run python scripts/run-config.py watch configs/full-nointernet-xhigh.json --dry-run
-uv run python scripts/run-config.py watch configs/full-nointernet-xhigh.json
+uv run python scripts/run-config.py watch configs/full-miniswecompat-xhigh.json --dry-run
+uv run python scripts/run-config.py watch configs/full-miniswecompat-xhigh.json
 ```
 
 Run the matching high-effort sweep as a separate batch:
 
 ```bash
-uv run python scripts/run-config.py watch configs/full-nointernet-high.json
+uv run python scripts/run-config.py watch configs/full-miniswecompat-high.json
 ```
 
 For local Mac/ARM harness smoke testing, use the small non-comparable batch
@@ -521,20 +536,20 @@ Linux amd64.
 Check status:
 
 ```bash
-uv run python scripts/run-config.py status configs/full-nointernet-xhigh.json
+uv run python scripts/run-config.py status configs/full-miniswecompat-xhigh.json
 ```
 
 Finalize completed instances, run ProgramBench evaluation, summarize metrics,
 and collect local evidence:
 
 ```bash
-uv run python scripts/run-config.py finalize configs/full-nointernet-xhigh.json \
+uv run python scripts/run-config.py finalize configs/full-miniswecompat-xhigh.json \
   --programbench-repo /path/to/ProgramBench
 ```
 
-That run is labeled `no-internet`: it blocks external lookup and target binary
-analysis, but still discloses that the scaffold is Codex `/goal`, not
-mini-SWE-agent.
+That run is labeled `mini-swe-compatible-nointernet`: it blocks external lookup
+and target binary analysis, uses the shorter parity prompt, and still discloses
+that the scaffold is Codex `/goal`, not mini-SWE-agent.
 
 For the “tool-starved” criticism, run the no-internet local-tools ablation
 separately:
@@ -545,11 +560,11 @@ uv run python scripts/run-config.py watch configs/full-localtools-xhigh.json
 
 Future split: if this ablation becomes important, split it into `base VM tools
 only` and `preinstalled reverse-engineering toolbox` variants. Keep both
-clearly non-compliant and separate from the primary no-internet result.
+clearly non-compliant and separate from the no-internet result matrix.
 
 The committed full-run configs all use `gpt-5.5`, 20 CPUs, 60GB RAM, and
-`max_parallel=10`. There are separate `high` and `xhigh` configs for the public
-no-internet track. Lower parallelism on smaller VMs with
+`max_parallel=10`. There are separate `high` and `xhigh` configs for the
+mini-SWE-compatible no-internet track. Lower parallelism on smaller VMs with
 `scripts/run-sweep.sh --max-parallel N` or `MAX_PARALLEL=N
 scripts/start-sweep-tmux.sh ...`. Do not mix reasoning modes in one batch.
 
@@ -596,8 +611,8 @@ uv run python scripts/run-batch.py watch target_sets/first_batch_near_miss.txt \
 
 Use `--max-parallel 1` on a laptop or small smoke VM. Use higher concurrency
 only when both Codex usage limits and host capacity are comfortable. Use
-separate batch names for `high`, `xhigh`, `no-internet`, and
-`no-internet-local-tools` runs. The manager stores resumable state under
+separate batch names for `high`, `xhigh`, `mini-swe-compatible-nointernet`,
+`no-internet`, and `no-internet-local-tools` runs. The manager stores resumable state under
 `local_state/batches/`, starts new work only when active sessions are below the
 concurrency cap, and pauses new launches when a running pane shows rate-limit
 text.
@@ -764,10 +779,11 @@ uv run python scripts/build-report.py \
 `build-report.py` fetches the latest ProgramBench public baseline rows by
 default before rendering. Use `--no-refresh-baselines` only for offline rebuilds.
 
-The report keeps `no-internet` and `no-internet-local-tools` tracks separate,
-includes ProgramBench-style resolved/almost/average-pass/estimated-cost/calls
-metrics, and commits only sanitized aggregate rows. Local Codex session-log paths stay in
-`local_state/` and are not published.
+The report keeps `mini-swe-compatible-nointernet`, `no-internet`, and
+`no-internet-local-tools` tracks separate, includes ProgramBench-style
+resolved/almost/average-pass/estimated-cost/calls metrics, and commits only
+sanitized aggregate rows. Local Codex session-log paths stay in `local_state/`
+and are not published.
 The summary page also plots ProgramBench-style behavioral pass-rate
 distributions (histogram and cumulative), plus per-task pass rate against
 estimated cost, Codex calls, and wall-clock latency. Calls are the public
@@ -777,8 +793,8 @@ Each sweep gets a `run_version`. `scripts/run-sweep.sh` generates a UTC version
 when `RUN_VERSION` is not set, and you can pin one manually:
 
 ```bash
-RUN_VERSION=20260514-nointernet-xhigh-a \
-  PUBLISH=1 scripts/start-sweep-tmux.sh configs/full-nointernet-xhigh.json
+RUN_VERSION=20260514-miniswecompat-xhigh-a \
+  PUBLISH=1 scripts/start-sweep-tmux.sh configs/full-miniswecompat-xhigh.json
 ```
 
 The version is written into batch state, `run.json`, `results.csv`,

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CONFIG="configs/full-nointernet-xhigh.json"
+CONFIG="configs/full-miniswecompat-xhigh.json"
 RUN_VERSION="${RUN_VERSION:-}"
 PROGRAMBENCH_REPO="${PROGRAMBENCH_REPO:-}"
 WATCH=1
@@ -24,7 +24,7 @@ Usage:
   scripts/run-sweep.sh [options]
 
 Options:
-  --config PATH              Batch config JSON (default: configs/full-nointernet-xhigh.json)
+  --config PATH              Batch config JSON (default: configs/full-miniswecompat-xhigh.json)
   --programbench-repo PATH   ProgramBench checkout used for target metadata and evaluation
                              (default: PROGRAMBENCH_REPO or sibling ../ProgramBench)
   --skip-watch               Do not run/watch Codex sessions
@@ -48,7 +48,7 @@ Options:
 Examples:
   scripts/run-sweep.sh --dry-run
   scripts/run-sweep.sh
-  scripts/run-sweep.sh --config configs/full-nointernet-high.json
+  scripts/run-sweep.sh --config configs/full-miniswecompat-high.json
   scripts/run-sweep.sh --site-only --publish
 EOF
 }
@@ -203,7 +203,7 @@ import sys
 config = json.loads(open(sys.argv[1]).read())
 dry_run = sys.argv[2] == "1"
 mode = config.get("inference_mode")
-if mode in {"no-internet", "no-internet-local-tools"} and not config.get("strict_egress"):
+if mode in {"no-internet", "mini-swe-compatible-nointernet", "no-internet-local-tools"} and not config.get("strict_egress"):
     raise SystemExit(f"{mode} configs must set strict_egress=true")
 if dry_run:
     raise SystemExit(0)

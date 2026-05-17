@@ -55,7 +55,7 @@ git clone git@github.com:Muhtasham/goalbench.git
 cd goalbench
 scripts/bootstrap-linux-vm.sh
 codex login
-scripts/doctor.sh configs/linux-smoke-nointernet-xhigh.json
+scripts/doctor.sh configs/linux-smoke-miniswecompat-xhigh.json
 ```
 
 Bootstrap installs Docker, `uv`, `tmux`, Codex CLI if missing, a sibling
@@ -64,9 +64,9 @@ Bootstrap installs Docker, `uv`, `tmux`, Codex CLI if missing, a sibling
 ## Smoke Run
 
 ```bash
-scripts/start-sweep-tmux.sh configs/linux-smoke-nointernet-xhigh.json
-uv run python scripts/run-config.py status configs/linux-smoke-nointernet-xhigh.json
-uv run python scripts/run-config.py finalize configs/linux-smoke-nointernet-xhigh.json
+scripts/start-sweep-tmux.sh configs/linux-smoke-miniswecompat-xhigh.json
+uv run python scripts/run-config.py status configs/linux-smoke-miniswecompat-xhigh.json
+uv run python scripts/run-config.py finalize configs/linux-smoke-miniswecompat-xhigh.json
 ```
 
 Do not treat smoke scores as ProgramBench-comparable.
@@ -83,7 +83,7 @@ parallelism on smaller hosts:
 
 ```bash
 scripts/run-sweep.sh --max-parallel 4
-MAX_PARALLEL=4 scripts/start-sweep-tmux.sh configs/full-nointernet-xhigh.json
+MAX_PARALLEL=4 scripts/start-sweep-tmux.sh configs/full-miniswecompat-xhigh.json
 ```
 
 Publish only after evaluation artifacts are ready:
@@ -96,14 +96,16 @@ scripts/run-sweep.sh --publish
 
 | Mode | Config | Meaning |
 | --- | --- | --- |
-| `no-internet` | `configs/full-nointernet-xhigh.json` | Primary track. Internet/source/package lookup is blocked, target binary-analysis tools are blocked, target probing stays black-box. |
+| `no-internet` | `configs/full-nointernet-xhigh.json` | Stricter GoalBench track. Internet/source/package lookup is blocked, target binary-analysis tools are blocked, target probing stays black-box, and the prompt asks for an explicit behavior audit. |
+| `mini-swe-compatible-nointernet` | `configs/full-miniswecompat-xhigh.json` | Parity attempt. Same no-internet enforcement, but with a shorter mini-SWE-style task prompt and no GoalBench audit loop requirements. Still a Codex `/goal` scaffold, not an official mini-SWE-agent baseline. |
 | `no-internet-local-tools` | `configs/full-localtools-xhigh.json` | Coming soon. External lookup stays blocked, but local binary-analysis/tracing tools are allowed. Non-compliant ablation. |
 
 Current recommended sequence:
 
-1. `cpx62-nointernet-xhigh`
-2. `cpx62-nointernet-high`
-3. `cpx62-localtools-xhigh` once enabled
+1. `cpx62-miniswecompat-xhigh`
+2. `cpx62-miniswecompat-high`
+3. `cpx62-nointernet-xhigh` if we want the stricter GoalBench audit-heavy scaffold
+4. `cpx62-localtools-xhigh` once enabled
 
 ## No-Internet Enforcement
 
@@ -136,8 +138,8 @@ Start a shard on a synced worker:
 ```bash
 RUN_VERSION=<version> NODE_LABEL=goalbench-eval-1 \
   scripts/start-eval-shard-tmux.sh \
-  configs/cpx62-nointernet-xhigh.json \
-  local_state/batches/cpx62-nointernet-xhigh/<version>/shards/shard-1.txt \
+  configs/cpx62-miniswecompat-xhigh.json \
+  local_state/batches/cpx62-miniswecompat-xhigh/<version>/shards/shard-1.txt \
   1
 ```
 
@@ -171,10 +173,10 @@ Raw Codex logs and submission tarballs stay local by default.
 ## Useful Commands
 
 ```bash
-scripts/doctor.sh configs/full-nointernet-xhigh.json
-uv run python scripts/run-config.py status configs/full-nointernet-xhigh.json
-uv run python scripts/run-config.py finalize configs/full-nointernet-xhigh.json
-scripts/backup-run-root.sh --batch-name full-nointernet-xhigh --run-version <version>
+scripts/doctor.sh configs/full-miniswecompat-xhigh.json
+uv run python scripts/run-config.py status configs/full-miniswecompat-xhigh.json
+uv run python scripts/run-config.py finalize configs/full-miniswecompat-xhigh.json
+scripts/backup-run-root.sh --batch-name full-miniswecompat-xhigh --run-version <version>
 uv run ruff check .
 uv run ty check
 uv run pre-commit run --all-files

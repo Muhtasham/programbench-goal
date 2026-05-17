@@ -14,7 +14,7 @@ from typing import Any
 
 REPO = Path(__file__).resolve().parents[1]
 RUN_BATCH = REPO / "scripts" / "run-batch.py"
-NO_INTERNET_MODES = {"no-internet", "no-internet-local-tools"}
+NO_INTERNET_MODES = {"no-internet", "mini-swe-compatible-nointernet", "no-internet-local-tools"}
 
 
 def load_config(path: Path) -> dict[str, Any]:

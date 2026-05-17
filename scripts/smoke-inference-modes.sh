@@ -10,9 +10,12 @@ TARGET_WRAPPER_COMMAND="${TARGET_WRAPPER_COMMAND:-sudo -n /usr/local/bin/pb-targ
 MODEL="${MODEL:-gpt-5.5}"
 REASONING_EFFORT="${REASONING_EFFORT:-high}"
 KEEP_SMOKE="${KEEP_SMOKE:-0}"
+STRICT_EGRESS="${STRICT_EGRESS:-1}"
+CODEX_USER="${CODEX_USER:-codex-runner}"
 
 MODES=(
   no-internet
+  mini-swe-compatible-nointernet
   no-internet-local-tools
 )
 
@@ -56,7 +59,7 @@ check_guard_behavior() {
   local guard_dir="$instance_dir/guard-bin"
 
   case "$mode" in
-    no-internet)
+    no-internet|mini-swe-compatible-nointernet)
       (
         cd "$solution_dir"
         if PATH="$guard_dir:$PATH" rg --files -uu .. >/tmp/pb-smoke-rg.out 2>/tmp/pb-smoke-rg.err; then
@@ -109,6 +112,13 @@ main() {
     echo
     echo "== $mode =="
     run_name="smoke-$(mode_slug "$mode")-$INSTANCE"
+    extra_args=()
+    if [[ "$STRICT_EGRESS" == "1" ]]; then
+      extra_args+=(--strict-egress)
+      if [[ -n "$CODEX_USER" ]]; then
+        extra_args+=(--codex-user "$CODEX_USER")
+      fi
+    fi
     output="$(
       python3 programbench_goal_runner.py prepare "$INSTANCE" \
         --run-root "$RUN_ROOT" \
@@ -119,7 +129,8 @@ main() {
         --target-access "$TARGET_ACCESS" \
         --target-wrapper-command "$TARGET_WRAPPER_COMMAND" \
         --model "$MODEL" \
-        --reasoning-effort "$REASONING_EFFORT"
+        --reasoning-effort "$REASONING_EFFORT" \
+        "${extra_args[@]}"
     )"
     instance_dir="$(first_path_line <<<"$output")"
     test -n "$instance_dir"

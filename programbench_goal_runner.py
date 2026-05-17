@@ -15,13 +15,17 @@ from pathlib import Path
 
 DEFAULT_ROOT = Path.home() / "pb-goal-runs"
 NO_INTERNET_PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal_no_internet.md"
+MINI_SWE_COMPAT_PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal_mini_swe_compatible.md"
 LOCAL_TOOLS_PROMPT_TEMPLATE = Path(__file__).parent / "prompts" / "programbench_goal_local_tools.md"
 DEFAULT_MODEL = "gpt-5.5"
 DEFAULT_REASONING_EFFORT = "xhigh"
 DEFAULT_INFERENCE_MODE = "no-internet"
-NO_INTERNET_MODES = {"no-internet", "no-internet-local-tools"}
+MINI_SWE_COMPAT_MODE = "mini-swe-compatible-nointernet"
+INFERENCE_MODES = ("no-internet", MINI_SWE_COMPAT_MODE, "no-internet-local-tools")
+NO_INTERNET_MODES = {"no-internet", MINI_SWE_COMPAT_MODE, "no-internet-local-tools"}
 MODE_RUN_SEGMENTS = {
     "no-internet": "nointernet",
+    MINI_SWE_COMPAT_MODE: "miniswecompat",
     "no-internet-local-tools": "localtools",
 }
 BLOCKED_ALWAYS_TOOLS = (
@@ -387,7 +391,9 @@ def prepare(args: argparse.Namespace) -> None:
     helper_dir = instance_dir / "helper-bin"
     cache_dir = instance_dir / "tool-caches"
     primary_no_internet_mode = args.inference_mode == "no-internet"
+    mini_swe_compat_mode = args.inference_mode == MINI_SWE_COMPAT_MODE
     local_tools_mode = args.inference_mode == "no-internet-local-tools"
+    strict_no_internet_mode = primary_no_internet_mode or mini_swe_compat_mode
     tool_env = list(LOCAL_TOOLS_OFFLINE_ENV) if local_tools_mode else list(TOOL_CACHE_ENV)
     container_name = f"pb-goal-{slug(prepared_run_name)}-{slug(args.instance_id)}"
     session_name = f"pb-goal-{slug(prepared_run_name)}-{slug(args.instance_id)}"
@@ -402,14 +408,20 @@ def prepare(args: argparse.Namespace) -> None:
         )
     )
     objective = (
-        f"Complete ProgramBench instance {args.instance_id} in the target container by reimplementing the "
-        "target CLI from black-box behavior only, without stopping until solution/compile.sh builds ./executable, "
-        "package-submission succeeds, and .goal/BEHAVIOR_AUDIT.md documents adversarial target-vs-local probe "
-        "coverage, comparisons, mismatches fixed, known gaps, and stopping rationale. Treat hidden tests as "
-        "adversarial edge-case tests. Keep iterating with generated/fuzzed probes until no documented or "
-        "discovered behavior class remains unexplored. Do not mark the goal complete just because packaging works "
-        "or representative probes pass. "
-        "Do not inspect parent directories or files outside the solution directory."
+        f"Complete ProgramBench instance {args.instance_id} by reimplementing the target CLI from the provided "
+        "binary behavior and documentation, without internet access, until compile.sh builds ./executable and "
+        "package-submission succeeds. Do not inspect parent directories or files outside the solution directory."
+        if mini_swe_compat_mode
+        else (
+            f"Complete ProgramBench instance {args.instance_id} in the target container by reimplementing the "
+            "target CLI from black-box behavior only, without stopping until solution/compile.sh builds ./executable, "
+            "package-submission succeeds, and .goal/BEHAVIOR_AUDIT.md documents adversarial target-vs-local probe "
+            "coverage, comparisons, mismatches fixed, known gaps, and stopping rationale. Treat hidden tests as "
+            "adversarial edge-case tests. Keep iterating with generated/fuzzed probes until no documented or "
+            "discovered behavior class remains unexplored. Do not mark the goal complete just because packaging works "
+            "or representative probes pass. "
+            "Do not inspect parent directories or files outside the solution directory."
+        )
     )
 
     solution_dir.mkdir(parents=True, exist_ok=True)
@@ -418,6 +430,15 @@ def prepare(args: argparse.Namespace) -> None:
     write_guard_bin(guard_dir, container_name, args.target_access, args.target_wrapper_command, local_tools_mode)
     (solution_dir / "AGENT_RULES.md").write_text(
         (
+            "Do not use internet, package registries, public source, external docs, ProgramBench tests, or "
+            "the ProgramBench evaluator repository. Do not inspect files outside this solution directory or run "
+            "commands against parent/sibling directories. Probe the target executable only through normal "
+            f"CLI/stdin/stdout/stderr/filesystem behavior using {target_command}. "
+            "Do not read, decompile, disassemble, trace, or wrap the target binary. Implement a complete replacement "
+            "codebase here. compile.sh must produce ./executable. Run package-submission before finishing.\n"
+        )
+        if mini_swe_compat_mode
+        else (
             "Do not use internet, package managers, upstream source, decompilers, "
             "disassemblers, tracing/instrumentation tools, ProgramBench tests, or "
             "the ProgramBench evaluator repository. Do not inspect files outside "
@@ -444,6 +465,7 @@ def prepare(args: argparse.Namespace) -> None:
         args.prompt_template
         or {
             "no-internet": NO_INTERNET_PROMPT_TEMPLATE,
+            MINI_SWE_COMPAT_MODE: MINI_SWE_COMPAT_PROMPT_TEMPLATE,
             "no-internet-local-tools": LOCAL_TOOLS_PROMPT_TEMPLATE,
         }[args.inference_mode]
     )
@@ -566,7 +588,7 @@ docker exec -u agent {shlex.quote(container_name)} bash -lc '
     base_codex_env = (
         f"PATH={shlex.quote(str(guard_dir))}:$PATH GIT_CEILING_DIRECTORIES={shlex.quote(str(instance_dir))} "
         f"{tool_cache_exports(cache_dir)}"
-        if primary_no_internet_mode
+        if strict_no_internet_mode
         else (
             f"PATH={shlex.quote(str(guard_dir))}:$PATH GIT_CEILING_DIRECTORIES={shlex.quote(str(instance_dir))} "
             f"{local_tools_offline_exports()}"
@@ -713,7 +735,7 @@ def main() -> None:
     prepare_parser.add_argument("--docker-memory", default="60g")
     prepare_parser.add_argument(
         "--inference-mode",
-        choices=["no-internet", "no-internet-local-tools"],
+        choices=INFERENCE_MODES,
         default=DEFAULT_INFERENCE_MODE,
     )
     prepare_parser.add_argument(
@@ -745,7 +767,7 @@ def main() -> None:
     batch_parser.add_argument("--docker-memory", default="60g")
     batch_parser.add_argument(
         "--inference-mode",
-        choices=["no-internet", "no-internet-local-tools"],
+        choices=INFERENCE_MODES,
         default=DEFAULT_INFERENCE_MODE,
     )
     batch_parser.add_argument(

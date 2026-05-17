@@ -444,6 +444,7 @@ def mode_label(row: ResultRow) -> str:
         return "Legacy internal"
     return {
         "no-internet": "No internet",
+        "mini-swe-compatible-nointernet": "Mini-SWE-compatible no internet",
         "no-internet-local-tools": "No internet + local tools",
     }.get(row.inference_mode, row.inference_mode or "Unknown")
 
@@ -470,6 +471,8 @@ def host_profile(row: ResultRow) -> str:
 def compliance_label(row: ResultRow) -> str:
     if row.inference_mode == "no-internet":
         return "Codex no-internet ablation"
+    if row.inference_mode == "mini-swe-compatible-nointernet":
+        return "Codex /goal mini-SWE-compatible no-internet"
     if row.inference_mode == "no-internet-local-tools":
         return "Non-compliant: local/binary tools allowed"
     if is_programbench_comparable(row):
@@ -1725,11 +1728,11 @@ def render_empty_state() -> str:
       <div class="mode-grid">
         <div class="mode-card">
           <strong>Headline track</strong>
-          <p>GPT-5.5 xhigh with Codex <code>/goal</code>, no internet/source/package lookup, target binary-analysis tools blocked, and black-box target access.</p>
+          <p>GPT-5.5 xhigh with Codex <code>/goal</code>, no internet/source/package lookup, target binary-analysis tools blocked, black-box target access, and the mini-SWE-compatible prompt.</p>
         </div>
         <div class="mode-card">
           <strong>Comparison track</strong>
-          <p>GPT-5.5 high uses the same no-internet scaffold, changing only reasoning effort for high-vs-xhigh comparison.</p>
+          <p>GPT-5.5 high uses the same mini-SWE-compatible no-internet scaffold, changing only reasoning effort for high-vs-xhigh comparison.</p>
         </div>
         <div class="mode-card">
           <strong>Local-tools ablation</strong>
@@ -1761,8 +1764,8 @@ def render_run_plan() -> str:
         <table>
           <thead><tr><th>#</th><th>Track</th><th>Config</th><th>What it answers</th><th>Compliance label</th></tr></thead>
           <tbody>
-            <tr><td>1</td><td>Primary</td><td><code>cpx62-nointernet-xhigh</code></td><td>GPT-5.5 xhigh with Codex <code>/goal</code> on ProgramBench without internet/source lookup, with strict host egress, sized for the current 16 CPU / 30g runner.</td><td>Codex no-internet ablation</td></tr>
-            <tr><td>2</td><td>High comparison</td><td><code>cpx62-nointernet-high</code></td><td>Same no-internet scaffold, changing only reasoning effort from xhigh to high.</td><td>Codex no-internet ablation</td></tr>
+            <tr><td>1</td><td>Primary</td><td><code>cpx62-miniswecompat-xhigh</code></td><td>GPT-5.5 xhigh with Codex <code>/goal</code> on ProgramBench without internet/source lookup, with strict host egress, wrapper-only target access, and a mini-SWE-compatible prompt.</td><td>Codex /goal mini-SWE-compatible no-internet</td></tr>
+            <tr><td>2</td><td>High comparison</td><td><code>cpx62-miniswecompat-high</code></td><td>Same mini-SWE-compatible no-internet scaffold, changing only reasoning effort from xhigh to high.</td><td>Codex /goal mini-SWE-compatible no-internet</td></tr>
             <tr><td>3</td><td>Local-tools ablation</td><td><code>cpx62-localtools-xhigh</code></td><td>Coming soon. Keeps internet/source/package lookup blocked and strict host egress enabled, but allows local binary-analysis/tracing tools.</td><td>Non-compliant: local/binary tools allowed</td></tr>
           </tbody>
         </table>
@@ -2301,8 +2304,12 @@ def render_html(data: dict, extended: bool = False) -> str:
       </div>
       <div class="mode-grid">
         <div class="mode-card">
+          <strong>Mini-SWE-compatible no internet</strong>
+          <p>Closest GoalBench parity attempt: same no-internet enforcement and black-box target access, but a shorter prompt without GoalBench audit-loop requirements.</p>
+        </div>
+        <div class="mode-card">
           <strong>No internet</strong>
-          <p>Primary Codex <code>/goal</code> scaffold: internet/source/package lookup is blocked, target binary-analysis tools are blocked, and target probing stays black-box.</p>
+          <p>Stricter GoalBench scaffold: internet/source/package lookup is blocked, target binary-analysis tools are blocked, target probing stays black-box, and the prompt asks for an explicit behavior audit.</p>
         </div>
         <div class="mode-card">
           <strong>No internet + local tools <span class="muted">(coming soon)</span></strong>
@@ -2326,7 +2333,7 @@ def render_html(data: dict, extended: bool = False) -> str:
     <section class="section">
     <h2>Method Notes</h2>
     <p>GoalBench reports separate Codex <code>/goal</code> runs, not official mini-SWE-agent leaderboard submissions. Metrics use ProgramBench's resolved, almost-resolved, average pass rate, cost, and calls shape. Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. Scoring is computed through ProgramBench's own <code>EvaluationResult</code> and <code>InstanceEvalSummary</code> logic after active-branch and ignored-test filtering. Resolved means the ProgramBench behavioral test pass rate is exactly 100%; evaluator warnings/errors are disclosed separately in evidence artifacts.</p>
-    <p>The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in no-internet mode. Local-tools runs are intentionally non-compliant and reported separately once available. The current Hetzner <code>cpx62</code> runner is a 16 CPU / 30g VM. All no-internet-style rows require strict host egress and wrapper-only target access. Public evidence manifests include sanitized eval summaries and package contents. Raw Codex session logs and submission tarballs stay local by default. Estimated cost comes from Codex token logs and the locally refreshed OpenAI model pricing snapshot; it is not authoritative billing. The committed data omits local session-log paths. See <a href="task-details.html">Task Details</a> and the <a href="runbook.html">runbook</a> for setup and mode details.</p>
+    <p>The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in mini-SWE-compatible no-internet mode. Local-tools runs are intentionally non-compliant and reported separately once available. The current Hetzner <code>cpx62</code> runner is a 16 CPU / 30g VM. All no-internet-style rows require strict host egress and wrapper-only target access. Public evidence manifests include sanitized eval summaries and package contents. Raw Codex session logs and submission tarballs stay local by default. Estimated cost comes from Codex token logs and the locally refreshed OpenAI model pricing snapshot; it is not authoritative billing. The committed data omits local session-log paths. See <a href="task-details.html">Task Details</a> and the <a href="runbook.html">runbook</a> for setup and mode details.</p>
     <p>Sources: <a href="https://programbench.com/extended/">ProgramBench extended results</a>, <a href="https://programbench.com/run/gpt-5-5-xhigh/">GPT 5.5 xhigh run detail</a>, and this repository's generated CSV summaries.</p>
     </section>
   </main>
