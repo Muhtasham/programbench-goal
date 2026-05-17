@@ -12,7 +12,7 @@ publishes.
 
 Environment:
   RUN_VERSION=VERSION       Required run version to evaluate.
-  PROGRAMBENCH_REPO=PATH    ProgramBench checkout (default: /root/ProgramBench when present).
+  PROGRAMBENCH_REPO=PATH    ProgramBench checkout (default: $HOME/ProgramBench when present).
   NODE_LABEL=LABEL          Human-readable node label printed into the log.
   NODE_ROLE=ROLE            Optional role label, for example eval-worker or coordinator.
   UV_BIN=PATH               Optional uv binary override.
@@ -96,8 +96,8 @@ if [[ -z "${RUN_VERSION:-}" ]]; then
   echo "RUN_VERSION is required" >&2
   exit 1
 fi
-if [[ -z "${PROGRAMBENCH_REPO:-}" && -d /root/ProgramBench ]]; then
-  PROGRAMBENCH_REPO=/root/ProgramBench
+if [[ -z "${PROGRAMBENCH_REPO:-}" && -d "$HOME/ProgramBench" ]]; then
+  PROGRAMBENCH_REPO="$HOME/ProgramBench"
 fi
 if [[ -z "${PROGRAMBENCH_REPO:-}" ]]; then
   echo "PROGRAMBENCH_REPO is required" >&2
