@@ -616,7 +616,11 @@ fi
   -C {shlex.quote(str(solution_dir))} $CODEX_BYPASS_FLAG --no-alt-screen"
 {tmux_command} pipe-pane -o -t {shlex.quote(session_name)} 'cat >> {transcript_log}'
 sleep 4
-{tmux_command} send-keys -t {shlex.quote(session_name)} {shlex.quote("/goal " + objective)} Enter
+{tmux_command} load-buffer {shlex.quote(str(instance_dir / "GOAL_OBJECTIVE.txt"))}
+{tmux_command} paste-buffer -t {shlex.quote(session_name)}
+{tmux_command} send-keys -t {shlex.quote(session_name)} Home
+{tmux_command} send-keys -l -t {shlex.quote(session_name)} '/goal '
+{tmux_command} send-keys -t {shlex.quote(session_name)} Enter
 sleep 2
 {tmux_command} load-buffer {shlex.quote(str(instance_dir / "GOAL_PROMPT.md"))}
 {tmux_command} paste-buffer -t {shlex.quote(session_name)}
