@@ -97,6 +97,19 @@ def command(config: dict[str, Any], args: argparse.Namespace) -> list[str]:
             config["batch_name"],
             *option_args("run_version", run_version(config)),
         ]
+    if args.action == "retry":
+        return [
+            sys.executable,
+            str(RUN_BATCH),
+            "retry",
+            "--batch-name",
+            config["batch_name"],
+            *option_args("run_version", run_version(config)),
+            *chain.from_iterable(option_args("instance", instance) for instance in args.instance or []),
+            *flag_args("failed", args.failed),
+            *flag_args("rerun_finalize_failed", args.retry_finalize_failed),
+            *option_args("max_attempts", args.max_attempts),
+        ]
     return [
         sys.executable,
         str(RUN_BATCH),
@@ -115,13 +128,19 @@ def command(config: dict[str, Any], args: argparse.Namespace) -> list[str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run a named ProgramBench /goal batch config")
-    parser.add_argument("action", choices=["watch", "status", "finalize"])
+    parser.add_argument("action", choices=["watch", "status", "finalize", "retry"])
     parser.add_argument("config")
     parser.add_argument("--once", action="store_true", help="only applies to watch")
     parser.add_argument("--max-parallel", type=int, default=None, help="override config max_parallel for watch")
     parser.add_argument("--programbench-repo", default="", help="only applies to finalize")
     parser.add_argument("--allow-partial", action="store_true", help="only applies to finalize")
-    parser.add_argument("--retry-finalize-failed", action="store_true", help="only applies to finalize")
+    parser.add_argument(
+        "--retry-finalize-failed",
+        action="store_true",
+        help="disabled; kept only for CLI compatibility",
+    )
+    parser.add_argument("--failed", action="store_true", help="retry only session_failed_before_goal_done rows")
+    parser.add_argument("--max-attempts", type=int, default=2, help="only applies to retry")
     parser.add_argument("--limit", type=int, default=0, help="only applies to finalize")
     parser.add_argument("--instance", action="append", help="only applies to finalize")
     parser.add_argument("--dry-run", action="store_true")

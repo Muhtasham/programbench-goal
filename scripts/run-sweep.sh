@@ -303,6 +303,11 @@ run_site() {
   result_csvs_file="$(mktemp)"
   collect_results_csvs > "$result_csvs_file"
 
+  current_results_csv="local_state/batches/$BATCH_NAME/$RUN_VERSION/results.csv"
+  if [[ -f "$current_results_csv" ]]; then
+    run uv run python scripts/validate-run-gates.py --repair-audit-pass --results-csv "$current_results_csv"
+  fi
+
   export_cmd=(uv run python scripts/export-public-evidence.py --clean-output)
   while IFS= read -r path; do
     [[ -n "$path" ]] || continue
@@ -344,6 +349,7 @@ run_publish() {
 }
 
 TARGET_FILE="$(config_value target_file)"
+BATCH_NAME="$(config_value batch_name)"
 TARGET_ACCESS="$(config_value target_access)"
 TARGET_WRAPPER_COMMAND="$(config_value target_wrapper_command)"
 validate_config_policy

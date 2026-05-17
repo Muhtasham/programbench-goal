@@ -483,6 +483,38 @@ scripts/run-sweep.sh --incremental-finalize --publish
 INCREMENTAL_FINALIZE=1 PUBLISH=1 scripts/start-sweep-tmux.sh configs/full-miniswecompat-xhigh.json
 ```
 
+### Retry and scoring policy
+
+Do not continue failed Codex sessions by pasting a follow-up into the same tmux
+session. That changes the `/goal` condition being measured.
+
+Only one retry class is allowed: `session_failed_before_goal_done`. Use it when
+the Codex tmux session exits before `/goal` completion and before a submission is
+produced. A retry starts from a fresh solution directory, keeps the prior attempt
+in `attempt_history`, and is capped by `--max-attempts`:
+
+```bash
+uv run python scripts/run-config.py retry configs/cpx62-miniswecompat-xhigh.json \
+  --failed \
+  --max-attempts 2
+```
+
+Do not retry low scores, valid evaluations, or audit violations. If Codex
+reaches `/goal` completion, produces `submission.tar.gz`, passes audit, and gets
+an eval result, that result is scored even when it is bad. If Codex exits
+normally without a submission, report it as no-submission/zero or disclose it
+separately in the denominator.
+
+Before scoring/publishing a current run, `scripts/run-sweep.sh` runs
+`scripts/validate-run-gates.py`. Each published row must have:
+
+- `CODEX_INITIAL_PROMPT.md` beginning with `/goal`
+- a tmux transcript showing `/goal`
+- `run.json` with model, reasoning effort, inference mode, and strict egress
+- `submission.tar.gz`
+- a passing audit marker
+- a ProgramBench eval JSON
+
 The public site intentionally publishes sanitized manifests, eval summaries,
 usage audits, and score CSV/JSON. It does not publish submission tarballs by
 default; those stay in the VM run root as private backups and can be archived

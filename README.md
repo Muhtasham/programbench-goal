@@ -92,6 +92,30 @@ Publish only after evaluation artifacts are ready:
 scripts/run-sweep.sh --publish
 ```
 
+## Scoring Policy
+
+GoalBench does not paste continuation prompts into failed Codex sessions. A row
+is scored once Codex reached `/goal` completion, produced `submission.tar.gz`,
+passed the no-internet audit, and ProgramBench wrote an eval result. Low scores
+from valid submissions are model results and are not rerun.
+
+The only retryable failure class is `session_failed_before_goal_done`: the tmux
+session ended before `/goal` completed and no submission was produced. Retrying
+that class starts a fresh solution directory and records attempt metadata:
+
+```bash
+uv run python scripts/run-config.py retry configs/cpx62-miniswecompat-xhigh.json --failed --max-attempts 2
+```
+
+Rows that end normally without a submission are reported separately as
+no-submission/zero rows. Audit violations, valid evaluations, and low scores are
+not retried.
+
+Before publishing, `scripts/run-sweep.sh` validates hard gates for the current
+run: initial prompt begins with `/goal`, transcript shows `/goal`, `run.json`
+records model/reasoning/mode/strict egress, `submission.tar.gz` exists, audit
+passed, and the eval JSON exists.
+
 ## Modes
 
 | Mode | Config | Meaning |

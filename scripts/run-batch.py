@@ -22,6 +22,9 @@ RATE_LIMIT_MARKERS = ("rate limit", "rate_limit", "429")
 FINALIZE_READY = {"goal_done", "packaged"}
 TERMINAL_STATUSES = {"goal_done", "packaged", "evaluated", "failed", "finalize_failed"}
 CLEANUP_STATUSES = TERMINAL_STATUSES
+SESSION_FAILED_BEFORE_GOAL_DONE = "session_failed_before_goal_done"
+GATE_FAILED = "gate_failed"
+NO_INTERNET_MODES = {"no-internet", "mini-swe-compatible-nointernet", "no-internet-local-tools"}
 STATUS_RANK = {
     "pending": 0,
     "running": 1,
@@ -173,7 +176,109 @@ def add_error(record: dict, error: str) -> dict:
     }
 
 
-def prepare_instance(args: argparse.Namespace, instance_id: str, run_root: Path) -> dict:
+def instance_dir(record: dict) -> Path:
+    return Path(record.get("instance_dir", "")).expanduser()
+
+
+def prompt_path(record: dict) -> Path:
+    return instance_dir(record) / "CODEX_INITIAL_PROMPT.md"
+
+
+def transcript_path(record: dict) -> Path:
+    return instance_dir(record) / "tmux-transcript.log"
+
+
+def run_json_path(record: dict) -> Path:
+    return instance_dir(record) / "run.json"
+
+
+def submission_path(record: dict) -> Path:
+    return instance_dir(record) / "submission.tar.gz"
+
+
+def eval_json_path(record: dict) -> Path:
+    return instance_dir(record) / f"{record['instance_id']}.eval.json"
+
+
+def audit_pass_path(record: dict) -> Path:
+    return instance_dir(record) / "goalbench-audit-pass.json"
+
+
+def prompt_starts_goal(record: dict) -> bool:
+    path = prompt_path(record)
+    return path.is_file() and path.read_text(errors="replace").lstrip().startswith("/goal ")
+
+
+def transcript_shows_goal(record: dict) -> bool:
+    path = transcript_path(record)
+    return path.is_file() and "/goal " in path.read_text(errors="replace")
+
+
+def run_json(record: dict) -> dict:
+    path = run_json_path(record)
+    return json.loads(path.read_text()) if path.is_file() else {}
+
+
+def run_metadata_failures(record: dict) -> list[str]:
+    run = run_json(record)
+    missing = [key for key in ("model", "reasoning_effort", "inference_mode", "strict_egress") if key not in run]
+    if run.get("inference_mode") in NO_INTERNET_MODES and run.get("strict_egress") is not True:
+        missing.append("strict_egress=true")
+    return missing
+
+
+def base_gate_failures(record: dict) -> list[str]:
+    failures = []
+    if not prompt_starts_goal(record):
+        failures.append("CODEX_INITIAL_PROMPT.md does not begin with /goal")
+    if not transcript_shows_goal(record):
+        failures.append("tmux transcript does not show /goal")
+    failures.extend(f"run.json missing/invalid {key}" for key in run_metadata_failures(record))
+    return failures
+
+
+def scored_gate_failures(record: dict) -> list[str]:
+    failures = base_gate_failures(record)
+    if not submission_path(record).is_file():
+        failures.append("missing submission.tar.gz")
+    if not (record.get("audit_passed_at") or audit_pass_path(record).is_file()):
+        failures.append("missing audit pass marker")
+    if not eval_json_path(record).is_file():
+        failures.append("missing eval result")
+    return failures
+
+
+def classify_session_failure(record: dict) -> str:
+    if "tmux session ended before goal_done" in record.get("last_error", ""):
+        return SESSION_FAILED_BEFORE_GOAL_DONE
+    if record.get("session_name") and not tmux_has_session(record["session_name"], record.get("codex_user", "")):
+        return SESSION_FAILED_BEFORE_GOAL_DONE
+    return record.get("failure_class", "")
+
+
+def retryable_failure_class(record: dict) -> str:
+    return record.get("failure_class") or classify_session_failure(record)
+
+
+def write_audit_pass(record: dict, output: str) -> dict:
+    path = audit_pass_path(record)
+    path.write_text(
+        json.dumps(
+            {
+                "instance_id": record["instance_id"],
+                "run_name": record.get("run_name", ""),
+                "passed_at": now(),
+                "output_tail": output[-4000:],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
+    return {**record, "audit_passed_at": now()}
+
+
+def prepare_instance(args: argparse.Namespace, instance_id: str, run_root: Path, attempt: int) -> dict:
     cmd = [
         sys.executable,
         str(REPO / "programbench_goal_runner.py"),
@@ -204,7 +309,9 @@ def prepare_instance(args: argparse.Namespace, instance_id: str, run_root: Path)
         cmd.extend(["--codex-user", args.codex_user])
     if args.run_name_prefix:
         version = f"{args.run_version}-" if args.run_version else ""
-        cmd.extend(["--run-name", f"{args.run_name_prefix}-{version}{instance_id.replace('__', '-').split('.', 1)[0]}"])
+        retry = f"-attempt-{attempt}" if attempt > 1 else ""
+        run_name = f"{args.run_name_prefix}-{version}{instance_id.replace('__', '-').split('.', 1)[0]}{retry}"
+        cmd.extend(["--run-name", run_name])
     output = run(cmd).stdout.splitlines()
     instance_dir = Path(next(line for line in output if line.startswith("/"))).resolve()
     run_json = json.loads((instance_dir / "run.json").read_text())
@@ -243,7 +350,15 @@ def refresh_record(record: dict) -> dict:
     if output and any(marker in output.lower() for marker in RATE_LIMIT_MARKERS):
         return {**record, "last_rate_limit_seen_at": now(), "last_pane_tail": output[-4000:]}
     if not tmux_has_session(record["session_name"], record.get("codex_user", "")):
-        return add_error({**record, "status": "failed", "failed_at": now()}, "tmux session ended before goal_done")
+        return add_error(
+            {
+                **record,
+                "status": "failed",
+                "failed_at": now(),
+                "failure_class": SESSION_FAILED_BEFORE_GOAL_DONE,
+            },
+            "tmux session ended before goal_done",
+        )
     return {**record, "last_rate_limit_seen_at": "", "last_pane_tail": output[-4000:]}
 
 
@@ -277,8 +392,16 @@ def launch_ready(args: argparse.Namespace, state: dict, run_root: Path) -> None:
         if record["status"] != "pending":
             continue
         try:
-            prepared = prepare_instance(args, instance_id, run_root)
-            state["items"][instance_id] = start_instance({**prepared, "attempts": record.get("attempts", 0) + 1})
+            next_attempt = record.get("attempts", 0) + 1
+            prepared = prepare_instance(args, instance_id, run_root, next_attempt)
+            state["items"][instance_id] = start_instance(
+                {
+                    **prepared,
+                    "attempts": next_attempt,
+                    "attempt_history": record.get("attempt_history", []),
+                    "retry_class": record.get("failure_class", ""),
+                }
+            )
         except subprocess.CalledProcessError as e:
             state["items"][instance_id] = add_error(
                 {**record, "status": "failed", "failed_at": now(), "attempts": record.get("attempts", 0) + 1},
@@ -342,6 +465,7 @@ def status_line(record: dict) -> str:
             record.get("run_name", ""),
             record.get("session_name", ""),
             f"attempts={record.get('attempts', 0)}",
+            f"failure_class={record.get('failure_class', '')}",
             record.get("last_error", "").replace("\n", "\\n")[:240],
         ]
     )
@@ -395,14 +519,29 @@ def finalize_one(args: argparse.Namespace, record: dict) -> dict:
     instance_dir = Path(record["instance_dir"])
     eval_containers = docker_container_ids("programbench-")
     try:
+        if failures := base_gate_failures(record):
+            return add_error(
+                {**record, "status": "finalize_failed", "finalize_failed_at": now(), "failure_class": GATE_FAILED},
+                "hard gate failed before package/eval:\n" + "\n".join(failures),
+            )
         run([str(instance_dir / "package-submission.sh")])
+        if not submission_path(record).is_file():
+            return add_error(
+                {**record, "status": "finalize_failed", "finalize_failed_at": now(), "failure_class": GATE_FAILED},
+                "hard gate failed after package: missing submission.tar.gz",
+            )
         audit_cmd = [sys.executable, str(REPO / "scripts" / "audit-run.py")]
         audit_cmd.append(str(instance_dir))
         audit_cmd.extend(codex_session_args(record))
-        run(audit_cmd)
+        record = write_audit_pass(record, run(audit_cmd).stdout)
         if args.programbench_repo:
             eval_cmd = [str(instance_dir / "eval-submission.sh"), str(Path(args.programbench_repo).expanduser())]
             run_with_timeout(eval_cmd, args.eval_timeout_seconds) if args.eval_timeout_seconds else run(eval_cmd)
+            if not eval_json_path(record).is_file():
+                return add_error(
+                    {**record, "status": "finalize_failed", "finalize_failed_at": now(), "failure_class": GATE_FAILED},
+                    "hard gate failed after eval: missing eval result",
+                )
             return {**record, "status": "evaluated", "evaluated_at": now(), "last_error": ""}
         return {**record, "status": "packaged", "packaged_at": now(), "last_error": ""}
     except subprocess.TimeoutExpired as e:
@@ -517,7 +656,7 @@ def retry(args: argparse.Namespace) -> None:
     state = load_state(args.batch_name, args.run_version)
     wanted = set(args.instance or [])
     state["items"] = {
-        instance_id: retry_record(record, args.failed, args.rerun_finalize_failed)
+        instance_id: retry_record(record, args.failed, args.rerun_finalize_failed, args.max_attempts)
         if not wanted or instance_id in wanted
         else record
         for instance_id, record in state["items"].items()
@@ -526,16 +665,34 @@ def retry(args: argparse.Namespace) -> None:
     print_status(state)
 
 
-def retry_record(record: dict, failed: bool, rerun_finalize_failed: bool) -> dict:
-    return (
-        {**record, "status": "pending", "last_error": "", "retried_at": now()}
-        if failed and record["status"] == "failed"
-        else {**record, "status": "pending", "last_error": "", "retried_at": now()}
-        if rerun_finalize_failed and record["status"] == "finalize_failed"
-        else {**record, "status": "goal_done", "last_error": "", "retried_at": now()}
-        if failed and record["status"] == "finalize_failed"
-        else record
-    )
+def retry_record(record: dict, failed: bool, rerun_finalize_failed: bool, max_attempts: int) -> dict:
+    if rerun_finalize_failed and record["status"] == "finalize_failed":
+        return add_error(record, "finalize_failed retries are disabled by benchmark policy")
+    failure_class = retryable_failure_class(record)
+    if not failed or record["status"] != "failed" or failure_class != SESSION_FAILED_BEFORE_GOAL_DONE:
+        return record
+    if record.get("attempts", 0) >= max_attempts:
+        return add_error(record, f"retry skipped: attempts {record.get('attempts', 0)} >= max_attempts {max_attempts}")
+    return {
+        **record,
+        "status": "pending",
+        "failure_class": failure_class,
+        "last_error": "",
+        "retried_at": now(),
+        "attempt_history": [
+            *record.get("attempt_history", []),
+            {
+                "attempt": record.get("attempts", 0),
+                "status": record["status"],
+                "instance_dir": record.get("instance_dir", ""),
+                "run_name": record.get("run_name", ""),
+                "session_name": record.get("session_name", ""),
+                "failure_class": failure_class,
+                "last_error": record.get("last_error", "")[-1000:],
+                "ended_at": record.get("failed_at", ""),
+            },
+        ],
+    }
 
 
 def add_common_run_args(parser: argparse.ArgumentParser) -> None:
@@ -591,7 +748,12 @@ def main() -> None:
     retry_parser.add_argument("--batch-name", required=True)
     retry_parser.add_argument("--run-version", default="")
     retry_parser.add_argument("--failed", action="store_true")
-    retry_parser.add_argument("--rerun-finalize-failed", action="store_true")
+    retry_parser.add_argument(
+        "--rerun-finalize-failed",
+        action="store_true",
+        help="disabled; kept only for CLI compatibility",
+    )
+    retry_parser.add_argument("--max-attempts", type=int, default=2)
     retry_parser.add_argument("--instance", action="append")
     retry_parser.set_defaults(func=retry)
 
