@@ -343,23 +343,21 @@ def local_tools_offline_exports() -> str:
 def proxy_exports(enabled: bool) -> str:
     if not enabled:
         return ""
-    if proxy_url := os.environ.get("PB_CODEX_PROXY_URL"):
-        no_proxy = os.environ.get("PB_CODEX_NO_PROXY", "localhost,127.0.0.1")
-        return " ".join(
-            f"{key}={shlex.quote(value)}"
-            for key, value in {
-                "HTTP_PROXY": proxy_url,
-                "HTTPS_PROXY": proxy_url,
-                "ALL_PROXY": proxy_url,
-                "NO_PROXY": no_proxy,
-                "http_proxy": proxy_url,
-                "https_proxy": proxy_url,
-                "all_proxy": proxy_url,
-                "no_proxy": no_proxy,
-            }.items()
-        )
-    keys = ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY", "http_proxy", "https_proxy", "all_proxy", "no_proxy")
-    return " ".join(f"{key}={shlex.quote(value)}" for key in keys if (value := os.environ.get(key)))
+    proxy_url = os.environ.get("PB_CODEX_PROXY_URL", "http://127.0.0.1:18080")
+    no_proxy = os.environ.get("PB_CODEX_NO_PROXY", "localhost,127.0.0.1")
+    return " ".join(
+        f"{key}={shlex.quote(value)}"
+        for key, value in {
+            "HTTP_PROXY": proxy_url,
+            "HTTPS_PROXY": proxy_url,
+            "ALL_PROXY": proxy_url,
+            "NO_PROXY": no_proxy,
+            "http_proxy": proxy_url,
+            "https_proxy": proxy_url,
+            "all_proxy": proxy_url,
+            "no_proxy": no_proxy,
+        }.items()
+    )
 
 
 def prepare(args: argparse.Namespace) -> None:

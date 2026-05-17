@@ -186,6 +186,16 @@ if [[ -f "$CONFIG" ]]; then
         fail "strict egress guard missing for $egress_user; run sudo scripts/linux-openai-egress-guard.sh proxy-apply $egress_user"
         cat /tmp/pb-doctor-egress.err >&2
       fi
+      proxy_port="${OPENAI_PROXY_PORT:-18080}"
+      python3 - "$proxy_port" <<'PY' \
+        && ok "OpenAI/Codex allowlist proxy listening on 127.0.0.1:$proxy_port" \
+        || fail "OpenAI/Codex allowlist proxy is not listening; run sudo nohup scripts/openai-connect-proxy.py >/var/log/pb-openai-connect-proxy.log 2>&1 &"
+import socket
+import sys
+
+with socket.create_connection(("127.0.0.1", int(sys.argv[1])), timeout=2):
+    pass
+PY
     fi
   fi
   target_file="$(config_value target_file)"
