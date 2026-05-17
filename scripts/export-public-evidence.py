@@ -11,6 +11,10 @@ from pathlib import Path
 LOCAL_ARTIFACTS = Path("local_state/run_artifacts")
 DEFAULT_OUTPUT = Path("docs/evidence")
 MAX_TEXT_CHARS = 2000
+MAX_FAILED_TESTS = 80
+MAX_PUBLIC_TEST_RESULTS = 120
+MAX_LOG_STEPS = 120
+MAX_PACKAGE_FILES = 250
 
 
 def truncate(value: str, limit: int = MAX_TEXT_CHARS) -> str:
@@ -44,10 +48,12 @@ def failed_tests(eval_json: dict) -> list[dict]:
 
 def eval_summary(eval_json: dict) -> dict:
     results = eval_json.get("test_results", [])
+    failures = failed_tests(eval_json)
     return {
         "test_records": len(results),
         "status_counts": status_counts(eval_json),
-        "failed_tests": failed_tests(eval_json),
+        "failed_tests": failures[:MAX_FAILED_TESTS],
+        "failed_tests_omitted": max(0, len(failures) - MAX_FAILED_TESTS),
         "error_code": eval_json.get("error_code"),
         "error_details": eval_json.get("error_details"),
         "test_branches": eval_json.get("test_branches", []),
@@ -62,12 +68,16 @@ def eval_summary(eval_json: dict) -> dict:
                 "wall_time": entry.get("wall_time"),
                 "exception_info": entry.get("exception_info", ""),
             }
-            for entry in eval_json.get("log", [])
+            for entry in eval_json.get("log", [])[:MAX_LOG_STEPS]
         ],
+        "evaluator_log_steps_omitted": max(0, len(eval_json.get("log", [])) - MAX_LOG_STEPS),
     }
 
 
 def public_eval(eval_json: dict) -> dict:
+    results = eval_json.get("test_results", [])
+    non_passed = [result for result in results if result["status"] != "passed"]
+    public_results = non_passed[:MAX_PUBLIC_TEST_RESULTS]
     return {
         "test_results": [
             {
@@ -76,11 +86,16 @@ def public_eval(eval_json: dict) -> dict:
                 "status": result["status"],
                 "extra": public_extra(result.get("extra", {})),
             }
-            for result in eval_json.get("test_results", [])
+            for result in public_results
         ],
+        "test_records": len(results),
+        "status_counts": status_counts(eval_json),
+        "test_results_policy": "non-passed records only, capped for public artifact size",
+        "test_results_omitted": max(0, len(non_passed) - len(public_results)),
         "error_code": eval_json.get("error_code"),
         "error_details": truncate(eval_json.get("error_details") or ""),
-        "log": [public_log_entry(entry) for entry in eval_json.get("log", [])],
+        "log": [public_log_entry(entry) for entry in eval_json.get("log", [])[:MAX_LOG_STEPS]],
+        "log_entries_omitted": max(0, len(eval_json.get("log", [])) - MAX_LOG_STEPS),
         "solution_branch": eval_json.get("solution_branch"),
         "test_branches": eval_json.get("test_branches", []),
         "test_branch_errors": eval_json.get("test_branch_errors", {}),
@@ -91,6 +106,19 @@ def public_eval(eval_json: dict) -> dict:
             "log_output": "redacted",
             "long_extra_text": f"truncated to {MAX_TEXT_CHARS} chars",
         },
+    }
+
+
+def public_usage_audit(usage_audit: dict, instance_id: str) -> dict:
+    return {
+        "generated_at": usage_audit.get("generated_at", ""),
+        "pricing_snapshot": usage_audit.get("pricing_snapshot", {}),
+        "row": next((row for row in usage_audit.get("rows", []) if row.get("instance_id") == instance_id), {}),
+        "totals": usage_audit.get("totals", {}),
+        "warnings_for_instance": [
+            warning for warning in usage_audit.get("warnings", []) if warning.startswith(f"{instance_id}:")
+        ],
+        "notes": usage_audit.get("notes", []),
     }
 
 
@@ -141,7 +169,8 @@ def public_manifest(manifest: dict, eval_summary_path: str, eval_json_path: str)
         "metrics": scrub_metrics(manifest.get("metrics", {})),
         "eval": {
             "test_records": manifest["eval"]["test_records"],
-            "failed_tests": manifest["eval"]["failed_tests"],
+            "failed_tests": manifest["eval"]["failed_tests"][:MAX_FAILED_TESTS],
+            "failed_tests_omitted": max(0, len(manifest["eval"]["failed_tests"]) - MAX_FAILED_TESTS),
             "error_code": manifest["eval"]["error_code"],
             "test_branch_errors": manifest["eval"]["test_branch_errors"],
             "warnings": manifest["eval"]["warnings"],
@@ -153,7 +182,8 @@ def public_manifest(manifest: dict, eval_summary_path: str, eval_json_path: str)
             "public_path": "usage-audit.json" if manifest["copied_files"].get("usage_audit") else "",
         },
         "package": {
-            "contents": manifest["package"]["contents"],
+            "contents": manifest["package"]["contents"][:MAX_PACKAGE_FILES],
+            "contents_omitted": max(0, len(manifest["package"]["contents"]) - MAX_PACKAGE_FILES),
             "submission_available_local_only": bool(manifest["copied_files"].get("submission")),
         },
         "agent_trace": {
@@ -184,7 +214,7 @@ def export_one(manifest_path: Path, output_dir: Path) -> None:
     usage_audit_path = manifest_path.parent / "usage-audit.json"
     if usage_audit_path.is_file():
         (target_dir / "usage-audit.json").write_text(
-            json.dumps(read_json(usage_audit_path), indent=2, sort_keys=True) + "\n"
+            json.dumps(public_usage_audit(read_json(usage_audit_path), instance_id), indent=2, sort_keys=True) + "\n"
         )
     (target_dir / "manifest.json").write_text(
         json.dumps(public_manifest(manifest, summary_name, public_eval_name), indent=2, sort_keys=True) + "\n"
