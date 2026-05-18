@@ -1753,7 +1753,7 @@ def render_empty_state() -> str:
 
 def render_data_downloads(prefix: str = "") -> str:
     return f"""
-    <div class="download-strip" aria-label="Download report data">
+    <div class="download-strip" aria-label="Report data downloads">
       <div class="download-actions">
         <a class="button primary" href="{prefix}data/results.csv">results.csv</a>
         <a class="button" href="{prefix}data/results.json">results.json</a>
