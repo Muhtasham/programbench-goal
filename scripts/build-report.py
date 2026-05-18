@@ -2321,10 +2321,6 @@ def render_html(data: dict, extended: bool = False) -> str:
       </div>
       <div class="mode-grid">
         <div class="mode-card">
-          <strong>Mini-SWE-compatible no internet</strong>
-          <p>Closest GoalBench parity attempt: same no-internet enforcement and black-box target access, but a shorter prompt without GoalBench audit-loop requirements.</p>
-        </div>
-        <div class="mode-card">
           <strong>No internet</strong>
           <p>Stricter GoalBench scaffold: internet/source/package lookup is blocked, target binary-analysis tools are blocked, target probing stays black-box, and the prompt asks for an explicit behavior audit.</p>
         </div>
@@ -2352,7 +2348,9 @@ def render_html(data: dict, extended: bool = False) -> str:
         <div class="method-notes-copy">
           <h2>Method Notes</h2>
           <p>GoalBench reports separate Codex <code>/goal</code> runs, not official mini-SWE-agent leaderboard submissions. Metrics use ProgramBench's resolved, almost-resolved, average pass rate, cost, and calls shape. Primary metric is fully resolved instances. Almost resolved follows ProgramBench's displayed threshold of at least 95% behavioral tests passing. Scoring is computed through ProgramBench's own <code>EvaluationResult</code> and <code>InstanceEvalSummary</code> logic after active-branch and ignored-test filtering. Resolved means the ProgramBench behavioral test pass rate is exactly 100%; evaluator warnings/errors are disclosed separately in evidence artifacts.</p>
-          <p>The headline track is GPT-5.5 xhigh with Codex <code>/goal</code> in mini-SWE-compatible no-internet mode. Local-tools runs are intentionally non-compliant and reported separately once available. The current Hetzner <code>cpx62</code> runner is a 16 CPU / 30g VM. All no-internet-style rows require strict host egress and wrapper-only target access. Public evidence manifests include sanitized eval summaries and package contents. Raw Codex session logs and submission tarballs stay local by default. Estimated cost comes from Codex token logs and the locally refreshed OpenAI model pricing snapshot; it is not authoritative billing. The committed data omits local session-log paths. See <a href="task-details.html">Task Details</a> and the <a href="runbook.html">runbook</a> for setup and mode details.</p>
+          <p>The headline track is the closest GoalBench parity attempt: GPT-5.5 xhigh with Codex <code>/goal</code>, strict no-internet enforcement, wrapper-only black-box target access, and a shorter mini-SWE-style prompt without GoalBench's extra behavior-audit loop requirements. The stricter <code>no-internet</code> scaffold additionally asks Codex for an explicit behavior audit while keeping internet/source/package lookup blocked, target binary-analysis tools blocked, and target probing black-box.</p>
+          <p><code>no-internet-local-tools</code> is coming soon as a separate, intentionally non-comparable ablation: external internet/source/package lookup remains blocked, but local binary-analysis/tracing tools are allowed. The current Hetzner <code>cpx62</code> runner is a 16 CPU / 30g VM. All no-internet-style rows require strict host egress and wrapper-only target access. Public evidence manifests include sanitized eval summaries and package contents. Raw Codex session logs and submission tarballs stay local by default. Estimated cost comes from Codex token logs and the locally refreshed OpenAI model pricing snapshot; it is not authoritative billing. The committed data omits local session-log paths. See <a href="task-details.html">Task Details</a> and the <a href="runbook.html">runbook</a> for setup and mode details.</p>
+          <p>The public site is scoped to the latest published result set so old submissions do not mix into the headline table. Earlier run artifacts remain in local run storage unless promoted into a dedicated history view.</p>
           <p>Sources: <a href="https://programbench.com/extended/">ProgramBench extended results</a>, <a href="https://programbench.com/run/gpt-5-5-xhigh/">GPT 5.5 xhigh run detail</a>, and this repository's generated CSV summaries.</p>
         </div>
         {render_tweet_embed()}

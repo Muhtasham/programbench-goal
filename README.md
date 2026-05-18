@@ -16,13 +16,14 @@ Primary track:
 - model: `gpt-5.5`
 - reasoning: `xhigh`
 - agent: Codex CLI `/goal`
-- mode: `no-internet`
+- mode: `mini-swe-compatible-nointernet`
 - platform: Linux `amd64`
 - task set: ProgramBench 200 tasks
 
-The no-internet track blocks source/package lookup and target binary-analysis
-tools. Codex may only probe the target through normal CLI behavior and bundled
-documentation inside the cleanroom target container.
+The headline track is the closest GoalBench parity attempt: no internet/source
+lookup, strict host egress, wrapper-only black-box target access, and a shorter
+mini-SWE-style task prompt. It is still a Codex `/goal` scaffold result, not an
+official mini-SWE-agent baseline submission.
 
 ## Architecture
 
@@ -120,8 +121,8 @@ passed, and the eval JSON exists.
 
 | Mode | Config | Meaning |
 | --- | --- | --- |
-| `no-internet` | `configs/full-nointernet-xhigh.json` | Stricter GoalBench track. Internet/source/package lookup is blocked, target binary-analysis tools are blocked, target probing stays black-box, and the prompt asks for an explicit behavior audit. |
 | `mini-swe-compatible-nointernet` | `configs/full-miniswecompat-xhigh.json` | Parity attempt. Same no-internet enforcement, but with a shorter mini-SWE-style task prompt and no GoalBench audit loop requirements. Still a Codex `/goal` scaffold, not an official mini-SWE-agent baseline. |
+| `no-internet` | `configs/full-nointernet-xhigh.json` | Stricter GoalBench track. Internet/source/package lookup is blocked, target binary-analysis tools are blocked, target probing stays black-box, and the prompt asks for an explicit behavior audit. |
 | `no-internet-local-tools` | `configs/full-localtools-xhigh.json` | Coming soon. External lookup stays blocked, but local binary-analysis/tracing tools are allowed. Non-compliant ablation. |
 
 Current recommended sequence:

@@ -12,11 +12,11 @@ not as mini-SWE-agent results.
 
 The harness keeps the solving workspace separate from the ProgramBench evaluator
 repo. It gives Codex a clean writable solution directory and produces the
-`submission.tar.gz` layout that `programbench eval` expects. The default mode
-is the no-internet Codex `/goal` harness. For closer mini-SWE-agent scaffold
-parity, use `mini-swe-compatible-nointernet`: it keeps the same no-internet and
-black-box enforcement, but uses a shorter prompt without GoalBench-specific
-audit-loop requirements.
+`submission.tar.gz` layout that `programbench eval` expects. The headline public
+track is `mini-swe-compatible-nointernet`: it keeps strict no-internet and
+black-box enforcement, but uses a shorter mini-SWE-style task prompt without
+GoalBench-specific audit-loop requirements. The `no-internet` mode is the
+stricter GoalBench scaffold that also asks Codex for an explicit behavior audit.
 
 ProgramBench is a free-form reimplementation benchmark. The agent should choose
 the language, architecture, source layout, abstractions, and build script from
