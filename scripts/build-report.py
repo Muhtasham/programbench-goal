@@ -2290,7 +2290,6 @@ def render_home_results(data: dict, instances: list[ResultRow]) -> str:
         </div>
         <div class="section-actions" aria-label="Current results actions">
           <a class="button primary" href="extended/">See extended results</a>
-          {render_data_buttons()}
         </div>
       </div>
       <div class="table-wrap priority-table">
