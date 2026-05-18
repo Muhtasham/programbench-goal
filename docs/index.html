@@ -123,12 +123,25 @@
     }
     .section-head {
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 18px;
       margin-bottom: 14px;
     }
-    .section-head p { margin: 0; }
+    .section-head > div:first-child {
+      min-width: 0;
+      max-width: 720px;
+    }
+    .section-head p { margin: 0; overflow-wrap: anywhere; }
+    .section-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex: 0 1 auto;
+      flex-wrap: wrap;
+      max-width: min(100%, 520px);
+    }
     .button {
       display: inline-flex;
       align-items: center;
@@ -142,7 +155,9 @@
       font-size: 13px;
       font-weight: 750;
       text-decoration: none;
-      white-space: nowrap;
+      text-align: center;
+      overflow-wrap: anywhere;
+      max-width: 100%;
     }
     .button:hover { border-color: #9fb4ad; background: #f5faf8; }
     .button.primary { border-color: #0f766e; background: #0f766e; color: #ffffff; }
@@ -164,6 +179,67 @@
       flex-wrap: wrap;
       flex: 0 0 auto;
     }
+    .prompt-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 10px;
+    }
+    .prompt-card {
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      color: var(--ink);
+      background: #fbfcfc;
+      text-decoration: none;
+    }
+    .prompt-card:hover { border-color: #9fb4ad; background: #f5faf8; }
+    .prompt-card span { display: block; font-weight: 800; }
+    .prompt-card strong { display: block; margin-top: 7px; color: var(--accent-strong); font-size: 12px; }
+    .prompt-card em { display: block; margin-top: 7px; color: var(--muted); font-size: 13px; line-height: 1.4; font-style: normal; }
+    .duration-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #ffffff;
+      margin: 0;
+    }
+    .duration-panel h2 { margin-top: 0; }
+    .duration-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .duration-stats div, .duration-bucket {
+      min-height: 76px;
+      border: 1px solid #e2e9e5;
+      border-radius: 7px;
+      padding: 10px;
+      background: #f8fbfa;
+    }
+    .duration-stats span, .duration-bucket span {
+      display: block;
+      color: #4e606c;
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+    .duration-stats strong, .duration-bucket strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 20px;
+      line-height: 1;
+    }
+    .duration-stats em, .duration-bucket em {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-style: normal;
+    }
+    .duration-buckets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+    .duration-longest { margin-bottom: 0; }
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -315,8 +391,10 @@
       .topbar { align-items: flex-start; flex-direction: column; margin-bottom: 26px; }
       .nav-links { justify-content: flex-start; }
       .section-head { align-items: flex-start; flex-direction: column; }
+      .section-actions { justify-content: flex-start; width: 100%; }
       .download-strip { justify-content: flex-start; }
       .download-actions { justify-content: flex-start; }
+      .duration-buckets { grid-template-columns: 1fr; }
       .method-notes-grid { grid-template-columns: 1fr; gap: 18px; }
       .tweet-card { justify-self: stretch; max-width: 550px; }
       .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -350,7 +428,7 @@
       </div>
     </div>
     <div class="pill-row">
-      <span class="pill">Generated 2026-05-18 13:32 UTC</span>
+      <span class="pill">Generated 2026-05-18 15:21 UTC</span>
       <span class="pill">200 evaluated instances</span>
       <span class="pill">200 tasks in full ProgramBench</span>
       <span class="pill">Sorted Resolved → Almost → Avg. pass</span>
@@ -364,21 +442,20 @@
       <div class="section-head">
         <div>
           <h2>Current Results</h2>
-          <p>Compact view of Codex <code>/goal</code> scaffold results, sorted with the same headline shape as ProgramBench: resolved, almost resolved, then average pass rate.</p>
+          <p>Compact view of Codex <code>/goal</code> scaffold results, including average and max inference session duration.</p>
         </div>
-        <a class="button primary" href="extended/">See extended results</a>
-      </div>
+        <div class="section-actions" aria-label="Current results actions">
+          <a class="button primary" href="extended/">See extended results</a>
 
-    <div class="download-strip" aria-label="Report data downloads">
-      <div class="download-actions">
-        <a class="button primary" href="data/results.csv">results.csv</a>
-        <a class="button" href="data/results.json">results.json</a>
-      </div>
-    </div>
+      <a class="button" href="data/results.csv">results.csv</a>
+      <a class="button" href="data/results.json">results.json</a>
+      <a class="button" href="data/prompts.json">prompts.json</a>
 
+        </div>
+      </div>
       <div class="table-wrap priority-table">
         <table>
-          <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Avg. est. cost</th><th>Avg. calls</th></tr></thead>
+          <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Avg. est. cost</th><th>Avg. calls</th><th>Avg /goal</th><th>Max /goal</th></tr></thead>
           <tbody>
             <tr>
               <td>1</td>
@@ -389,6 +466,8 @@
               <td>6.0% (12/200)</td>
               <td>$4.89</td>
               <td>80.2</td>
+              <td>14.7m</td>
+              <td>27.2m</td>
             </tr>
             </tbody>
         </table>
@@ -411,11 +490,90 @@
           <div><strong>16,038</strong><span>total calls</span></div>
           <div><strong>$4.89</strong><span>est. cost / task</span></div>
           <div><strong>80.2</strong><span>calls / task</span></div>
+          <div><strong>14.7m</strong><span>avg /goal session</span></div>
+          <div><strong>27.2m</strong><span>max /goal session</span></div>
         </div>
       </section>
 
       </div>
     </section>
+
+
+    <section class="section">
+      <div class="section-eyebrow">Latency</div>
+
+    <section class="duration-panel" aria-label="Run duration distribution">
+      <div>
+        <h2>Goal Session Duration</h2>
+        <p class="muted">Wall-clock time is measured per Codex <code>/goal</code> session from launch to packaged submission. ProgramBench's public mini-SWE-agent runs use a much larger timeout, so this block makes latency differences explicit.</p>
+      </div>
+      <div class="duration-stats">
+        <div><span>Average</span><strong>0.244h</strong><em>14.7 min</em></div>
+        <div><span>Median</span><strong>0.234h</strong><em>14.0 min</em></div>
+        <div><span>P75</span><strong>0.281h</strong><em>16.9 min</em></div>
+        <div><span>P90</span><strong>0.329h</strong><em>19.8 min</em></div>
+        <div><span>P95</span><strong>0.363h</strong><em>21.8 min</em></div>
+        <div><span>Max</span><strong>0.454h</strong><em>27.2 min</em></div>
+        <div><span>Over 6h</span><strong>0 / 200</strong><em>0.0%</em></div>
+      </div>
+      <div class="duration-buckets">
+        <div class="duration-bucket">
+          <span>&lt;15 min</span>
+          <strong>121 / 200</strong>
+          <em>60.5%</em>
+        </div>
+
+
+        <div class="duration-bucket">
+          <span>15-30 min</span>
+          <strong>79 / 200</strong>
+          <em>39.5%</em>
+        </div>
+
+
+        <div class="duration-bucket">
+          <span>&gt;30 min</span>
+          <strong>0 / 200</strong>
+          <em>0.0%</em>
+        </div>
+        </div>
+      <p class="duration-longest">Longest task: <a href="task/hairyhenderson__gomplate.05eb3aa/"><code>hairyhenderson__gomplate.05eb3aa</code></a> at <strong>27.2 min</strong>.</p>
+    </section>
+
+    </section>
+
+
+    <section class="section">
+      <div class="section-eyebrow">Prompt artifacts</div>
+      <div class="section-head">
+        <div>
+          <h2>Prompts by Mode</h2>
+          <p>Exact Codex <code>/goal</code> prompts are published as first-class artifacts so each result row can be traced back to its scaffold.</p>
+        </div>
+      </div>
+      <div class="prompt-grid">
+        <a class="prompt-card" href="prompt/mini-swe-compatible-nointernet/">
+          <span>Mini-SWE-Compatible No Internet</span>
+          <strong>mini-swe-compatible-nointernet</strong>
+          <em>Short Codex /goal prompt for the closest mini-SWE-agent scaffold parity attempt.</em>
+        </a>
+
+
+        <a class="prompt-card" href="prompt/no-internet/">
+          <span>No Internet</span>
+          <strong>no-internet</strong>
+          <em>Stricter GoalBench prompt with explicit behavior-audit requirements.</em>
+        </a>
+
+
+        <a class="prompt-card" href="prompt/no-internet-local-tools/">
+          <span>No Internet + Local Tools</span>
+          <strong>no-internet-local-tools</strong>
+          <em>Non-comparable ablation prompt that keeps external lookup blocked while allowing local binary-analysis tools.</em>
+        </a>
+        </div>
+    </section>
+
 
 
     <section class="section">

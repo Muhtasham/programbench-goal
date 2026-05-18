@@ -69,7 +69,8 @@
       font-size: 13px;
       font-weight: 750;
       text-decoration: none;
-      white-space: nowrap;
+      text-align: center;
+      overflow-wrap: anywhere;
     }
     .button:hover { border-color: #9fb4ad; background: #f5faf8; }
     .button.primary { border-color: var(--accent); background: var(--accent); color: #ffffff; }
@@ -89,7 +90,7 @@
     }
     .run-kpis {
       display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
       gap: 10px;
       margin: 24px 0 10px;
     }
@@ -104,6 +105,53 @@
     .run-kpi span { display: block; color: #4e606c; font-size: 12px; font-weight: 800; text-transform: uppercase; }
     .run-kpi strong { display: block; margin-top: 14px; color: var(--ink); font-size: clamp(22px, 3vw, 30px); line-height: 1; }
     .run-kpi em { display: block; margin-top: 8px; color: var(--muted); font-size: 12px; font-style: normal; }
+    .duration-panel, .prompt-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #ffffff;
+      margin: 18px 0;
+    }
+    .duration-panel h2, .prompt-panel h2 { margin-top: 0; }
+    .duration-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .duration-stats div, .duration-bucket {
+      min-height: 76px;
+      border: 1px solid #e2e9e5;
+      border-radius: 7px;
+      padding: 10px;
+      background: #f8fbfa;
+    }
+    .duration-stats span, .duration-bucket span, .prompt-panel dt {
+      display: block;
+      color: #4e606c;
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+    .duration-stats strong, .duration-bucket strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 20px;
+      line-height: 1;
+    }
+    .duration-stats em, .duration-bucket em {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-style: normal;
+    }
+    .duration-buckets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+    .duration-longest { margin-bottom: 0; }
+    .prompt-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+    .prompt-panel dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 12px 0 0; }
+    .prompt-panel dl div { border: 1px solid #e2e9e5; border-radius: 7px; padding: 10px; background: #f8fbfa; min-width: 0; }
+    .prompt-panel dd { margin: 7px 0 0; overflow-wrap: anywhere; }
     .plot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 14px 0 18px; }
     .plot-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: #ffffff; }
     .plot { width: 100%; height: auto; display: block; }
@@ -134,15 +182,12 @@
     .status.almost { color: var(--warn); background: #fef3c7; }
     .status.open { color: var(--bad); background: #ffe4e6; }
     .muted { color: var(--muted); }
-    @media (max-width: 900px) {
-      .run-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    }
     @media (max-width: 680px) {
       header, main { padding-left: 16px; padding-right: 16px; }
       .topbar { align-items: flex-start; flex-direction: column; }
       .nav-links { justify-content: flex-start; }
-      .run-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .run-kpi { min-height: 104px; padding: 12px; }
+      .duration-buckets, .prompt-panel dl { grid-template-columns: 1fr; }
       h1 { font-size: clamp(34px, 11vw, 48px); }
     }
   </style>
@@ -182,8 +227,67 @@
       <div class="run-kpi"><span>Average pass rate</span><strong>63.6%</strong><em>behavioral tests</em></div>
       <div class="run-kpi"><span>Total est. cost</span><strong>$977</strong><em>$4.89 / task</em></div>
       <div class="run-kpi"><span>Total calls</span><strong>16,038</strong><em>80.2 / task</em></div>
-      <div class="run-kpi"><span>Wall clock</span><strong>48.89h</strong><em>200 published tasks</em></div>
+      <div class="run-kpi"><span>Avg /goal session</span><strong>14.7m</strong><em>0.244h</em></div>
+      <div class="run-kpi"><span>Max /goal session</span><strong>27.2m</strong><em>0.454h</em></div>
+      <div class="run-kpi"><span>Total wall time</span><strong>48.89h</strong><em>sum across 200 tasks</em></div>
     </div>
+
+
+    <section class="duration-panel" aria-label="Run duration distribution">
+      <div>
+        <h2>Goal Session Duration</h2>
+        <p class="muted">Wall-clock time is measured per Codex <code>/goal</code> session from launch to packaged submission. ProgramBench's public mini-SWE-agent runs use a much larger timeout, so this block makes latency differences explicit.</p>
+      </div>
+      <div class="duration-stats">
+        <div><span>Average</span><strong>0.244h</strong><em>14.7 min</em></div>
+        <div><span>Median</span><strong>0.234h</strong><em>14.0 min</em></div>
+        <div><span>P75</span><strong>0.281h</strong><em>16.9 min</em></div>
+        <div><span>P90</span><strong>0.329h</strong><em>19.8 min</em></div>
+        <div><span>P95</span><strong>0.363h</strong><em>21.8 min</em></div>
+        <div><span>Max</span><strong>0.454h</strong><em>27.2 min</em></div>
+        <div><span>Over 6h</span><strong>0 / 200</strong><em>0.0%</em></div>
+      </div>
+      <div class="duration-buckets">
+        <div class="duration-bucket">
+          <span>&lt;15 min</span>
+          <strong>121 / 200</strong>
+          <em>60.5%</em>
+        </div>
+
+
+        <div class="duration-bucket">
+          <span>15-30 min</span>
+          <strong>79 / 200</strong>
+          <em>39.5%</em>
+        </div>
+
+
+        <div class="duration-bucket">
+          <span>&gt;30 min</span>
+          <strong>0 / 200</strong>
+          <em>0.0%</em>
+        </div>
+        </div>
+      <p class="duration-longest">Longest task: <a href="../../task/hairyhenderson__gomplate.05eb3aa/"><code>hairyhenderson__gomplate.05eb3aa</code></a> at <strong>27.2 min</strong>.</p>
+    </section>
+
+
+    <section class="prompt-panel">
+      <div>
+        <h2>Prompt & Config</h2>
+        <p class="muted">Short Codex /goal prompt for the closest mini-SWE-agent scaffold parity attempt. The exact prompt is published as a stable artifact and referenced from <code>results.json</code> and <code>results.csv</code>.</p>
+      </div>
+      <div class="prompt-actions">
+        <a class="button primary" href="../../prompt/mini-swe-compatible-nointernet/">View prompt</a>
+        <a class="button" href="../../data/results.json">results.json</a>
+        <a class="button" href="../../data/results.csv">results.csv</a>
+      </div>
+      <dl>
+        <div><dt>Prompt</dt><dd>Mini-SWE-Compatible No Internet</dd></div>
+        <div><dt>Source</dt><dd><code>prompts/programbench_goal_mini_swe_compatible.md</code></dd></div>
+        <div><dt>SHA-256</dt><dd><code>78be3d42ed7efe84f5ed66a4ae175a428db4afbc0e1a03f048fd94c8e4e31853</code></dd></div>
+      </dl>
+    </section>
 
 
     <h2>Behavioral Test Pass Rate Distribution</h2>

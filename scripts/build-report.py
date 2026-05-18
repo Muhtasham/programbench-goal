@@ -4,16 +4,18 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import html
 import json
 import re
 import shutil
 from dataclasses import dataclass, fields
 from datetime import datetime, timezone
+from decimal import ROUND_HALF_UP, Decimal
 from html import unescape
 from itertools import groupby
 from pathlib import Path
-from statistics import mean, stdev
+from statistics import mean, median, stdev
 from urllib.request import Request, urlopen
 
 AGENT_NAME = "Codex /goal"
@@ -33,6 +35,26 @@ BRAND_SLASH_PATHS = """
 """.strip()
 TAG_RE = re.compile(r"<[^>]+>")
 RUN_VERSION_RE = re.compile(r"\d{8}T\d{6}Z")
+PROMPTS = {
+    "mini-swe-compatible-nointernet": {
+        "slug": "mini-swe-compatible-nointernet",
+        "title": "Mini-SWE-Compatible No Internet",
+        "path": Path("prompts/programbench_goal_mini_swe_compatible.md"),
+        "summary": "Short Codex /goal prompt for the closest mini-SWE-agent scaffold parity attempt.",
+    },
+    "no-internet": {
+        "slug": "no-internet",
+        "title": "No Internet",
+        "path": Path("prompts/programbench_goal_no_internet.md"),
+        "summary": "Stricter GoalBench prompt with explicit behavior-audit requirements.",
+    },
+    "no-internet-local-tools": {
+        "slug": "no-internet-local-tools",
+        "title": "No Internet + Local Tools",
+        "path": Path("prompts/programbench_goal_local_tools.md"),
+        "summary": "Non-comparable ablation prompt that keeps external lookup blocked while allowing local binary-analysis tools.",
+    },
+}
 
 
 @dataclass
@@ -152,6 +174,44 @@ def load_baselines(output_dir: Path) -> list[dict]:
 
 def write_html(path: Path, content: str) -> None:
     path.write_text("\n".join(line.rstrip() for line in content.splitlines()) + "\n")
+
+
+def sha256_text(value: str) -> str:
+    return hashlib.sha256(value.encode()).hexdigest()
+
+
+def prompt_record(mode: str) -> dict:
+    prompt = PROMPTS.get(mode)
+    if not prompt:
+        return {"mode": mode, "slug": "", "title": "", "path": "", "summary": "", "sha256": "", "text": ""}
+    source_path = Path(prompt["path"])
+    text = source_path.read_text()
+    return {
+        "mode": mode,
+        "slug": prompt["slug"],
+        "title": prompt["title"],
+        "path": f"prompt/{prompt['slug']}/",
+        "source_path": str(source_path),
+        "summary": prompt["summary"],
+        "sha256": sha256_text(text),
+        "text": text,
+    }
+
+
+def prompt_summary_record(mode: str) -> dict:
+    prompt = prompt_record(mode)
+    return {key: value for key, value in prompt.items() if key != "text"}
+
+
+def prompt_records() -> list[dict]:
+    return [prompt_record(mode) for mode in PROMPTS]
+
+
+def prompt_link(mode: str, prefix: str = "") -> str:
+    prompt = prompt_record(mode)
+    if not prompt["path"]:
+        return '<span class="muted">not recorded</span>'
+    return f'<a href="{cell(prefix + prompt["path"])}">{cell(prompt["title"])}</a>'
 
 
 def brand_slash_svg(class_name: str = "brand-mark") -> str:
@@ -351,6 +411,73 @@ def render_doc_page(markdown_path: Path, title: str) -> str:
 """
 
 
+def render_prompt_page(prompt: dict) -> str:
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{cell(str(prompt["title"]))} Prompt · {SITE_NAME}</title>
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <style>
+    :root {{ --ink: #182026; --muted: #5b6b78; --line: #d9e0e6; --soft: #f4f8f6; --accent: #0f766e; --accent-strong: #0b5f59; }}
+    * {{ box-sizing: border-box; }}
+    body {{ margin: 0; color: var(--ink); background: linear-gradient(180deg, #fbfcfb 0%, #f6f9f7 300px, #ffffff 301px); font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }}
+    a {{ color: #075985; text-decoration-thickness: 1px; text-underline-offset: 2px; }}
+    header, main {{ max-width: 980px; margin: 0 auto; padding: 22px 28px; }}
+    .topbar {{ display: flex; align-items: center; justify-content: space-between; gap: 20px; }}
+    .nav-brand {{ display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 850; text-decoration: none; }}
+    .brand-mark {{ width: 30px; height: 30px; display: block; flex: 0 0 auto; }}
+    .nav-links {{ display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }}
+    .nav-links a {{ color: #40515c; text-decoration: none; border-radius: 6px; padding: 7px 9px; font-size: 14px; }}
+    .nav-links a:hover {{ color: #075985; background: #eef6f3; }}
+    .prompt-hero {{ padding: 34px 0 28px; border-bottom: 1px solid var(--line); }}
+    .prompt-eyebrow {{ color: var(--accent-strong); font-size: 13px; font-weight: 850; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.08em; }}
+    h1 {{ margin: 0; font-size: clamp(34px, 6vw, 64px); line-height: 0.98; letter-spacing: 0; }}
+    p {{ color: var(--muted); line-height: 1.55; }}
+    .meta-grid {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 20px 0; }}
+    .meta-grid div {{ border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #ffffff; min-width: 0; }}
+    .meta-grid span {{ display: block; color: var(--muted); font-size: 12px; font-weight: 850; text-transform: uppercase; }}
+    .meta-grid strong, .meta-grid code {{ display: block; margin-top: 7px; overflow-wrap: anywhere; }}
+    pre {{ overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #10201d; color: #effff9; line-height: 1.55; }}
+    code {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }}
+    pre code {{ color: inherit; font-size: 13px; }}
+    @media (max-width: 760px) {{ header, main {{ padding-left: 16px; padding-right: 16px; }} .topbar {{ align-items: flex-start; flex-direction: column; }} .nav-links {{ justify-content: flex-start; }} .meta-grid {{ grid-template-columns: 1fr; }} }}
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="topbar" aria-label="Primary">
+      <a class="nav-brand" href="../../">{brand_slash_svg()}<span>{SITE_NAME}</span></a>
+      <div class="nav-links">
+        <a href="../../">Leaderboard</a>
+        <a href="../../extended/">Extended</a>
+        <a href="../../task-details.html">Tasks</a>
+        <a href="../../runbook.html">Runbook</a>
+        <a href="{GOALBENCH_GITHUB}">GitHub</a>
+        <a href="{PROGRAMBENCH_HOME}">ProgramBench</a>
+      </div>
+    </nav>
+    <section class="prompt-hero">
+      <p class="prompt-eyebrow">Codex /goal prompt artifact</p>
+      <h1>{cell(str(prompt["title"]))}</h1>
+      <p>{cell(str(prompt["summary"]))}</p>
+    </section>
+  </header>
+  <main>
+    <div class="meta-grid">
+      <div><span>Mode</span><strong>{cell(str(prompt["mode"]))}</strong></div>
+      <div><span>Source</span><code>{cell(str(prompt["source_path"]))}</code></div>
+      <div><span>SHA-256</span><code>{cell(str(prompt["sha256"]))}</code></div>
+      <div><span>Machine-readable</span><a href="../../data/prompts.json">data/prompts.json</a></div>
+    </div>
+    <pre><code>{cell(str(prompt["text"]))}</code></pre>
+  </main>
+</body>
+</html>
+"""
+
+
 def load_task_baselines(output_dir: Path) -> dict:
     path = output_dir / "data" / "programbench-task-baselines.json"
     return json.loads(path.read_text())["tasks"] if path.is_file() else {}
@@ -430,6 +557,44 @@ def aggregate(rows: list[ResultRow]) -> dict:
     }
 
 
+def percentile(values: list[int], q: float) -> float:
+    if not values:
+        return 0
+    ordered = sorted(values)
+    return ordered[round((len(ordered) - 1) * q)]
+
+
+def duration_bucket(rows: list[ResultRow], lower: int, upper: int | None) -> dict:
+    count = sum(lower <= row.wall_clock_seconds and (upper is None or row.wall_clock_seconds < upper) for row in rows)
+    return {
+        "lower_seconds": lower,
+        "upper_seconds": upper,
+        "count": count,
+        "rate": count / len(rows) if rows else 0,
+    }
+
+
+def duration_summary(rows: list[ResultRow]) -> dict:
+    seconds = [row.wall_clock_seconds for row in rows]
+    longest = max(rows, key=lambda row: row.wall_clock_seconds) if rows else None
+    return {
+        "instances": len(rows),
+        "average_seconds": mean(seconds) if seconds else 0,
+        "median_seconds": median(seconds) if seconds else 0,
+        "p75_seconds": percentile(seconds, 0.75),
+        "p90_seconds": percentile(seconds, 0.90),
+        "p95_seconds": percentile(seconds, 0.95),
+        "max_seconds": max(seconds) if seconds else 0,
+        "over_6h": sum(row.wall_clock_seconds > 6 * 60 * 60 for row in rows),
+        "buckets": [
+            {"label": "<15 min", **duration_bucket(rows, 0, 15 * 60)},
+            {"label": "15-30 min", **duration_bucket(rows, 15 * 60, 30 * 60)},
+            {"label": ">30 min", **duration_bucket(rows, 30 * 60, None)},
+        ],
+        "longest_task": row_to_dict(longest) if longest else {},
+    }
+
+
 def stddev(values: list[float]) -> float:
     return stdev(values) if len(values) > 1 else 0
 
@@ -495,6 +660,8 @@ def result_groups(rows: list[ResultRow]) -> list[dict]:
             "compliance": key[3],
             "host_profile": ", ".join(sorted({host_profile(row) for row in group_rows})),
             "run_version": key[4],
+            "prompt": prompt_summary_record(group_rows[0].inference_mode),
+            "duration": duration_summary(group_rows),
             "score_distribution": distribution_bins(group_rows),
             **aggregate(group_rows),
         }
@@ -583,6 +750,7 @@ def row_to_dict(row: ResultRow) -> dict:
         "reasoning_effort": row.reasoning_effort,
         "inference_mode": row.inference_mode,
         "mode": mode_label(row),
+        "prompt": prompt_summary_record(row.inference_mode),
         "compliance": compliance_label(row),
         "host_profile": host_profile(row),
         "programbench_comparable": is_programbench_comparable(row),
@@ -655,6 +823,18 @@ def whole_money(value: float) -> str:
 
 def integer(value: float | int) -> str:
     return f"{value:,.0f}"
+
+
+def minutes(value: float) -> str:
+    return f"{value / 60:.1f} min"
+
+
+def hours(value: float) -> str:
+    return f"{Decimal(str(value / 3600)).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)}h"
+
+
+def short_minutes(value: float) -> str:
+    return f"{value / 60:.1f}m"
 
 
 def cell(value: str) -> str:
@@ -892,6 +1072,8 @@ def render_summary_cards(label: str, summary: dict) -> str:
           <div><strong>{integer(summary["total_calls"])}</strong><span>total calls</span></div>
           <div><strong>{money(summary["average_cost_usd"])}</strong><span>est. cost / task</span></div>
           <div><strong>{summary["average_calls"]:.1f}</strong><span>calls / task</span></div>
+          <div><strong>{short_minutes(summary["duration"]["average_seconds"])}</strong><span>avg /goal session</span></div>
+          <div><strong>{short_minutes(summary["duration"]["max_seconds"])}</strong><span>max /goal session</span></div>
         </div>
       </section>
     """
@@ -925,8 +1107,45 @@ def run_metric_cards(group: dict) -> str:
       <div class="run-kpi"><span>Average pass rate</span><strong>{percent(group["average_pass_rate"])}</strong><em>behavioral tests</em></div>
       <div class="run-kpi"><span>Total est. cost</span><strong>{whole_money(group["total_cost_usd"])}</strong><em>{money(group["average_cost_usd"])} / task</em></div>
       <div class="run-kpi"><span>Total calls</span><strong>{integer(group["total_calls"])}</strong><em>{group["average_calls"]:.1f} / task</em></div>
-      <div class="run-kpi"><span>Wall clock</span><strong>{group["total_wall_clock_hours"]:.2f}h</strong><em>{group["instances"]} published task{"s" if group["instances"] != 1 else ""}</em></div>
+      <div class="run-kpi"><span>Avg /goal session</span><strong>{short_minutes(group["duration"]["average_seconds"])}</strong><em>{hours(group["duration"]["average_seconds"])}</em></div>
+      <div class="run-kpi"><span>Max /goal session</span><strong>{short_minutes(group["duration"]["max_seconds"])}</strong><em>{hours(group["duration"]["max_seconds"])}</em></div>
+      <div class="run-kpi"><span>Total wall time</span><strong>{group["total_wall_clock_hours"]:.2f}h</strong><em>sum across {group["instances"]} task{"s" if group["instances"] != 1 else ""}</em></div>
     </div>
+    """
+
+
+def render_duration_summary(summary: dict, prefix: str = "") -> str:
+    if not summary["instances"]:
+        return ""
+    longest = summary["longest_task"]
+    buckets = "\n".join(
+        f"""
+        <div class="duration-bucket">
+          <span>{cell(bucket["label"])}</span>
+          <strong>{bucket["count"]} / {summary["instances"]}</strong>
+          <em>{percent(bucket["rate"])}</em>
+        </div>
+        """
+        for bucket in summary["buckets"]
+    )
+    return f"""
+    <section class="duration-panel" aria-label="Run duration distribution">
+      <div>
+        <h2>Goal Session Duration</h2>
+        <p class="muted">Wall-clock time is measured per Codex <code>/goal</code> session from launch to packaged submission. ProgramBench's public mini-SWE-agent runs use a much larger timeout, so this block makes latency differences explicit.</p>
+      </div>
+      <div class="duration-stats">
+        <div><span>Average</span><strong>{hours(summary["average_seconds"])}</strong><em>{minutes(summary["average_seconds"])}</em></div>
+        <div><span>Median</span><strong>{hours(summary["median_seconds"])}</strong><em>{minutes(summary["median_seconds"])}</em></div>
+        <div><span>P75</span><strong>{hours(summary["p75_seconds"])}</strong><em>{minutes(summary["p75_seconds"])}</em></div>
+        <div><span>P90</span><strong>{hours(summary["p90_seconds"])}</strong><em>{minutes(summary["p90_seconds"])}</em></div>
+        <div><span>P95</span><strong>{hours(summary["p95_seconds"])}</strong><em>{minutes(summary["p95_seconds"])}</em></div>
+        <div><span>Max</span><strong>{hours(summary["max_seconds"])}</strong><em>{minutes(summary["max_seconds"])}</em></div>
+        <div><span>Over 6h</span><strong>{summary["over_6h"]} / {summary["instances"]}</strong><em>{percent(summary["over_6h"] / summary["instances"])}</em></div>
+      </div>
+      <div class="duration-buckets">{buckets}</div>
+      <p class="duration-longest">Longest task: <a href="{cell(prefix + str(longest["task_path"]))}"><code>{cell(str(longest["instance_id"]))}</code></a> at <strong>{minutes(float(longest["wall_clock_seconds"]))}</strong>.</p>
+    </section>
     """
 
 
@@ -934,18 +1153,20 @@ def version_label(version: str) -> str:
     return version or "not recorded"
 
 
-def render_leaderboard(groups: list[dict]) -> str:
+def render_leaderboard(groups: list[dict], prefix: str = "") -> str:
     return "\n".join(
         f"""
             <tr>
               <td>{index}</td>
-              <td><a href="run/{cell(str(group["slug"]))}/">{cell(str(group["model"]))}</a></td>
+              <td><a href="{prefix}run/{cell(str(group["slug"]))}/">{cell(str(group["model"]))}</a></td>
               <td><code>{cell(version_label(str(group.get("run_version", ""))))}</code></td>
               <td>{cell(str(group["agent"]))}</td>
               <td>{result_count(group, "resolved")}</td>
               <td>{result_count(group, "almost_resolved")}</td>
               <td>{money(group["average_cost_usd"])}</td>
               <td>{group["average_calls"]:.1f}</td>
+              <td>{short_minutes(group["duration"]["average_seconds"])}</td>
+              <td>{short_minutes(group["duration"]["max_seconds"])}</td>
             </tr>
             """
         for index, group in enumerate(groups, start=1)
@@ -964,6 +1185,9 @@ def render_disclosures(groups: list[dict]) -> str:
               <td>{cell(str(group["host_profile"]))}</td>
               <td>{group["instances"]}/{PROGRAMBENCH_TASKS}</td>
               <td>{percent(group["average_pass_rate"])}</td>
+              <td>{prompt_link(str(group["prompt"]["mode"]))}</td>
+              <td>{short_minutes(group["duration"]["average_seconds"])}</td>
+              <td>{short_minutes(group["duration"]["max_seconds"])}</td>
               <td>{group["total_wall_clock_hours"]:.2f}h</td>
             </tr>
             """
@@ -971,7 +1195,7 @@ def render_disclosures(groups: list[dict]) -> str:
     )
 
 
-def render_instances(rows: list[ResultRow]) -> str:
+def render_instances(rows: list[ResultRow], prefix: str = "") -> str:
     table_rows = []
     for index, row in enumerate(
         sorted(rows, key=lambda item: (item.resolved, item.almost_resolved, item.score), reverse=True), start=1
@@ -981,7 +1205,7 @@ def render_instances(rows: list[ResultRow]) -> str:
             f"""
             <tr>
               <td>{index}</td>
-              <td><a href="task/{cell(row.instance_id)}/"><code>{cell(row.instance_id)}</code></a></td>
+              <td><a href="{task_page_link(row, prefix)}"><code>{cell(row.instance_id)}</code></a></td>
               <td><code>{cell(version_label(row.run_version))}</code></td>
               <td>{cell(mode_label(row))}</td>
               <td>{cell(model_display(row))}</td>
@@ -995,7 +1219,7 @@ def render_instances(rows: list[ResultRow]) -> str:
               <td>{row.wall_clock_seconds / 3600:.2f}h</td>
               <td>{cell(row.host_system)}/{cell(row.host_machine)}</td>
               <td>{cell(row.docker_cpus)} CPU / {cell(row.docker_memory)}</td>
-              <td>{evidence_links(row)}</td>
+              <td>{evidence_links(row, prefix)}</td>
             </tr>
             """
         )
@@ -1062,18 +1286,19 @@ def baseline_model_link(row: dict) -> str:
 def render_csv(rows: list[ResultRow]) -> str:
     output = []
     names = [field.name for field in fields(ResultRow)]
-    output.append(",".join(names))
+    prompt_names = ["prompt", "prompt_path", "prompt_sha256"]
+    output.append(",".join(names + prompt_names))
     for row in rows:
         values = []
-        for name in names:
-            value = getattr(row, name)
+        prompt = prompt_record(row.inference_mode)
+        for value in [getattr(row, name) for name in names] + [prompt["title"], prompt["path"], prompt["sha256"]]:
             text = str(value)
-            values.append('"' + text.replace('"', '""') + '"' if "," in text else text)
+            values.append('"' + text.replace('"', '""') + '"' if "," in text or "\n" in text else text)
         output.append(",".join(values))
     return "\n".join(output) + "\n"
 
 
-def render_task_index(tasks: list[dict]) -> str:
+def render_task_index(tasks: list[dict], prefix: str = "") -> str:
     if not tasks:
         return ""
     sorted_tasks = sorted(
@@ -1084,7 +1309,7 @@ def render_task_index(tasks: list[dict]) -> str:
         f"""
         <tr>
           <td>{index}</td>
-          <td><a href="{cell(str(task["task_path"]))}"><code>{cell(str(task["instance_id"]))}</code></a></td>
+          <td><a href="{cell(prefix + str(task["task_path"]))}"><code>{cell(str(task["instance_id"]))}</code></a></td>
           <td>{task["official_generated_tests"] if task["official_generated_tests"] is not None else "pending"}</td>
           <td>{percent(float(task["official_best_score"])) if task["official_best_score"] is not None else "pending"}</td>
           <td>{percent(float(task["best_score"])) if task["best_score"] is not None else "pending"}</td>
@@ -1098,7 +1323,7 @@ def render_task_index(tasks: list[dict]) -> str:
     )
     return f"""
     <h2>Task Details</h2>
-    <p>Per-task pages show official ProgramBench context, GoalBench rows by model/mode, failed-test evidence, and baseline links. See <a href="task-details.html">how to read task pages</a>.</p>
+    <p>Per-task pages show official ProgramBench context, GoalBench rows by model/mode, failed-test evidence, and baseline links. See <a href="{prefix}task-details.html">how to read task pages</a>.</p>
     <div class="table-wrap">
       <table>
         <thead><tr><th>#</th><th>Task</th><th>Generated tests</th><th>Official best</th><th>Codex best</th><th>Codex model</th><th>Codex rows</th><th>Official rows</th><th>ProgramBench</th></tr></thead>
@@ -1153,10 +1378,31 @@ def run_chips(group: dict) -> str:
         "Codex no-internet ablation",
     }:
         values.insert(1, cell(compliance))
-    return "".join(
-        f'<span class="run-chip">{value}</span>'
-        for value in values
-    )
+    return "".join(f'<span class="run-chip">{value}</span>' for value in values)
+
+
+def render_prompt_panel(group: dict) -> str:
+    prompt = group.get("prompt", {})
+    if not prompt.get("path"):
+        return ""
+    return f"""
+    <section class="prompt-panel">
+      <div>
+        <h2>Prompt & Config</h2>
+        <p class="muted">{cell(str(prompt["summary"]))} The exact prompt is published as a stable artifact and referenced from <code>results.json</code> and <code>results.csv</code>.</p>
+      </div>
+      <div class="prompt-actions">
+        <a class="button primary" href="../../{cell(str(prompt["path"]))}">View prompt</a>
+        <a class="button" href="../../data/results.json">results.json</a>
+        <a class="button" href="../../data/results.csv">results.csv</a>
+      </div>
+      <dl>
+        <div><dt>Prompt</dt><dd>{cell(str(prompt["title"]))}</dd></div>
+        <div><dt>Source</dt><dd><code>{cell(str(prompt["source_path"]))}</code></dd></div>
+        <div><dt>SHA-256</dt><dd><code>{cell(str(prompt["sha256"]))}</code></dd></div>
+      </dl>
+    </section>
+    """
 
 
 def official_run_button(group: dict) -> str:
@@ -1263,7 +1509,8 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
       font-size: 13px;
       font-weight: 750;
       text-decoration: none;
-      white-space: nowrap;
+      text-align: center;
+      overflow-wrap: anywhere;
     }}
     .button:hover {{ border-color: #9fb4ad; background: #f5faf8; }}
     .button.primary {{ border-color: var(--accent); background: var(--accent); color: #ffffff; }}
@@ -1283,7 +1530,7 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
     }}
     .run-kpis {{
       display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
       gap: 10px;
       margin: 24px 0 10px;
     }}
@@ -1298,6 +1545,53 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
     .run-kpi span {{ display: block; color: #4e606c; font-size: 12px; font-weight: 800; text-transform: uppercase; }}
     .run-kpi strong {{ display: block; margin-top: 14px; color: var(--ink); font-size: clamp(22px, 3vw, 30px); line-height: 1; }}
     .run-kpi em {{ display: block; margin-top: 8px; color: var(--muted); font-size: 12px; font-style: normal; }}
+    .duration-panel, .prompt-panel {{
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #ffffff;
+      margin: 18px 0;
+    }}
+    .duration-panel h2, .prompt-panel h2 {{ margin-top: 0; }}
+    .duration-stats {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }}
+    .duration-stats div, .duration-bucket {{
+      min-height: 76px;
+      border: 1px solid #e2e9e5;
+      border-radius: 7px;
+      padding: 10px;
+      background: #f8fbfa;
+    }}
+    .duration-stats span, .duration-bucket span, .prompt-panel dt {{
+      display: block;
+      color: #4e606c;
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }}
+    .duration-stats strong, .duration-bucket strong {{
+      display: block;
+      margin-top: 8px;
+      font-size: 20px;
+      line-height: 1;
+    }}
+    .duration-stats em, .duration-bucket em {{
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-style: normal;
+    }}
+    .duration-buckets {{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }}
+    .duration-longest {{ margin-bottom: 0; }}
+    .prompt-actions {{ display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }}
+    .prompt-panel dl {{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 12px 0 0; }}
+    .prompt-panel dl div {{ border: 1px solid #e2e9e5; border-radius: 7px; padding: 10px; background: #f8fbfa; min-width: 0; }}
+    .prompt-panel dd {{ margin: 7px 0 0; overflow-wrap: anywhere; }}
     .plot-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 14px 0 18px; }}
     .plot-card {{ border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: #ffffff; }}
     .plot {{ width: 100%; height: auto; display: block; }}
@@ -1328,15 +1622,12 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
     .status.almost {{ color: var(--warn); background: #fef3c7; }}
     .status.open {{ color: var(--bad); background: #ffe4e6; }}
     .muted {{ color: var(--muted); }}
-    @media (max-width: 900px) {{
-      .run-kpis {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
-    }}
     @media (max-width: 680px) {{
       header, main {{ padding-left: 16px; padding-right: 16px; }}
       .topbar {{ align-items: flex-start; flex-direction: column; }}
       .nav-links {{ justify-content: flex-start; }}
-      .run-kpis {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
       .run-kpi {{ min-height: 104px; padding: 12px; }}
+      .duration-buckets, .prompt-panel dl {{ grid-template-columns: 1fr; }}
       h1 {{ font-size: clamp(34px, 11vw, 48px); }}
     }}
   </style>
@@ -1367,6 +1658,8 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
   </header>
   <main>
     {run_metric_cards(group)}
+    {render_duration_summary(group["duration"], "../../")}
+    {render_prompt_panel(group)}
     {render_score_distribution(matching)}
     <h2>Score by Task</h2>
     <p class="muted">Each cell is one evaluated task instance. Dark green means fully resolved, amber means almost resolved, and muted cells are partial or open.</p>
@@ -1543,7 +1836,8 @@ def render_task_detail(instance_id: str, rows: list[ResultRow], official_tasks: 
       font-size: 13px;
       font-weight: 750;
       text-decoration: none;
-      white-space: nowrap;
+      text-align: center;
+      overflow-wrap: anywhere;
     }}
     .button:hover {{ border-color: #9fb4ad; background: #f5faf8; }}
     .button.primary {{ border-color: var(--accent); background: var(--accent); color: #ffffff; }}
@@ -1670,7 +1964,7 @@ def render_comparison(groups: list[dict]) -> str:
     """
 
 
-def render_repeatability(data: dict) -> str:
+def render_repeatability(data: dict, prefix: str = "") -> str:
     repeated = data["repeatability"]
     if not repeated:
         return ""
@@ -1679,7 +1973,7 @@ def render_repeatability(data: dict) -> str:
         f"""
         <tr>
           <td>{index}</td>
-          <td><a href="task/{cell(str(item["instance_id"]))}/"><code>{cell(str(item["instance_id"]))}</code></a></td>
+          <td><a href="{prefix}task/{cell(str(item["instance_id"]))}/"><code>{cell(str(item["instance_id"]))}</code></a></td>
           <td>{cell(str(item["model"]))}</td>
           <td>{cell(str(item["mode"]))}</td>
           <td>{cell(str(item["compliance"]))}</td>
@@ -1757,8 +2051,54 @@ def render_data_downloads(prefix: str = "") -> str:
       <div class="download-actions">
         <a class="button primary" href="{prefix}data/results.csv">results.csv</a>
         <a class="button" href="{prefix}data/results.json">results.json</a>
+        <a class="button" href="{prefix}data/prompts.json">prompts.json</a>
       </div>
     </div>
+    """
+
+
+def render_data_buttons(prefix: str = "") -> str:
+    return f"""
+      <a class="button" href="{prefix}data/results.csv">results.csv</a>
+      <a class="button" href="{prefix}data/results.json">results.json</a>
+      <a class="button" href="{prefix}data/prompts.json">prompts.json</a>
+    """
+
+
+def render_prompt_catalog(prompts: list[dict], prefix: str = "") -> str:
+    cards = "\n".join(
+        f"""
+        <a class="prompt-card" href="{cell(prefix + str(prompt["path"]))}">
+          <span>{cell(str(prompt["title"]))}</span>
+          <strong>{cell(str(prompt["mode"]))}</strong>
+          <em>{cell(str(prompt["summary"]))}</em>
+        </a>
+        """
+        for prompt in prompts
+    )
+    return f"""
+    <section class="section">
+      <div class="section-eyebrow">Prompt artifacts</div>
+      <div class="section-head">
+        <div>
+          <h2>Prompts by Mode</h2>
+          <p>Exact Codex <code>/goal</code> prompts are published as first-class artifacts so each result row can be traced back to its scaffold.</p>
+        </div>
+      </div>
+      <div class="prompt-grid">{cards}</div>
+    </section>
+    """
+
+
+def render_duration_overview(data: dict, prefix: str = "") -> str:
+    if not data["groups"]:
+        return ""
+    group = data["groups"][0]
+    return f"""
+    <section class="section">
+      <div class="section-eyebrow">Latency</div>
+      {render_duration_summary(group["duration"], prefix)}
+    </section>
     """
 
 
@@ -1883,7 +2223,7 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
         return f"""
     {render_empty_state()}
     {render_pending_charts()}
-    {render_task_index(data["tasks"])}
+    {render_task_index(data["tasks"], "../")}
     """
     return f"""
     <div class="cards">
@@ -1891,10 +2231,12 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
     </div>
 
     {render_data_downloads("../")}
+    {render_duration_overview(data, "../")}
+    {render_prompt_catalog(data["prompts"], "../")}
 
     <h2>Score by Model × Task</h2>
     <div class="score-matrix">
-      {"".join(f'<a class="heat-cell" style="background:{heat_color(row.score)}" title="{cell(row.instance_id)}: {percent(row.score)}" href="{task_page_link(row)}"></a>' for row in sorted(instances, key=lambda row: (model_display(row), row.instance_id)))}
+      {"".join(f'<a class="heat-cell" style="background:{heat_color(row.score)}" title="{cell(row.instance_id)}: {percent(row.score)}" href="{task_page_link(row, "../")}"></a>' for row in sorted(instances, key=lambda row: (model_display(row), row.instance_id)))}
     </div>
 
     {render_score_distribution(instances)}
@@ -1904,32 +2246,32 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
     <h2>Extended Results</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Avg. est. cost</th><th>Avg. calls</th></tr></thead>
-        <tbody>{render_leaderboard(data["groups"])}</tbody>
+        <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Avg. est. cost</th><th>Avg. calls</th><th>Avg /goal</th><th>Max /goal</th></tr></thead>
+        <tbody>{render_leaderboard(data["groups"], "../")}</tbody>
       </table>
     </div>
-    <p>Columns mirror ProgramBench's extended leaderboard shape: resolved and almost-resolved rates, average estimated API cost per task instance, and average calls per task instance. ProgramBench run-detail pages show total cost and total calls; our run-detail pages do the same. Run versions keep repeated same-config sweeps separate instead of silently merging attempts. Mode and compliance are shown in Run Disclosures and Per-Instance Results so the mirrored metric table stays close to ProgramBench's shape.</p>
+    <p>Columns mirror ProgramBench's extended leaderboard shape while adding the latency fields needed for Codex <code>/goal</code>: average and max wall-clock session duration from launch to packaged submission. Run versions keep repeated same-config sweeps separate instead of silently merging attempts.</p>
 
     <h2>Run Disclosures</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Mode</th><th>Compliance</th><th>Host profile</th><th>Tasks</th><th>Avg. pass</th><th>Wall</th></tr></thead>
+        <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Mode</th><th>Compliance</th><th>Host profile</th><th>Tasks</th><th>Avg. pass</th><th>Prompt</th><th>Avg /goal</th><th>Max /goal</th><th>Total wall</th></tr></thead>
         <tbody>{render_disclosures(data["groups"])}</tbody>
       </table>
     </div>
-    <p>These disclosure fields are intentionally outside the mirrored metric table because ProgramBench's public leaderboard does not mix scaffold deviations into the metric columns. Rows labeled smaller VM are Codex <code>/goal</code> scaffold experiments on the disclosed runner size.</p>
+    <p>These disclosure fields make scaffold differences explicit: prompt, compliance label, host size, per-session latency, and total wall-clock sum. Rows labeled smaller VM are Codex <code>/goal</code> scaffold experiments on the disclosed runner size.</p>
 
     {render_comparison(data["groups"])}
 
-    {render_repeatability(data)}
+    {render_repeatability(data, "../")}
 
-    {render_task_index(data["tasks"])}
+    {render_task_index(data["tasks"], "../")}
 
     <h2>Per-Instance Results</h2>
     <div class="table-wrap">
       <table>
         <thead><tr><th>#</th><th>Instance</th><th>Run</th><th>Mode</th><th>Model</th><th>Compliance</th><th>Status</th><th>Eval</th><th>Score</th><th>Tests</th><th>Est. cost</th><th>Calls</th><th>Wall</th><th>Host</th><th>Docker</th><th>Evidence</th></tr></thead>
-        <tbody>{render_instances(instances)}</tbody>
+        <tbody>{render_instances(instances, "../")}</tbody>
       </table>
     </div>
     """
@@ -1944,14 +2286,16 @@ def render_home_results(data: dict, instances: list[ResultRow]) -> str:
       <div class="section-head">
         <div>
           <h2>Current Results</h2>
-          <p>Compact view of Codex <code>/goal</code> scaffold results, sorted with the same headline shape as ProgramBench: resolved, almost resolved, then average pass rate.</p>
+          <p>Compact view of Codex <code>/goal</code> scaffold results, including average and max inference session duration.</p>
         </div>
-        <a class="button primary" href="extended/">See extended results</a>
+        <div class="section-actions" aria-label="Current results actions">
+          <a class="button primary" href="extended/">See extended results</a>
+          {render_data_buttons()}
+        </div>
       </div>
-      {render_data_downloads()}
       <div class="table-wrap priority-table">
         <table>
-          <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Avg. est. cost</th><th>Avg. calls</th></tr></thead>
+          <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Avg. est. cost</th><th>Avg. calls</th><th>Avg /goal</th><th>Max /goal</th></tr></thead>
           <tbody>{render_leaderboard(data["groups"])}</tbody>
         </table>
       </div>
@@ -1963,6 +2307,9 @@ def render_home_results(data: dict, instances: list[ResultRow]) -> str:
         {"".join(render_summary_cards(summary_title(group), group) for group in data["groups"])}
       </div>
     </section>
+
+    {render_duration_overview(data)}
+    {render_prompt_catalog(data["prompts"])}
     """
 
 
@@ -2124,12 +2471,25 @@ def render_html(data: dict, extended: bool = False) -> str:
     }}
     .section-head {{
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 18px;
       margin-bottom: 14px;
     }}
-    .section-head p {{ margin: 0; }}
+    .section-head > div:first-child {{
+      min-width: 0;
+      max-width: 720px;
+    }}
+    .section-head p {{ margin: 0; overflow-wrap: anywhere; }}
+    .section-actions {{
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex: 0 1 auto;
+      flex-wrap: wrap;
+      max-width: min(100%, 520px);
+    }}
     .button {{
       display: inline-flex;
       align-items: center;
@@ -2143,7 +2503,9 @@ def render_html(data: dict, extended: bool = False) -> str:
       font-size: 13px;
       font-weight: 750;
       text-decoration: none;
-      white-space: nowrap;
+      text-align: center;
+      overflow-wrap: anywhere;
+      max-width: 100%;
     }}
     .button:hover {{ border-color: #9fb4ad; background: #f5faf8; }}
     .button.primary {{ border-color: #0f766e; background: #0f766e; color: #ffffff; }}
@@ -2165,6 +2527,67 @@ def render_html(data: dict, extended: bool = False) -> str:
       flex-wrap: wrap;
       flex: 0 0 auto;
     }}
+    .prompt-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 10px;
+    }}
+    .prompt-card {{
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      color: var(--ink);
+      background: #fbfcfc;
+      text-decoration: none;
+    }}
+    .prompt-card:hover {{ border-color: #9fb4ad; background: #f5faf8; }}
+    .prompt-card span {{ display: block; font-weight: 800; }}
+    .prompt-card strong {{ display: block; margin-top: 7px; color: var(--accent-strong); font-size: 12px; }}
+    .prompt-card em {{ display: block; margin-top: 7px; color: var(--muted); font-size: 13px; line-height: 1.4; font-style: normal; }}
+    .duration-panel {{
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #ffffff;
+      margin: 0;
+    }}
+    .duration-panel h2 {{ margin-top: 0; }}
+    .duration-stats {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }}
+    .duration-stats div, .duration-bucket {{
+      min-height: 76px;
+      border: 1px solid #e2e9e5;
+      border-radius: 7px;
+      padding: 10px;
+      background: #f8fbfa;
+    }}
+    .duration-stats span, .duration-bucket span {{
+      display: block;
+      color: #4e606c;
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }}
+    .duration-stats strong, .duration-bucket strong {{
+      display: block;
+      margin-top: 8px;
+      font-size: 20px;
+      line-height: 1;
+    }}
+    .duration-stats em, .duration-bucket em {{
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-style: normal;
+    }}
+    .duration-buckets {{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }}
+    .duration-longest {{ margin-bottom: 0; }}
     .cards {{
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -2316,8 +2739,10 @@ def render_html(data: dict, extended: bool = False) -> str:
       .topbar {{ align-items: flex-start; flex-direction: column; margin-bottom: 26px; }}
       .nav-links {{ justify-content: flex-start; }}
       .section-head {{ align-items: flex-start; flex-direction: column; }}
+      .section-actions {{ justify-content: flex-start; width: 100%; }}
       .download-strip {{ justify-content: flex-start; }}
       .download-actions {{ justify-content: flex-start; }}
+      .duration-buckets {{ grid-template-columns: 1fr; }}
       .method-notes-grid {{ grid-template-columns: 1fr; gap: 18px; }}
       .tweet-card {{ justify-self: stretch; max-width: 550px; }}
       .metric-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
@@ -2386,6 +2811,7 @@ def build(args: argparse.Namespace) -> None:
             output_dir / "assets",
             output_dir / "run",
             output_dir / "task",
+            output_dir / "prompt",
             output_dir / "official-run",
             output_dir / "extended",
         ):
@@ -2394,6 +2820,7 @@ def build(args: argparse.Namespace) -> None:
         for generated in (
             output_dir / "data" / "results.json",
             output_dir / "data" / "results.csv",
+            output_dir / "data" / "prompts.json",
             output_dir / "data" / "programbench-run-baselines.json",
         ):
             if generated.exists():
@@ -2401,6 +2828,7 @@ def build(args: argparse.Namespace) -> None:
     if args.refresh_baselines:
         refresh_baselines(output_dir)
     repeated = repeatability_groups(rows)
+    prompts = prompt_records()
     data = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "sample_instances": len(rows),
@@ -2410,12 +2838,14 @@ def build(args: argparse.Namespace) -> None:
         "repeatability": repeated,
         "repeatability_summary": repeatability_summary(repeated),
         "rows": [row_to_dict(row) for row in rows],
+        "prompts": prompts,
         "baselines": load_baselines(output_dir),
     }
     (output_dir / "data").mkdir(parents=True, exist_ok=True)
     write_support_files(output_dir)
     (output_dir / "data" / "results.json").write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
     (output_dir / "data" / "results.csv").write_text(render_csv(rows))
+    (output_dir / "data" / "prompts.json").write_text(json.dumps(prompts, indent=2, sort_keys=True) + "\n")
     write_html(output_dir / "index.html", render_html(data))
     (output_dir / "extended").mkdir(parents=True, exist_ok=True)
     write_html(output_dir / "extended" / "index.html", render_html(data, extended=True))
@@ -2425,6 +2855,10 @@ def build(args: argparse.Namespace) -> None:
         run_dir = output_dir / "run" / str(group["slug"])
         run_dir.mkdir(parents=True, exist_ok=True)
         write_html(run_dir / "index.html", render_run_detail(group, rows))
+    for prompt in prompts:
+        prompt_dir = output_dir / "prompt" / str(prompt["slug"])
+        prompt_dir.mkdir(parents=True, exist_ok=True)
+        write_html(prompt_dir / "index.html", render_prompt_page(prompt))
     for task in data["tasks"]:
         task_dir = output_dir / "task" / str(task["instance_id"])
         task_dir.mkdir(parents=True, exist_ok=True)
