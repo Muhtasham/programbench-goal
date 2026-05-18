@@ -1754,10 +1754,6 @@ def render_empty_state() -> str:
 def render_data_downloads(prefix: str = "") -> str:
     return f"""
     <div class="download-strip" aria-label="Download report data">
-      <div>
-        <strong>Download report data</strong>
-        <span>Machine-readable latest results for replication, plotting, and independent checks.</span>
-      </div>
       <div class="download-actions">
         <a class="button primary" href="{prefix}data/results.csv">results.csv</a>
         <a class="button" href="{prefix}data/results.json">results.json</a>
@@ -2156,24 +2152,10 @@ def render_html(data: dict, extended: bool = False) -> str:
     .download-strip {{
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 18px;
+      justify-content: flex-end;
+      gap: 10px;
       margin: 4px 0 16px;
-      padding: 14px 0;
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-    }}
-    .download-strip strong {{
-      display: block;
-      color: var(--text);
-      font-size: 14px;
-      margin-bottom: 3px;
-    }}
-    .download-strip span {{
-      display: block;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
+      padding: 0;
     }}
     .download-actions {{
       display: flex;
@@ -2334,7 +2316,7 @@ def render_html(data: dict, extended: bool = False) -> str:
       .topbar {{ align-items: flex-start; flex-direction: column; margin-bottom: 26px; }}
       .nav-links {{ justify-content: flex-start; }}
       .section-head {{ align-items: flex-start; flex-direction: column; }}
-      .download-strip {{ align-items: flex-start; flex-direction: column; }}
+      .download-strip {{ justify-content: flex-start; }}
       .download-actions {{ justify-content: flex-start; }}
       .method-notes-grid {{ grid-template-columns: 1fr; gap: 18px; }}
       .tweet-card {{ justify-self: stretch; max-width: 550px; }}
