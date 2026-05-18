@@ -2232,7 +2232,6 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
 
     {render_data_downloads("../")}
     {render_duration_overview(data, "../")}
-    {render_prompt_catalog(data["prompts"], "../")}
 
     <h2>Score by Model × Task</h2>
     <div class="score-matrix">
@@ -2286,7 +2285,6 @@ def render_home_results(data: dict, instances: list[ResultRow]) -> str:
       <div class="section-head">
         <div>
           <h2>Current Results</h2>
-          <p>Compact view of Codex <code>/goal</code> scaffold results, including average and max inference session duration.</p>
         </div>
         <div class="section-actions" aria-label="Current results actions">
           <a class="button primary" href="extended/">See extended results</a>
@@ -2308,7 +2306,6 @@ def render_home_results(data: dict, instances: list[ResultRow]) -> str:
     </section>
 
     {render_duration_overview(data)}
-    {render_prompt_catalog(data["prompts"])}
     """
 
 
