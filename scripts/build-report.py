@@ -20,6 +20,9 @@ from urllib.request import Request, urlopen
 
 AGENT_NAME = "Codex /goal"
 SITE_NAME = "GoalBench"
+SITE_URL = "https://muhtasham.github.io/goalbench/"
+SITE_DESCRIPTION = "GoalBench measures Codex /goal on ProgramBench tasks: rebuild CLI behavior from binaries and documentation, then score with ProgramBench behavioral tests."
+SOCIAL_IMAGE = "assets/goalbench-social-preview.png"
 PROGRAMBENCH_TASKS = 200
 PROGRAMBENCH_EXTENDED = "https://programbench.com/extended/"
 PROGRAMBENCH_HOME = "https://programbench.com/"
@@ -223,12 +226,38 @@ def codex_logo_img(class_name: str = "codex-mark") -> str:
     return f'<img class="{class_name}" src="assets/codex-logo.png" alt="" aria-hidden="true">'
 
 
+def absolute_site_url(path: str = "") -> str:
+    return SITE_URL + path.lstrip("/")
+
+
+def social_meta(title: str, description: str = SITE_DESCRIPTION, path: str = "") -> str:
+    url = absolute_site_url(path)
+    image = absolute_site_url(SOCIAL_IMAGE)
+    return f"""
+  <link rel="canonical" href="{cell(url)}">
+  <meta name="description" content="{cell(description)}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{SITE_NAME}">
+  <meta property="og:title" content="{cell(title)}">
+  <meta property="og:description" content="{cell(description)}">
+  <meta property="og:url" content="{cell(url)}">
+  <meta property="og:image" content="{cell(image)}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="GoalBench preview card">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{cell(title)}">
+  <meta name="twitter:description" content="{cell(description)}">
+  <meta name="twitter:image" content="{cell(image)}">""".rstrip()
+
+
 def write_support_files(output_dir: Path) -> None:
     (output_dir / "favicon.svg").write_text(
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">{BRAND_SLASH_PATHS}</svg>\n',
     )
     (output_dir / "assets").mkdir(exist_ok=True)
     shutil.copyfile(Path("assets/codex-logo.png"), output_dir / "assets" / "codex-logo.png")
+    shutil.copyfile(Path("assets/goalbench-social-preview.png"), output_dir / SOCIAL_IMAGE)
 
 
 def inline_markdown(text: str) -> str:
@@ -345,13 +374,14 @@ def render_markdown_blocks(markdown: str) -> str:
     return "\n".join(blocks)
 
 
-def render_doc_page(markdown_path: Path, title: str) -> str:
+def render_doc_page(markdown_path: Path, title: str, page_path: str) -> str:
     return f"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{cell(title)} · {SITE_NAME}</title>
+  {social_meta(f"{title} · {SITE_NAME}", path=page_path)}
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <style>
     :root {{ --ink: #182026; --muted: #5b6b78; --line: #d9e0e6; --soft: #f4f8f6; --accent: #0f766e; --accent-strong: #0b5f59; }}
@@ -412,12 +442,14 @@ def render_doc_page(markdown_path: Path, title: str) -> str:
 
 
 def render_prompt_page(prompt: dict) -> str:
+    prompt_title = f"{prompt['title']} Prompt · {SITE_NAME}"
     return f"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{cell(str(prompt["title"]))} Prompt · {SITE_NAME}</title>
+  {social_meta(prompt_title, path=str(prompt["path"]))}
   <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
   <style>
     :root {{ --ink: #182026; --muted: #5b6b78; --line: #d9e0e6; --soft: #f4f8f6; --accent: #0f766e; --accent-strong: #0b5f59; }}
@@ -1438,12 +1470,20 @@ def render_run_detail(group: dict, rows: list[ResultRow]) -> str:
         for row in sorted(matching, key=lambda item: item.score, reverse=True)
     )
     official_button = official_run_button(group)
+    run_title = f"{group['model']} · {group['mode']} · {SITE_NAME}"
+    run_description = (
+        f"{group['instances']} evaluated tasks: {percent(group['resolved_rate'])} resolved, "
+        f"{percent(group['almost_resolved_rate'])} almost resolved, "
+        f"{percent(group['average_pass_rate'])} average pass rate."
+    )
+    run_path = f"run/{group['slug']}/"
     return f"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{cell(str(group["model"]))} GoalBench Run</title>
+  {social_meta(run_title, run_description, run_path)}
   <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
   <style>
     :root {{
@@ -1783,12 +1823,15 @@ def render_task_detail(instance_id: str, rows: list[ResultRow], official_tasks: 
           <td colspan="11">No Codex results published for this task yet.</td>
         </tr>
         """
+    task_title = f"{instance_id} · {SITE_NAME}"
+    task_description = "GoalBench task detail with ProgramBench context, Codex /goal scores, evidence links, cost, calls, and wall-clock time."
     return f"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{cell(instance_id)} ProgramBench Task</title>
+  {social_meta(task_title, task_description, f"task/{instance_id}/")}
   <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
   <style>
     :root {{
@@ -2117,6 +2160,7 @@ def render_task_details_page() -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Task Details · {SITE_NAME}</title>
+  {social_meta(f"Task Details · {SITE_NAME}", "How to read GoalBench per-task pages: ProgramBench context, Codex /goal rows, evidence links, scores, cost, calls, and latency.", "task-details.html")}
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <style>
     :root {{
@@ -2328,6 +2372,7 @@ def render_html(data: dict, extended: bool = False) -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {base}<title>{title}</title>
+  {social_meta(title, path="extended/" if extended else "")}
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <style>
     :root {{
@@ -2825,7 +2870,7 @@ def build(args: argparse.Namespace) -> None:
     (output_dir / "extended").mkdir(parents=True, exist_ok=True)
     write_html(output_dir / "extended" / "index.html", render_html(data, extended=True))
     write_html(output_dir / "task-details.html", render_task_details_page())
-    write_html(output_dir / RUNBOOK_PAGE, render_doc_page(Path("docs/runbook.md"), "Runbook"))
+    write_html(output_dir / RUNBOOK_PAGE, render_doc_page(Path("docs/runbook.md"), "Runbook", RUNBOOK_PAGE))
     for group in data["groups"]:
         run_dir = output_dir / "run" / str(group["slug"])
         run_dir.mkdir(parents=True, exist_ok=True)
