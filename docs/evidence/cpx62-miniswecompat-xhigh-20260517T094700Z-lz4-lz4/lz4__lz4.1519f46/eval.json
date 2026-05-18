@@ -1,0 +1,2110 @@
+{
+  "error_code": null,
+  "error_details_chars": 0,
+  "error_details_redacted": false,
+  "executable_hash": "a109969990cfeb39c0d4f18b8eb19eb9e3c95b879544a8cc37b1772ed99e068e",
+  "log": [
+    {
+      "branch": "",
+      "command": "rm -rf /workspace/* /workspace/.[!.]*",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "wipe_workspace",
+      "wall_time": 0.15790304400434252
+    },
+    {
+      "branch": "",
+      "command": "find /workspace -type f -exec sha256sum {} + 2>/dev/null | grep -E \"^(39482b2512114fc5e593949649b644a0eb9f10856baf8e579deb4e7a6161cefc)  \" | cut -c67- | xargs -I% rm -fv %",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "remove_hashed_files",
+      "wall_time": 0.1046016779873753
+    },
+    {
+      "branch": "",
+      "command": "if [ ! -d .git ]; then GIT_AUTHOR_DATE='2000-01-01T00:00:00Z' GIT_COMMITTER_DATE='2000-01-01T00:00:00Z' git -c init.defaultBranch=gold init -q && git -c user.email=gold@local -c user.name=gold -c commit.gpgsign=false add -A && GIT_AUTHOR_DATE='2000-01-01T00:00:00Z' GIT_COMMITTER_DATE='2000-01-01T00:00:00Z' git -c user.email=gold@local -c user.name=gold -c commit.gpgsign=false commit -q --allow-empty -m gold; fi",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "seed_git",
+      "wall_time": 0.13576413098780904
+    },
+    {
+      "branch": "",
+      "command": "chmod +x ./compile.sh && ./compile.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "compile",
+      "wall_time": 0.4389442469982896
+    },
+    {
+      "branch": "",
+      "command": "mv ./executable /opt/programbench-stashed-executable-do-not-modify",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "copy_executable",
+      "wall_time": 0.13076675799675286
+    },
+    {
+      "branch": "",
+      "command": "sha256sum /opt/programbench-stashed-executable-do-not-modify",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 117,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "hash_executable",
+      "wall_time": 0.12505814401083626
+    },
+    {
+      "branch": "",
+      "command": "pip3 install -q --disable-pip-version-check pytest-rerunfailures",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 222,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "install_rerunfailures",
+      "wall_time": 0.6551176420034608
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.11530220501299482
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.10845226699893828
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.12187913600064348
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.11887810799817089
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 48044,
+      "output_redacted": true,
+      "returncode": 1,
+      "step": "run_tests",
+      "wall_time": 6.576686822998454
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "command": "docker cp af9ac27ee81a1643b5dd452321409f35043b01ad35de6dfa1cc5b968e2d21da1:/workspace/eval/results.xml /tmp/tmp71bjo5af.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 55616,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.04086560200084932
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.10633223599870689
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.14082572200277355
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.12760279899521265
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.1240630779939238
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 272272,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "run_tests",
+      "wall_time": 25.035067251010332
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "command": "docker cp c738215996dd2321f7ffc576a73a64ce35441940efec06de36e05eebb1e0ea38:/workspace/eval/results.xml /tmp/tmpr_o7dng7.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 228320,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.037234561998047866
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.13730740899336524
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.1279325659997994
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.11602595399017446
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.11076656499062665
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 397612,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "run_tests",
+      "wall_time": 34.787205939006526
+    },
+    {
+      "branch": "1379dfae0b18",
+      "command": "docker cp 02b878e7cf855356e0fbc8decbe0659182bc04e14224d37226143f92ab2e54a0:/workspace/eval/results.xml /tmp/tmpe7i21e0t.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 433239,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.03851121399202384
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.13807655000709929
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.1316547449969221
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.12789633499050979
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.1289271919958992
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 13663,
+      "output_redacted": true,
+      "returncode": 1,
+      "step": "run_tests",
+      "wall_time": 11.771915004006587
+    },
+    {
+      "branch": "b9729b57ee68",
+      "command": "docker cp a7d843ecf2d07433cf171042f31a3addafede7fc64e498c452e36531c926083f:/workspace/eval/results.xml /tmp/tmpkjxzkjf9.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 18817,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.02363876400340814
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.13349797000410035
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.11605961399618536
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.12484264600789174
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.13757048499246594
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 12920,
+      "output_redacted": true,
+      "returncode": 1,
+      "step": "run_tests",
+      "wall_time": 5.506942594991415
+    },
+    {
+      "branch": "782de56cd02f",
+      "command": "docker cp e79cd22dcee01e953d740c797e7dc0735e53ab029f1aafffd3e7f19514052b42:/workspace/eval/results.xml /tmp/tmpv1wuuesk.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 8675,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.03301795700099319
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.12457209901185706
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.12086463900050148
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.13329697398876306
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.1297906999971019
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 8441,
+      "output_redacted": true,
+      "returncode": 1,
+      "step": "run_tests",
+      "wall_time": 5.593614450990572
+    },
+    {
+      "branch": "1ac41bacc9b0",
+      "command": "docker cp 14ad781af8a5eda5d96750c452329a056b58ed2de23916139af7efe974133cce:/workspace/eval/results.xml /tmp/tmphjupj14c.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 5132,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.03845984399958979
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.1256054569967091
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.12792725399776828
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.1393198010046035
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.13000939700577874
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 12758,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "run_tests",
+      "wall_time": 5.553853057004744
+    },
+    {
+      "branch": "d5041197eae9",
+      "command": "docker cp 7f33ca86e43de1cf15a25e69ceda464bab21a3a3f0b01a5f2338a3ff484e9f0f:/workspace/eval/results.xml /tmp/tmpuusnrc56.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 11122,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.024554520001402125
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.11297042499063537
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.10427068200078793
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.10617711600207258
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.12592315099027473
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 4343,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "run_tests",
+      "wall_time": 5.690872551000211
+    },
+    {
+      "branch": "2e73c2003ae6",
+      "command": "docker cp b0d208c82da18a908a91990a4f859f52195477c12d4fb077d19439792be1c3a8:/workspace/eval/results.xml /tmp/tmp8z8baqas.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 2291,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.0362481929914793
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.10526643799676094
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.091948016997776
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.12796692400297616
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.11739410601148847
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 14392,
+      "output_redacted": true,
+      "returncode": 1,
+      "step": "run_tests",
+      "wall_time": 6.266837256989675
+    },
+    {
+      "branch": "afb74aae5103",
+      "command": "docker cp 502eaf9bb135fe3abd8f14d7fb8a1ce7725a787f924164c5244ce6f9d073180e:/workspace/eval/results.xml /tmp/tmpjhg7v1yk.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 8966,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.02783368600648828
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.1314999269961845
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.11470861099951435
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.13689866400090978
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.12421175499912351
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 24839,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "run_tests",
+      "wall_time": 4.458872378003434
+    },
+    {
+      "branch": "109fd0edf50d",
+      "command": "docker cp 41fb694db4add5145378acc177708efbda8a58757495aa00785f346a321c74f8:/workspace/eval/results.xml /tmp/tmpsdt7326o.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 15349,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.03641512099420652
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.13210257900936995
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.12364324300142471
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.1322123370046029
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.12481826600560453
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 5011,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "run_tests",
+      "wall_time": 5.515993769993656
+    },
+    {
+      "branch": "cad835235795",
+      "command": "docker cp 8ffa1279a64f1d1b16b2a93c4e131de952e10726ae5951cf0b72012f46db6b75:/workspace/eval/results.xml /tmp/tmp9n76s2fn.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 3198,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.026981757997418754
+    },
+    {
+      "branch": "",
+      "command": "rm -f ./executable && mv /opt/programbench-stashed-executable-do-not-modify ./executable && chmod +x ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "restore_executable",
+      "wall_time": 0.13582516799215227
+    },
+    {
+      "branch": "",
+      "command": "sha256sum ./executable",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 79,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "verify_executable_hash",
+      "wall_time": 0.12496781400113832
+    },
+    {
+      "branch": "",
+      "command": "rm -f eval/results.xml results.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "clean_stale_results",
+      "wall_time": 0.1319107610033825
+    },
+    {
+      "branch": "",
+      "command": "test -f eval/run.sh && sed -i 's/--timeout-method=thread/--timeout-method=signal/g' eval/run.sh || true",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 0,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "patch_timeout_method",
+      "wall_time": 0.10725121200084686
+    },
+    {
+      "branch": "",
+      "command": "export PYTEST_ADDOPTS=\"$PYTEST_ADDOPTS --reruns=2 --reruns-delay=1\" && chmod +x ./eval/run.sh && ./eval/run.sh",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 4255,
+      "output_redacted": true,
+      "returncode": 1,
+      "step": "run_tests",
+      "wall_time": 5.493972315991414
+    },
+    {
+      "branch": "f72bf60b2346",
+      "command": "docker cp 1740d6fc5ab6672d4b2df931df606efc3e03d4d493fbd5cc1a175fef74693353:/workspace/eval/results.xml /tmp/tmp4bv7yatr.xml",
+      "exception_info_chars": 0,
+      "exception_info_redacted": false,
+      "output_original_chars": 2252,
+      "output_redacted": true,
+      "returncode": 0,
+      "step": "results_read",
+      "wall_time": 0.027093576994957402
+    }
+  ],
+  "log_entries_omitted": 0,
+  "public_redactions": {
+    "extra_text": "redacted",
+    "log_output": "redacted",
+    "long_extra_text": "truncated to 2000 chars"
+  },
+  "solution_branch": "submission",
+  "status_counts": {
+    "failure": 344,
+    "passed": 1483,
+    "skipped": 2
+  },
+  "test_branch_errors": {},
+  "test_branches": [
+    "84cbe4a71abe",
+    "7d95f4d40acc",
+    "1379dfae0b18",
+    "b9729b57ee68",
+    "782de56cd02f",
+    "1ac41bacc9b0",
+    "d5041197eae9",
+    "2e73c2003ae6",
+    "afb74aae5103",
+    "109fd0edf50d",
+    "cad835235795",
+    "f72bf60b2346"
+  ],
+  "test_records": 1829,
+  "test_results": [
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 2338,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_basic_invocation.test_help_short",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 2446,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_basic_invocation.test_help_capital_h",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 247,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_benchmark.test_benchmark_default_level",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 262,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_benchmark.test_benchmark_range",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 253,
+        "message_redacted": true,
+        "time": 0.015
+      },
+      "name": "tests.test_error_handling.test_fast_negative_fails",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 252,
+        "message_redacted": true,
+        "time": 0.014
+      },
+      "name": "tests.test_error_handling.test_fast_zero_fails",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 6253,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_error_handling.test_incomplete_arguments",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 816,
+        "message_redacted": true,
+        "time": 0.014
+      },
+      "name": "tests.test_frame_options.test_frame_crc",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 822,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_frame_options.test_no_content_size",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 190,
+        "message_redacted": true,
+        "time": 0.022
+      },
+      "name": "tests.test_list_mode.test_list_from_stdin",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 816,
+        "message_redacted": true,
+        "time": 0.013
+      },
+      "name": "tests.test_threading.test_threads_long_form",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 2342,
+        "message_redacted": true,
+        "time": 0.009
+      },
+      "name": "tests.test_basic_invocation.test_help_long",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 248,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark.test_benchmark_specific_level",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 254,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_benchmark.test_benchmark_duration",
+      "status": "failure"
+    },
+    {
+      "branch": "84cbe4a71abe",
+      "extra": {
+        "message_chars": 813,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_frame_options.test_no_crc",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 1150,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_absolute_final_70.TestListModeErrors.test_list_invalid_lz4",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 151,
+        "message_redacted": true,
+        "time": 0.009
+      },
+      "name": "tests.test_benchmark.test_benchmark_basic",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 269,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_benchmark_targeted.TestBenchmarkCore.test_benchmark_high_level",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_with_checksum",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 91,
+        "message_redacted": true,
+        "time": 0.009
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_max_level",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 490,
+        "message_redacted": true,
+        "time": 0.078
+      },
+      "name": "tests.test_absolute_final_coverage.TestLargeDataSets.test_compress_highly_redundant_large",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 238,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_additional_coverage.test_compress_to_dev_null",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 807,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_advanced_compression.test_no_content_size_explicit",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 283,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_dictionary_extended.test_dictionary_stdin_compression",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 100,
+        "message_redacted": true,
+        "time": 0.013
+      },
+      "name": "tests.test_edge_cases_comprehensive.TestVerbosityModes.test_verbose_compression",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 279,
+        "message_redacted": true,
+        "time": 0.019
+      },
+      "name": "tests.test_final_70_threshold.TestErrorPathsComprehensive.test_decompress_truncated_file",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 85,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_final_coverage.test_frame_crc_corruption_detection",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 151,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_benchmark.test_benchmark_compression_level",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 269,
+        "message_redacted": true,
+        "time": 0.014
+      },
+      "name": "tests.test_benchmark_targeted.TestBenchmarkCore.test_benchmark_multiple_files",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_multiple_files",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_favor_dec_speed",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 151,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_additional_coverage.test_benchmark_with_threads",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 831,
+        "message_redacted": true,
+        "time": 0.019
+      },
+      "name": "tests.test_final_coverage.test_long_flag_combinations",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 801,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_advanced_compression.test_frame_crc_explicit",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 778,
+        "message_redacted": true,
+        "time": 0.064
+      },
+      "name": "tests.test_absolute_final.TestAbsoluteFinal.test_all_block_sizes_with_high_level",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 269,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_final_coverage_push_70.TestBenchmarkAdditional.test_benchmark_with_small_data",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 800,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_final_push.test_frame_options_all_combinations",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 735,
+        "message_redacted": true,
+        "time": 0.016
+      },
+      "name": "tests.test_final_push.test_stdout_aliases",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 1169,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_error_handling.test_missing_dictionary_file",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 151,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_benchmark.test_benchmark_high_compression",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_evaluation_time_variation",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_legacy_format",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 100,
+        "message_redacted": true,
+        "time": 0.013
+      },
+      "name": "tests.test_improved_coverage.TestXXHashCoverage.test_frame_checksum_default",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 798,
+        "message_redacted": true,
+        "time": 0.013
+      },
+      "name": "tests.test_advanced_compression.test_no_frame_crc_and_no_block_checksum",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 61,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_coverage_boost.TestLegacyModes.test_lz4c_symlink_legacy_help",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 7281,
+        "message_redacted": true,
+        "time": 0.152
+      },
+      "name": "tests.test_absolute_final.TestAbsoluteFinal.test_concatenate_many_frames",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 777,
+        "message_redacted": true,
+        "time": 0.101
+      },
+      "name": "tests.test_library_coverage.TestFrameCombinations.test_different_block_sizes_high_level",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 771,
+        "message_redacted": true,
+        "time": 0.024
+      },
+      "name": "tests.test_library_coverage.TestDictionaryEdgeCases.test_empty_dictionary",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 592,
+        "message_redacted": true,
+        "time": 0.037
+      },
+      "name": "tests.test_lz4cat.TestLz4Cat.test_lz4cat_multiple_files",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 838,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_more_coverage.test_compress_with_all_frame_options_bd_bx_content",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 811,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_more_coverage.test_no_sparse_with_no_crc",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 151,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_more_coverage.test_benchmark_with_dictionary",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 809,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_more_coverage.test_threads_with_best_compression",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 832,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_more_coverage.test_list_nonexistent_file",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 744,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_multithreading.test_threads_long_flag",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 151,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark.test_benchmark_minimum_time",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.008
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_with_block_size",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 125,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_progress_indicator",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 124,
+        "message_redacted": true,
+        "time": 0.013
+      },
+      "name": "tests.test_coverage_boost.TestLegacyModes.test_lz4c_legacy_c0_fast",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 287,
+        "message_redacted": true,
+        "time": 0.024
+      },
+      "name": "tests.test_push_over_70.TestFinalCoveragePush.test_compression_with_all_flag_combos",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 859,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_lz4cat.TestLz4Cat.test_lz4cat_passthrough",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 785,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_absolute_final_70.TestListModeErrors.test_list_non_lz4_file",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 805,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_push_to_70.test_no_crc_all_compression_levels",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 826,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_push_to_70.test_all_block_sizes_with_checksums",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 829,
+        "message_redacted": true,
+        "time": 0.022
+      },
+      "name": "tests.test_push_to_70.test_combinations_three_options",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 508,
+        "message_redacted": true,
+        "time": 0.033
+      },
+      "name": "tests.test_push_to_70.test_power_of_two_sizes_DISABLED",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 287,
+        "message_redacted": true,
+        "time": 0.022
+      },
+      "name": "tests.test_push_to_70.test_all_bytes_DISABLED",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 278,
+        "message_redacted": true,
+        "time": 0.032
+      },
+      "name": "tests.test_push_to_70.test_mixed_compressibility_DISABLED",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 459,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_reach_70_final.TestBenchmarkBasic.test_benchmark_simple",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 151,
+        "message_redacted": true,
+        "time": 0.009
+      },
+      "name": "tests.test_benchmark.test_benchmark_stdin",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_with_block_dependency",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_fast_flag",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 124,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_coverage_boost.TestLegacyModes.test_lz4c_legacy_c1_high",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 101,
+        "message_redacted": true,
+        "time": 0.014
+      },
+      "name": "tests.test_push_to_70.test_verbose_all_operations",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 151,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_push_to_70.test_benchmark_all_high_levels_DISABLED",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 738,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_special_behaviors.test_long_flag_to_stdout",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 767,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_suffix_parsing.TestSuffixParsing.test_block_size_with_M_suffix",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 769,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_suffix_parsing.TestSuffixParsing.test_block_size_with_MiB_suffix",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 278,
+        "message_redacted": true,
+        "time": 0.022
+      },
+      "name": "tests.test_push_to_70.test_all_printable_ascii_DISABLED",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 255,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_reach_70_final.TestBenchmarkBasic.test_benchmark_level_5",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 255,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_reach_70_final.TestBenchmarkBasic.test_benchmark_level_9",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 151,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_benchmark.test_benchmark_very_high_level",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_with_content_size",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.009
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_best_flag",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 776,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_coverage_boost.TestBenchmarkEdgeCases.test_benchmark_with_range_e_flag",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 768,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_suffix_parsing.TestSuffixParsing.test_block_size_with_MB_suffix",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 151,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark.test_benchmark_with_fast_flag",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_decompression_speed",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_with_verbose",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 459,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_coverage_boost.TestBenchmarkEdgeCases.test_benchmark_single_iteration",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 719,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_benchmark.test_benchmark_empty_file",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 82,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_compression_ratio",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.009
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_level_medium",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 776,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_coverage_boost.TestBenchmarkEdgeCases.test_benchmark_high_compression_range",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 91,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_no_file_uses_lorem",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 269,
+        "message_redacted": true,
+        "time": 0.009
+      },
+      "name": "tests.test_benchmark_targeted.TestBenchmarkCore.test_benchmark_basic_level1",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.009
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_with_threads",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_with_file",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 751,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_benchmark_targeted.TestBenchmarkCore.test_benchmark_level_range",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_large_block_size",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 91,
+        "message_redacted": true,
+        "time": 0.009
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_level_0",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 269,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_benchmark_targeted.TestBenchmarkCore.test_benchmark_stdin_input",
+      "status": "failure"
+    },
+    {
+      "branch": "7d95f4d40acc",
+      "extra": {
+        "message_chars": 84,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_benchmark_comprehensive.test_benchmark_small_block_size",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 288,
+        "message_redacted": true,
+        "time": 0.019
+      },
+      "name": "tests.test_alt_names.test_unlz4_decompresses_by_default",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 356,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_cli_gaps.test_help_flag_long_form",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 34,
+        "message_redacted": true,
+        "time": 0.008
+      },
+      "name": "tests.test_benchmark.test_benchmark_negative_fast_level_range",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 60,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_cli_gaps.test_blocksize_byte_mode_displays_size_in_bytes_when_small",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 61,
+        "message_redacted": true,
+        "time": 0.008
+      },
+      "name": "tests.test_benchmark.test_benchmark_multiple_levels_in_sequence",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 93,
+        "message_redacted": true,
+        "time": 0.007
+      },
+      "name": "tests.test_benchmark.test_benchmark_compression_decompression_speeds",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 425,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_checksum_gaps.test_list_block_checksum_vs_no_frame_crc",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 609,
+        "message_redacted": true,
+        "time": 0.014
+      },
+      "name": "tests.test_advanced_options.test_list_file_without_content_size",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 367,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_checksum_gaps.test_block_checksum_different_block_sizes",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 1447,
+        "message_redacted": true,
+        "time": 0.014
+      },
+      "name": "tests.test_advanced_options.test_no_content_size_flag",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 2469,
+        "message_redacted": true,
+        "time": 0.018
+      },
+      "name": "tests.test_advanced_options.test_large_file_with_multiple_advanced_options",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 853,
+        "message_redacted": true,
+        "time": 0.022
+      },
+      "name": "tests.test_alt_names.test_lz4c_legacy_y_option",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 90,
+        "message_redacted": true,
+        "time": 0.014
+      },
+      "name": "tests.test_alt_names.test_lz4c_legacy_combined_with_modern_flags",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 356,
+        "message_redacted": true,
+        "time": 0.012
+      },
+      "name": "tests.test_cli_gaps.test_help_flag_lowercase_h",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 318,
+        "message_redacted": true,
+        "time": 0.01
+      },
+      "name": "tests.test_decompress.test_test_mode_corrupted_file",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 703,
+        "message_redacted": true,
+        "time": 0.014
+      },
+      "name": "tests.test_decompress.test_decompress_refuse_overwrite_without_force",
+      "status": "failure"
+    },
+    {
+      "branch": "1379dfae0b18",
+      "extra": {
+        "message_chars": 237,
+        "message_redacted": true,
+        "time": 0.011
+      },
+      "name": "tests.test_cli_gaps.test_env_clevel_invalid_value",
+      "status": "failure"
+    }
+  ],
+  "test_results_omitted": 226,
+  "test_results_policy": "non-passed records only, capped for public artifact size",
+  "warnings": []
+}

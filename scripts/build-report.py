@@ -1018,9 +1018,10 @@ def evidence_links(row: ResultRow, prefix: str = "") -> str:
         (f"{base}/eval-summary.json", "eval summary"),
         (f"{base}/usage-audit.json", "usage audit"),
     ]
-    return " · ".join(
+    rendered = " · ".join(
         f'<a href="{cell(prefix + path)}">{label}</a>' for path, label in links if Path("docs", path).is_file()
     )
+    return rendered or '<span class="muted">not exported</span>'
 
 
 def task_page_link(row: ResultRow, prefix: str = "") -> str:
@@ -1141,14 +1142,20 @@ def run_version_chip(group: dict) -> str:
 
 
 def run_chips(group: dict) -> str:
+    values = [
+        cell(str(group["mode"])),
+        cell(str(group["host_profile"])),
+        cell(run_version_chip(group)),
+    ]
+    compliance = str(group["compliance"])
+    if compliance not in {
+        "Codex /goal mini-SWE-compatible no-internet",
+        "Codex no-internet ablation",
+    }:
+        values.insert(1, cell(compliance))
     return "".join(
         f'<span class="run-chip">{value}</span>'
-        for value in [
-            cell(str(group["mode"])),
-            cell(str(group["compliance"])),
-            cell(str(group["host_profile"])),
-            cell(run_version_chip(group)),
-        ]
+        for value in values
     )
 
 
