@@ -2358,26 +2358,6 @@ def render_html(data: dict, extended: bool = False) -> str:
     {body}
 
     <section class="section">
-      <div class="section-eyebrow">Modes</div>
-      <div class="section-head">
-        <div>
-          <h2>How To Read Modes</h2>
-          <p>Every row is a Codex <code>/goal</code> scaffold run. Compliance labels tell you what environment and tool access the run had.</p>
-        </div>
-      </div>
-      <div class="mode-grid">
-        <div class="mode-card">
-          <strong>No internet</strong>
-          <p>Stricter GoalBench scaffold: internet/source/package lookup is blocked, target binary-analysis tools are blocked, target probing stays black-box, and the prompt asks for an explicit behavior audit.</p>
-        </div>
-        <div class="mode-card">
-          <strong>No internet + local tools <span class="muted">(coming soon)</span></strong>
-          <p>Non-compliant local-tools ablation: external internet/source/package lookup remains blocked, but local binary-analysis/tracing tools are allowed.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
     <h2>Official Baseline Context</h2>
     <p>For orientation only. ProgramBench's public extended table reports mini-SWE-agent over 200 tasks, sorted by resolved, almost-resolved, then average pass rate.</p>
     <div class="table-wrap">
