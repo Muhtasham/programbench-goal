@@ -1744,6 +1744,21 @@ def render_empty_state() -> str:
     """
 
 
+def render_data_downloads(prefix: str = "") -> str:
+    return f"""
+    <div class="download-strip" aria-label="Download report data">
+      <div>
+        <strong>Download report data</strong>
+        <span>Machine-readable latest results for replication, plotting, and independent checks.</span>
+      </div>
+      <div class="download-actions">
+        <a class="button primary" href="{prefix}data/results.csv">results.csv</a>
+        <a class="button" href="{prefix}data/results.json">results.json</a>
+      </div>
+    </div>
+    """
+
+
 def render_tweet_embed() -> str:
     return """
     <aside class="tweet-card" aria-label="Request tweet">
@@ -1872,6 +1887,8 @@ def render_results_sections(data: dict, instances: list[ResultRow]) -> str:
       {"".join(render_summary_cards(summary_title(group), group) for group in data["groups"])}
     </div>
 
+    {render_data_downloads("../")}
+
     <h2>Score by Model × Task</h2>
     <div class="score-matrix">
       {"".join(f'<a class="heat-cell" style="background:{heat_color(row.score)}" title="{cell(row.instance_id)}: {percent(row.score)}" href="{task_page_link(row)}"></a>' for row in sorted(instances, key=lambda row: (model_display(row), row.instance_id)))}
@@ -1928,6 +1945,7 @@ def render_home_results(data: dict, instances: list[ResultRow]) -> str:
         </div>
         <a class="button primary" href="extended/">See extended results</a>
       </div>
+      {render_data_downloads()}
       <div class="table-wrap priority-table">
         <table>
           <thead><tr><th>#</th><th>Model</th><th>Run</th><th>Agent</th><th>Resolved</th><th>Almost</th><th>Avg. est. cost</th><th>Avg. calls</th></tr></thead>
@@ -2128,6 +2146,36 @@ def render_html(data: dict, extended: bool = False) -> str:
     .button.primary {{ border-color: #0f766e; background: #0f766e; color: #ffffff; }}
     .button.primary:hover {{ background: #115e59; }}
     .link-row {{ display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }}
+    .download-strip {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 4px 0 16px;
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }}
+    .download-strip strong {{
+      display: block;
+      color: var(--text);
+      font-size: 14px;
+      margin-bottom: 3px;
+    }}
+    .download-strip span {{
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }}
+    .download-actions {{
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex: 0 0 auto;
+    }}
     .cards {{
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -2279,6 +2327,8 @@ def render_html(data: dict, extended: bool = False) -> str:
       .topbar {{ align-items: flex-start; flex-direction: column; margin-bottom: 26px; }}
       .nav-links {{ justify-content: flex-start; }}
       .section-head {{ align-items: flex-start; flex-direction: column; }}
+      .download-strip {{ align-items: flex-start; flex-direction: column; }}
+      .download-actions {{ justify-content: flex-start; }}
       .method-notes-grid {{ grid-template-columns: 1fr; gap: 18px; }}
       .tweet-card {{ justify-self: stretch; max-width: 550px; }}
       .metric-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
@@ -2313,10 +2363,6 @@ def render_html(data: dict, extended: bool = False) -> str:
         <div>
           <h2>How To Read Modes</h2>
           <p>Every row is a Codex <code>/goal</code> scaffold run. Compliance labels tell you what environment and tool access the run had.</p>
-        </div>
-        <div class="link-row">
-          <a class="button" href="data/results.json">results.json</a>
-          <a class="button" href="data/results.csv">results.csv</a>
         </div>
       </div>
       <div class="mode-grid">
