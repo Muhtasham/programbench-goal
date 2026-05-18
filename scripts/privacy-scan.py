@@ -19,8 +19,8 @@ def patterns() -> list[str]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Scan tracked public files for local machine paths")
-    parser.add_argument("root", nargs="?", default=".")
+    parser = argparse.ArgumentParser(description="Scan public site files for local machine paths")
+    parser.add_argument("root", nargs="?", default="docs")
     args = parser.parse_args()
 
     results = [
