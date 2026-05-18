@@ -213,7 +213,8 @@ def uses_allowed_docker(command: str, container_name: str) -> bool:
 def uses_allowed_local_tools_docker(command: str, container_name: str) -> bool:
     escaped = re.escape(container_name)
     return bool(
-        re.search(rf"\bdocker\s+exec\s+(?:-i\s+)?{escaped}\b", command)
+        re.search(rf"\bdocker\s+exec\s+(?:-i\s+)?(?:-u\s+agent\s+)?{escaped}\b", command)
+        or re.search(rf"\bdocker\s+exec\s+-u\s+agent\s+(?:-i\s+)?{escaped}\b", command)
         or re.search(rf"\bdocker\s+cp\s+{escaped}:/", command)
         or re.search(rf"\bdocker\s+inspect\s+{escaped}\b", command)
     )
